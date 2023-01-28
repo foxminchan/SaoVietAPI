@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+
+  prometheus:
+    image: ubuntu/prometheus
+    container_name: dev_prometheus_test
+    ports:
+      - "30090:9090"
+    environment:
+      - TZ=Europe/Copenhagen
+    volumes:
+      - ./prom/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    container_name: dev_grafana_test
+    ports:
+      - "30091:3000"
+    volumes:
+      - ./grafana-data/data:/var/lib/grafana
