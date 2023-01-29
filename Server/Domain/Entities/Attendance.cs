@@ -15,7 +15,7 @@
         public Class? @class { get; set; }
         public string? lessonId { get; set; }
         public Lesson? lesson { get; set; }
-        public DateOnly? date { get; set; }
+        public string? date { get; set; }
         public string? comment { get; set; }
         public byte? evaluation { get; set; }
         public byte? attendance { get; set; }

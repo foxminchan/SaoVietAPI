@@ -19,7 +19,7 @@ namespace Domain.Interfaces
         void Delete(T entity);
         void Delete(Expression<Func<T, bool>> where);
         int Count(Expression<Func<T, bool>> where);
-        T GetById(object id);
+        T GetById(object? id);
         IEnumerable<T> GetList(
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,

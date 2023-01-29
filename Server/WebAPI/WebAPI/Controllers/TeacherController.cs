@@ -1,8 +1,8 @@
-﻿using System.Text.RegularExpressions;
-using Application.Services;
+﻿using Application.Services;
 using AutoMapper;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace WebAPI.Controllers
 {
@@ -15,12 +15,20 @@ namespace WebAPI.Controllers
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
 
+    /// <summary>
+    /// Quản lý giáo viên
+    /// </summary>
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class TeacherController : ControllerBase
+    public partial class TeacherController : ControllerBase
     {
         private readonly ILogger<TeacherController> _logger;
         private readonly TeacherService _teacherService;
+
+        [GeneratedRegex("^([\\w\\.\\-]+)@([\\w\\-]+)((\\.(\\w){2,3})+)$")]
+        private static partial Regex EmailPattern();
+        [GeneratedRegex("^([0-9]{10})$")]
+        private static partial Regex PhonePattern();
 
         /// <inheritdoc />
         public TeacherController(TeacherService teacherService, ILogger<TeacherController> logger)
@@ -33,6 +41,11 @@ namespace WebAPI.Controllers
         /// Lấy danh sách giáo viên
         /// </summary>
         /// <returns>Danh sách giáo viên</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /getTeachers
+        /// </remarks>
         /// <response code="200">Lấy danh sách giáo viên thành công</response>
         /// <response code="204">Không có giáo viên nào</response>
         /// <response code="500">Lỗi server</response>
@@ -42,7 +55,7 @@ namespace WebAPI.Controllers
             try
             {
                 _logger.LogInformation("Get teachers");
-                var teachers = await Task.Run(() => _teacherService.GetTeachers());
+                var teachers = await Task.Run(_teacherService.GetTeachers);
                 if (teachers.Count == 0)
                     return NoContent();
                 return Ok(new { status = true, message = "Get data successfully", data = teachers });
@@ -50,6 +63,74 @@ namespace WebAPI.Controllers
             catch (Exception)
             {
                 _logger.LogError("GetTeachers");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Lấy giáo viên theo tên
+        /// </summary>
+        /// <param name="name">Tên giáo viên</param>
+        /// <returns>Danh sách giáo viên theo tên được chỉ định</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /api/v1/teacher/findByName/string
+        ///     {
+        ///         "name": "string"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Lấy danh sách giáo viên thành công</response>
+        /// <response code="204">Không có giáo viên nào</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpGet("findByName/{name}")]
+        public async Task<IActionResult> GetTeachersByName([FromRoute] string name)
+        {
+            try
+            {
+                _logger.LogInformation("Get teachers by name");
+                var teachers = await Task.Run(() => _teacherService.FindTeacherByName(name));
+                if (teachers.Count == 0)
+                    return NoContent();
+                return Ok(new { status = true, message = "Get data successfully", data = teachers });
+            }
+            catch (Exception)
+            {
+                _logger.LogError("GetTeachersByName");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Tìm kiếm giáo viên theo mã
+        /// </summary>
+        /// <param name="id">Mã giáo viên</param>
+        /// <returns>Giáo viên theo mã được chỉ định</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /api/v1/teacher/uuid
+        ///     {
+        ///         "id": "uuid
+        ///     }
+        /// </remarks>
+        /// <response code="200">Lấy giáo viên thành công</response>
+        /// <response code="204">Không có giáo viên nào</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpGet("getTeacherById/{id:guid}")]
+        public async Task<IActionResult> GetTeacherById([FromRoute] Guid id)
+        {
+            try
+            {
+                _logger.LogInformation("Get teacher by id");
+                var teacher = await Task.Run(() => _teacherService.GetTeacherById(id));
+                if (teacher == null)
+                    return NoContent();
+                return Ok(new { status = true, message = "Get data successfully", data = teacher });
+            }
+            catch (Exception)
+            {
+                _logger.LogError("GetTeacherById");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -64,10 +145,10 @@ namespace WebAPI.Controllers
         ///
         ///     POST /addTeacher
         ///     {
-        ///         "fullName": "Nguyễn Xuân Nhân",
-        ///         "email": "nguyenxuannhan407@gmail.com",
-        ///         "phone": "0123456789",
-        ///         "customerId": null
+        ///         "fullName": "string",
+        ///         "email": "string",
+        ///         "phone": "string",
+        ///         "customerId": "uuid"
         ///     }
         /// </remarks>
         /// <response code="200">Thêm giáo viên thành công</response>
@@ -84,10 +165,12 @@ namespace WebAPI.Controllers
                 phone = teacher.phone,
                 customerId = teacher.customerId
             };
-            
-            if (newTeacher.email != null && !Regex.IsMatch(newTeacher.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"))
+
+            if (teacher.fullName == null && teacher.email == null && teacher.phone == null)
+                return BadRequest(new { status = false, message = "Full name, email and phone are required" });
+            if (newTeacher.email != null && !EmailPattern().IsMatch(newTeacher.email))
                 return BadRequest(new { status = false, message = "Email syntax is not correct" });
-            if (newTeacher.phone != null && !Regex.IsMatch(newTeacher.phone, @"^([0-9]{10})$"))
+            if (newTeacher.phone != null && !PhonePattern().IsMatch(newTeacher.phone))
                 return BadRequest(new { status = false, message = "Phone syntax is not correct" });
             if (newTeacher.customerId != null)
             {
@@ -116,20 +199,20 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /updateTeacher
+        ///     PUT /updateTeacher/uuid
         ///     {
-        ///         "id": "d9f9b9f0-5b5a-4b9f-9b9f-0d5b5a4b9f9b",
-        ///         "fullName": "Nguyễn Xuân Nhân",
-        ///         "email": "nguyenxuannhan407@gmail.com",
-        ///         "phone": "9876543210",
-        ///         "customerId": null
+        ///         "id": "uuid",
+        ///         "fullName": "string",
+        ///         "email": "string",
+        ///         "phone": "string",
+        ///         "customerId": "string"
         ///     }
         /// </remarks>
         /// <response code="200">Cập nhật giáo viên thành công</response>
         /// <response code="404">Không tìm thấy giáo viên</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("updateTeacher/{id}")]
-        public async Task<IActionResult> UpdateTeacher([FromBody] Model.Teacher teacher, Guid id)
+        [HttpPut("updateTeacher/{id:guid}")]
+        public async Task<IActionResult> UpdateTeacher([FromBody] Model.Teacher teacher, [FromRoute] Guid id)
         {
             MapperConfiguration config = new(cfg => cfg.CreateMap<Model.Teacher, Teacher>());
             var mapper = config.CreateMapper();
@@ -156,21 +239,21 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /deleteTeacher
+        ///     DELETE /deleteTeacher/uuid
         ///     {
-        ///         "id": "d9f9b9f0-5b5a-4b9f-9b9f-0d5b5a4b9f9b"
+        ///         "id": "uuid"
         ///     }
         /// </remarks>
         /// <response code="200">Xóa giáo viên thành công</response>
         /// <response code="404">Không tìm thấy giáo viên</response>
         /// <response code="500">Lỗi server</response>
-        [HttpDelete("deleteTeacher/{id}")]
-        public async Task<IActionResult> DeleteTeacher(Guid id)
+        [HttpDelete("deleteTeacher/{id:guid}")]
+        public async Task<IActionResult> DeleteTeacher([FromRoute] Guid id)
         {
             try
             {
                 if (await Task.Run(() => _teacherService.GetTeachers().FirstOrDefault(x => x.id == id)) == null)
-                    return NotFound( new { status = false, message = "Teacher not found" });
+                    return NotFound(new { status = false, message = "Teacher not found" });
                 await _teacherService.DeleteTeacher(id);
                 return Ok(new { status = true, message = "Delete teacher successfully" });
             }

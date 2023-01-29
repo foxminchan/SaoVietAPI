@@ -11,11 +11,13 @@ namespace Infrastructure.Converter
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
 
-    public class DateOnlyConverter : ValueConverter<DateOnly, DateTime>
+    public class StringConverter : ValueConverter<string, DateTime>
     {
-        public DateOnlyConverter() : base(
-            d => d.ToDateTime(TimeOnly.MinValue),
-            d => DateOnly.FromDateTime(d))
-        { }
+        public StringConverter() : base(
+            v => DateTime.Parse(v),
+            v => v.ToString("dd/MM/yyyy")
+        )
+        {
+        }
     }
 }

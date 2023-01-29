@@ -29,8 +29,8 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 builder.Services.AddTransient<TeacherService>();
+builder.Services.AddTransient<ClassService>();
 
 var app = builder.Build();
 
@@ -38,7 +38,7 @@ var info = new OpenApiInfo
 {
     Title = "Sao Việt API",
     Version = "v1",
-    Description = "API cho ứng dụng quản lý trung tâm tin học Sao Việt",
+    Description = "API cho ứng dụng quản lý trung tâm tin học Sao Việt. Mọi thắc mắc xin liên hệ theo địa chỉ email nguyenxuannhan407@gmail.com hoặc nd.anh@hutech.edu.vn",
     Contact = new OpenApiContact
     {
         Name = "Nguyễn Xuân Nhân",
@@ -64,6 +64,11 @@ var teacherTag = new OpenApiTag
     Description = "Quản lý thông tin giáo viên"
 };
 
+var classTag = new OpenApiTag
+{
+    Name = "Class",
+    Description = "Quản lý thông tin lớp học"
+};
 
 app.UseSwagger(c =>
 {
@@ -75,14 +80,14 @@ app.UseSwagger(c =>
             throw new ArgumentNullException(nameof(httpReq));
         swagger.Info = info;
         swagger.ExternalDocs = externalDocs;
-        swagger.Tags = new List<OpenApiTag> { teacherTag };
+        swagger.Tags = new List<OpenApiTag> { teacherTag, classTag };
     });
 
 });
 
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1.0");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sao Việt API v1");
 });
 
 app.UseCors("AllowAll");

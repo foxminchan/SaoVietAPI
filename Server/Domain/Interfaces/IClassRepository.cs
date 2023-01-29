@@ -13,7 +13,11 @@ namespace Domain.Interfaces
 
     public interface IClassRepository : IGenericRepository<Class>
     {
-
+        public List<Class> GetClasses();
+        public void AddClass(Class entity);
+        public void UpdateClass(Class entity, string id);
+        public void DeleteClass(string id);
+        public List<Class> FindClassByName(string name);
+        public List<Class> GetClassesByStatus(string? status);
     }
-
 }

@@ -58,7 +58,7 @@ namespace Infrastructure.Repositories
 
         public virtual int Count(Expression<Func<T, bool>> where) => _dbSet.Count(where);
 
-        public virtual T GetById(object id) => _dbSet.Find(id) ?? throw new InvalidOperationException();
+        public virtual T GetById(object? id) => _dbSet.Find(id) ?? throw new InvalidOperationException();
 
         public virtual IEnumerable<T> GetList(
             Expression<Func<T, bool>>? filter = null,
@@ -85,9 +85,9 @@ namespace Infrastructure.Repositories
             return query.ToList();
         }
 
-        public IEnumerable<T> GetMany(Expression<Func<T, bool>> where) => _dbSet.Where(where).ToList();
+        public virtual IEnumerable<T> GetMany(Expression<Func<T, bool>> where) => _dbSet.Where(where).ToList();
 
-        public bool Any(Expression<Func<T, bool>> where) => _dbSet.Any(where);
+        public virtual bool Any(Expression<Func<T, bool>> where) => _dbSet.Any(where);
 
     }
 }

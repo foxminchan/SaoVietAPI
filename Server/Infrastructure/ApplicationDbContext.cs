@@ -29,13 +29,6 @@ namespace Infrastructure
         {
         }
 
-        protected override void ConfigureConventions(ModelConfigurationBuilder builder)
-        {
-            builder.Properties<DateOnly>()
-                .HaveConversion<DateOnlyConverter>()
-                .HaveColumnType("date");
-        }
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -82,9 +75,11 @@ namespace Infrastructure
                     .HasColumnType("nvarchar(25)")
                     .IsRequired();
                 entity.Property(e => e.startDate)
+                    .HasConversion<StringConverter>()
                     .HasColumnType("date")
                     .IsRequired();
                 entity.Property(e => e.endDate)
+                    .HasConversion<StringConverter>()
                     .HasColumnType("date")
                     .IsRequired();
                 entity.HasOne(s => s.teacher)
@@ -105,6 +100,7 @@ namespace Infrastructure
                     .HasColumnType("nvarchar(50)")
                     .IsRequired();
                 entity.Property(e => e.dob)
+                    .HasConversion<StringConverter>()
                     .HasColumnType("date");
                 entity.Property(e => e.email)
                     .HasColumnType("varchar(50)")
@@ -177,6 +173,7 @@ namespace Infrastructure
                 entity.ToTable("Attendance");
                 entity.HasKey(e => new { e.classId, e.lessonId });
                 entity.Property(e => e.date)
+                    .HasConversion<StringConverter>()
                     .HasColumnType("date")
                     .IsRequired();
                 entity.Property(e => e.comment)

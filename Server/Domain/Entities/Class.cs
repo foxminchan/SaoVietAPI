@@ -13,8 +13,8 @@
     {
         public string? id { get; set; }
         public string? name { get; set; }
-        public DateOnly? startDate { get; set; }
-        public DateOnly? endDate { get; set; }
+        public string? startDate { get; set; }
+        public string? endDate { get; set; }
         public Guid? teacherId { get; set; }
         public Teacher? teacher { get; set; }
         public string? branchId { get; set; }

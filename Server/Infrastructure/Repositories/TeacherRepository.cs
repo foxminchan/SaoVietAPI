@@ -26,5 +26,8 @@ namespace Infrastructure.Repositories
 
         public void DeleteTeacher(Guid id) => Delete(x => x.id == id);
 
+        public List<Teacher> FindTeacherByName(string name) => GetList(filter: x => x.fullName != null && x.fullName.Contains(name)).ToList();
+
+        public Teacher? GetTeacherById(Guid? id) => id == null ? null : GetById(id);
     }
 }

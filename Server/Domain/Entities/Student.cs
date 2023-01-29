@@ -13,7 +13,7 @@
     {
         public Guid? id { get; set; }
         public string? fullName { get; set; }
-        public DateOnly? dob { get; set; }
+        public string? dob { get; set; }
         public string? email { get; set; }
         public string? phone { get; set; }
         public ICollection<ClassStudent>? classStudents { get; set; }

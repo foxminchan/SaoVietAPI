@@ -18,7 +18,7 @@ namespace Application.Services
     public class TeacherService : BaseService
     {
         private readonly ApplicationDbContext _context;
-        readonly ITeacherRepository _teacherRepository;
+        private readonly ITeacherRepository _teacherRepository;
 
         public TeacherService(ApplicationDbContext context) : base(context)
         {
@@ -26,7 +26,7 @@ namespace Application.Services
             _teacherRepository = new TeacherRepository(_context);
         }
 
-        public List<string> GetAllId() => _context.Users.Select(x => x.Id).ToList();
+        public IEnumerable<string> GetAllId() => _context.Users.Select(x => x.Id).ToList();
 
         public List<Teacher> GetTeachers() => _teacherRepository.GetTeachers();
 
@@ -47,5 +47,9 @@ namespace Application.Services
             _teacherRepository.DeleteTeacher(id);
             return SaveAsync();
         }
+
+        public List<Teacher> FindTeacherByName(string name) => _teacherRepository.FindTeacherByName(name);
+
+        public Teacher? GetTeacherById(Guid? id) => _teacherRepository.GetTeacherById(id);
     }
 }
