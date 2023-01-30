@@ -132,7 +132,7 @@ Sau khi khởi động API, bạn có thể truy cập vào giao diện người
 - Xem tài liệu API tại trang [Wiki](https://github.com/foxminchan/SaoVietAPI/wiki)
 - Xem Các thay đổi tại trang [CHANGELOG](./CHANGELOG.md)
 - Xem tài liệu về cách sử dụng API tại trang [API Documentation](#)
-- Xem quy tắc ứng xử tại trang [CODE_OF_CONDUCT](./CODE_OF_CONDUCT.md)
+- Xem quy tắc ứng xử tại trang [Contributor Covenant Code of Conduct](./CODE_OF_CONDUCT.md)
 
 # Người đóng góp
 
