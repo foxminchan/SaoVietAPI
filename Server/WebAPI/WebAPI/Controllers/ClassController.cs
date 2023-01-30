@@ -22,21 +22,23 @@ namespace WebAPI.Controllers
     [ApiController]
     public partial class ClassController : ControllerBase
     {
+        private readonly ILogger<TeacherController> _logger;
         private readonly ClassService _classService;
 
         [GeneratedRegex("^\\d{4}-\\d{2}-\\d{2}$")]
         private static partial Regex DateFormatRegex();
 
         /// <inheritdoc />
-        public ClassController(ClassService classService)
+        public ClassController(ClassService classService, ILogger<TeacherController> logger)
         {
             _classService = classService;
+            _logger = logger;
         }
 
         /// <summary>
         /// Lấy danh sách lớp học
         /// </summary>
-        /// <returns>Danh sách lớp học</returns>
+        /// <returns></returns>
         /// <remarks>
         /// Sample request:
         ///
@@ -65,7 +67,7 @@ namespace WebAPI.Controllers
         /// Thêm lớp học
         /// </summary>
         /// <param name="request">Đối tượng lớp học</param>
-        /// <returns>Lớp học mới được tạo</returns>
+        /// <returns></returns>
         /// <remarks>
         /// Sample request:
         ///
@@ -184,6 +186,89 @@ namespace WebAPI.Controllers
 
                 await Task.Run(() => _classService.DeleteClass(id));
                 return Ok(new { status = true, message = "Delete class successfully" });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Tìm lớp theo tên
+        /// </summary>
+        /// <param name="name">Tên lớp</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /api/v1/class/findByName/string
+        ///     {
+        ///         "name": "string"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Tìm lớp theo tên thành công</response>
+        /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="404">Không tìm thấy lớp</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpGet("findByName/{name}")]
+        public async Task<IActionResult> FindClassByName([FromRoute] string? name)
+        {
+            if (name == null)
+                return BadRequest(new { status = false, message = "Name is null" });
+            try
+            {
+                var config = new MapperConfiguration(cfg => cfg.CreateMap<Class, Model.Class>());
+                var classEntity = await Task.Run(() => _classService.FindClassByName(name));
+
+                if (classEntity.Count == 0)
+                    return NotFound(new { status = false, message = "Class is not found" });
+
+                return Ok(new { status = true, message = "Find class successfully", data = config.CreateMapper().Map<Model.Class>(classEntity) });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Tìm lớp theo trạng thái
+        /// </summary>
+        /// <param name="status">Trạng thái</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Status:
+        /// - ```Expired```: Lớp đã kết thúc
+        /// - ```Active```: Lớp đang diễn ra
+        /// - ```Upcoming```: Lớp sắp diễn ra
+        /// 
+        /// Sample request:
+        ///
+        ///     GET /api/v1/class/findByStatus/string
+        ///     {
+        ///         "status": "string"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Tìm lớp theo trạng thái thành công</response>
+        /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="204">Không tìm thấy lớp</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpGet("findByStatus/{status}")]
+        public async Task<IActionResult> FindClassByStatus([FromRoute] string? status)
+        {
+            List<string?> statusList = new() { "Expired", "Active", "Upcoming" };
+            if (statusList.Contains(status) == false)
+                return BadRequest(new { status = false, message = "Status is not valid" });
+
+            try
+            {
+                var config = new MapperConfiguration(cfg => cfg.CreateMap<Class, Model.Class>());
+                var classEntity = await Task.Run(() => _classService.GetClassesByStatus(status));
+
+                if (classEntity.Count == 0)
+                    return NoContent();
+
+                return Ok(new { status = true, message = "Find class successfully", data = config.CreateMapper().Map<Model.Class>(classEntity) });
             }
             catch (Exception)
             {

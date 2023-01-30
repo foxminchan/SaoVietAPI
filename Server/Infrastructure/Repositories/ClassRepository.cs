@@ -26,18 +26,18 @@ namespace Infrastructure.Repositories
 
         public void DeleteClass(string id) => Delete(x => x.id == id);
 
-        public List<Class> FindClassByName(string name) => GetList(filter: x => x.name != null && x.name.Contains(name)).ToList();
+        public List<Class> FindClassByName(string? name) => GetList(filter: x => name != null && x.name != null && x.name.Contains(name)).ToList();
 
         public List<Class> GetClassesByStatus(string? status)
         {
             var classes = new List<Class>();
-            if (status == null) return GetClasses();
+            if (status == null) return classes;
             if (status.Contains("Expired"))
-                classes = GetList(filter: x => x.endDate != null && DateTime.Parse(x.endDate) < DateTime.Now).ToList();
+                classes = GetList(filter: x => x.endDate != null).Where(x => Convert.ToDateTime(x.endDate) < DateTime.Now).AsEnumerable().ToList();
             else if (status.Contains("Active"))
-                classes = GetList(filter: x => x.endDate != null && DateTime.Parse(x.endDate) >= DateTime.Now).ToList();
+                classes = GetList(filter: x => x.endDate != null).Where(x => Convert.ToDateTime(x.endDate) >= DateTime.Now).AsEnumerable().ToList();
             else if (status.Contains("Upcoming"))
-                classes = GetList(filter: x => x.startDate != null && DateTime.Parse(x.startDate) > DateTime.Now).ToList();
+                classes = GetList(filter: x => x.startDate != null).Where(x => Convert.ToDateTime(x.startDate) > DateTime.Now).AsEnumerable().ToList();
             return classes;
         }
 

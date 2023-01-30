@@ -1,4 +1,7 @@
+version: '3.4'
+
 services:
+
   elasticsearch:
     container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
@@ -12,7 +15,8 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - discovery.type=single-node
     networks:
-      - customname
+      - elk
+
   kibana:
     container_name: kibana
     image: docker.elastic.co/kibana/kibana:7.6.2
@@ -23,4 +27,33 @@ services:
     environment:
       - ELASTICSEARCH_URL=http://localhost:9200
     networks:
-      - loggers
+      - elk
+
+  prometheus:
+    image: ubuntu/prometheus
+    container_name: prometheus
+    ports:
+      - "30090:9090"
+    environment:
+      - TZ=Europe/Copenhagen
+    volumes:
+      - ./prom/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "30091:3000"
+    volumes:
+      - ./grafana-data/data:/var/lib/grafana
+    networks:
+      - monitoring
+
+networks:
+  elk:
+  monitoring:
+
+volumes:
+  elasticsearch-data:

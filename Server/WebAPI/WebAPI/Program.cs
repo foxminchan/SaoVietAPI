@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Application.Services;
+using Prometheus;
+using Serilog;
+using Serilog.Sinks.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,10 +27,44 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", cors =>
     {
         cors.AllowAnyOrigin()
-            .AllowAnyMethod()
+        .AllowAnyMethod()
             .AllowAnyHeader();
     });
 });
+
+// ELK Stack Configuration
+ConfigureLogging();
+builder.Host.UseSerilog();
+
+void ConfigureLogging()
+{
+    var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    var configuration = new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile(
+            $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
+            optional: true)
+        .Build();
+
+    Log.Logger = new LoggerConfiguration()
+        .Enrich.FromLogContext()
+        .Enrich.WithEnvironmentName()
+        .WriteTo.Debug()
+        .WriteTo.Console()
+        .WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment!))
+        .Enrich.WithProperty("Environment", environment!)
+        .ReadFrom.Configuration(configuration)
+        .CreateLogger();
+}
+
+ElasticsearchSinkOptions ConfigureElasticSink(IConfiguration configuration, string? environment)
+{
+    return new ElasticsearchSinkOptions(new Uri(configuration["ElasticConfiguration:Uri"] ?? string.Empty))
+    {
+        AutoRegisterTemplate = true,
+        IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name?.ToLower(System.Globalization.CultureInfo.CurrentCulture).Replace(".", "-")}-{environment?.ToLower(System.Globalization.CultureInfo.CurrentCulture).Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
+    };
+}
 
 builder.Services.AddTransient<TeacherService>();
 builder.Services.AddTransient<ClassService>();
@@ -70,39 +107,40 @@ var classTag = new OpenApiTag
     Description = "Quản lý thông tin lớp học"
 };
 
-app.UseSwagger(c =>
-{
-    c.RouteTemplate = "swagger/{documentName}/swagger.json";
-    c.SerializeAsV2 = true;
-    c.PreSerializeFilters.Add((swagger, httpReq) =>
-    {
-        if (httpReq is null)
-            throw new ArgumentNullException(nameof(httpReq));
-        swagger.Info = info;
-        swagger.ExternalDocs = externalDocs;
-        swagger.Tags = new List<OpenApiTag> { teacherTag, classTag };
-    });
-
-});
-
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sao Việt API v1");
-});
-
 app.UseCors("AllowAll");
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger(c =>
+    {
+        c.RouteTemplate = "swagger/{documentName}/swagger.json";
+        c.SerializeAsV2 = true;
+        c.PreSerializeFilters.Add((swagger, httpReq) =>
+        {
+            if (httpReq is null)
+                throw new ArgumentNullException(nameof(httpReq));
+            swagger.Info = info;
+            swagger.ExternalDocs = externalDocs;
+            swagger.Tags = new List<OpenApiTag> { teacherTag, classTag };
+        });
+
+    });
+
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sao Việt API v1");
+    });
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
+app.UseRouting();
+app.UseHttpMetrics();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapMetrics();
 
 app.Run();

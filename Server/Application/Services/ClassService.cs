@@ -46,7 +46,7 @@ namespace Application.Services
             return SaveAsync();
         }
 
-        public List<Class> FindClassByName(string name) => _classRepository.FindClassByName(name);
+        public List<Class> FindClassByName(string? name) => _classRepository.FindClassByName(name);
 
         public List<Class> GetClassesByStatus(string? status) => _classRepository.GetClassesByStatus(status);
 
