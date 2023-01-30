@@ -21,8 +21,8 @@ API trung tâm tin học Sao Việt
 	- [Repository pattern](#repository-pattern)
 	- [Môi trường phát triển](#môi-trường-phát-triển)
 - [Cài đặt](#cài-đặt)
-- [Người đóng góp](#người-đóng-góp)
 - [Tài liệu](#tài-liệu)
+- [Người đóng góp](#người-đóng-góp)
 - [Liên hệ](#liên-hệ)
 - [Giấy phép](#giấy-phép)
 
@@ -127,6 +127,13 @@ dotnet run
 
 Sau khi khởi động API, bạn có thể truy cập vào giao diện người dùng của API tại địa chỉ `http://localhost:(port)/swagger`. Với port được thiết lập trong file `appsettings.json`.
 
+# Tài liệu
+
+- Xem tài liệu API tại trang [Wiki](https://github.com/foxminchan/SaoVietAPI/wiki)
+- Xem Các thay đổi tại trang [CHANGELOG](./CHANGELOG.md)
+- Xem tài liệu về cách sử dụng API tại trang [API Documentation](#)
+- Xem quy tắc ứng xử tại trang [CODE_OF_CONDUCT](./CODE_OF_CONDUCT.md)
+
 # Người đóng góp
 
 Sao Việt API là một dự án mã nguồn mở và được phát triển bởi các đóng góp của các thành viên sau:
@@ -139,12 +146,6 @@ Sao Việt API là một dự án mã nguồn mở và được phát triển b�
 	</tr>
   </tbody>
 </table>
-
-# Tài liệu
-
-- Xem tài liệu API tại trang [Wiki](https://github.com/foxminchan/SaoVietAPI/wiki)
-- Xem Các thay đổi tại trang [CHANGELOG](./CHANGELOG.md)
-- Xem tài liệu về cách sử dụng API tại trang [API Documentation](#)
 
 # Liên hệ
 
