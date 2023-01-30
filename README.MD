@@ -144,7 +144,7 @@ Sao Việt API là một dự án mã nguồn mở và được phát triển b�
 
 - Xem tài liệu API tại trang [Wiki](https://github.com/foxminchan/SaoVietAPI/wiki)
 - Xem Các thay đổi tại trang [CHANGELOG](./CHANGELOG.md)
-- Xem tài liệu về cách sử dụng API (Vui lòng triển khai API và sử dụng swagger để xem tài liệu API) tại trang [API Documentation](#)
+- Xem tài liệu về cách sử dụng API tại trang [API Documentation](#)
 
 # Liên hệ
 
