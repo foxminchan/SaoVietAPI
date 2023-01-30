@@ -8,6 +8,7 @@ API trung tâm tin học Sao Việt
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 ![.NET](https://img.shields.io/badge/.NET%20Core-7.0-%238338ec?style=for-the-badge&logo=appveyor)
 ![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg?style=for-the-badge&logo=appveyor)
+![Swagger](https://img.shields.io/badge/swagger-valid-green?style=for-the-badge&logo=appveyor)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge&logo=appveyor)](https://opensource.org/licenses/MIT)
 
 # Mục lục
