@@ -17,6 +17,9 @@ API trung tâm tin học Sao Việt
 - [Tổng quan](#tổng-quan)
 	- [Giới thiệu](#giới-thiệu)
 	- [Chi tiết](#chi-tiết)
+	- [Kiến trúc](#kiến-trúc)
+	- [Repository pattern](#repository-pattern)
+	- [Môi trường phát triển](#môi-trường-phát-triển)
 - [Cài đặt](#cài-đặt)
 - [Người đóng góp](#người-đóng-góp)
 - [Tài liệu](#tài-liệu)
@@ -38,6 +41,37 @@ Các thành phần chính của API bao gồm:
 - **Giám sát:** Sử dụng trình quản lý giám sát Prometheus và Grafana để giám sát tình trạng của API.
 - **Cache:** Sử dụng Redis để lưu trữ dữ liệu cache.
 - **Giao diện người dùng:** Sử dụng Swagger để triển khai giao diện người dùng.
+
+## Kiến trúc
+
+API được thiết kế theo kiến trúc Clean architecture. Các thành phần chính của kiến trúc bao gồm:
+
+<p align="center"><img width=75% src="./Resources/CleanArchitecture.png"></p>
+
+- **Domain:** Là các đối tượng thể hiện các bảng trong cơ sở dữ liệu.
+- **Application:** Là các lớp xử lý nghiệp vụ của API.
+- **Infrastructure:** Là các lớp cung cấp các dịch vụ như cơ sở dữ liệu, giao diện người dùng, nhật ký, giám sát, cache...
+- **WebApi:** Là các lớp cung cấp các API cho người dùng.
+
+## Repository pattern
+
+API sử dụng mô hình Repository pattern để truy xuất dữ liệu. Mô hình này bao gồm các thành phần sau:
+
+<p align="center"><img width=75% src="./Resources/RepositoryPattern.png"></p>
+
+- **Interface:** Là một interface chứa các phương thức truy xuất dữ liệu.
+- **Repository:** Là một lớp thực thi interface.
+- **Service:** Là một lớp chứa các phương thức xử lý nghiệp vụ.
+
+## Môi trường phát triển
+
+Để phát triển API, bạn cần cài đặt các thành phần sau:
+
+- .NET Core 7
+- ELK Stack
+- Prometheus
+- Grafana
+- Redis
 
 # Cài đặt
 
