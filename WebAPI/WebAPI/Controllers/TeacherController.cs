@@ -31,10 +31,10 @@ namespace WebAPI.Controllers
         private static partial Regex PhonePattern();
 
         /// <inheritdoc />
-        public TeacherController(TeacherService teacherService, ILogger<TeacherController> logger, IMapper mapper)
+        public TeacherController(TeacherService teacherService, ILogger<TeacherController> logger)
         {
             _logger = logger;
-            _mapper = mapper;
+            _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Model.Teacher, Domain.Entities.Teacher>()).CreateMapper();
             _teacherService = teacherService;
         }
 

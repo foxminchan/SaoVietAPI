@@ -29,10 +29,10 @@ namespace WebAPI.Controllers
         private static partial Regex DateFormatRegex();
 
         /// <inheritdoc />
-        public ClassController(ClassService classService, ILogger<TeacherController> logger, IMapper mapper)
+        public ClassController(ClassService classService, ILogger<TeacherController> logger)
         {
             _logger = logger;
-            _mapper = mapper;
+            _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Model.Class, Domain.Entities.Class>()).CreateMapper();
             _classService = classService;
         }
 
@@ -81,10 +81,11 @@ namespace WebAPI.Controllers
                 return false;
             }
 
-            if (@class.branchId != null
-                && _classService.GetBranches().Any(x => x != null && x.id == @class.branchId)) return true;
+            if (@class.branchId == null
+                || _classService.GetBranches().Any(x => x != null && x.id == @class.branchId)) return true;
             message = "Branch id is not exist";
             return false;
+
         }
 
         /// <summary>
@@ -104,7 +105,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var classes = await Task.Run(_classService.GetClasses); ;
+                var classes = await Task.Run(_classService.GetClasses);
                 return classes.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = classes })
                     : NoContent();

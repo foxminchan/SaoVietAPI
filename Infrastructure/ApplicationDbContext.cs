@@ -14,7 +14,7 @@ namespace Infrastructure
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
 
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<Teacher>? teachers { get; set; }
         public DbSet<Branch>? branches { get; set; }
@@ -27,6 +27,7 @@ namespace Infrastructure
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+            ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
