@@ -186,8 +186,8 @@ namespace WebAPI.Controllers
         [HttpPost("addTeacher")]
         public async Task<IActionResult> AddTeacher([FromBody] Model.Teacher teacher)
         {
-            if (!ValidData(teacher, out var result))
-                return BadRequest(new { status = false, message = result });
+            if (!ValidData(teacher, out var message))
+                return BadRequest(new { status = false, message });
 
             try
             {
@@ -232,8 +232,8 @@ namespace WebAPI.Controllers
                 var existTeacher = await Task.Run(() => _teacherService.GetTeacherById(id));
                 if (existTeacher == null)
                     return NotFound(new { status = false, message = "Teacher not found" });
-                if (!ValidData(teacher, out var result))
-                    return BadRequest(new { status = false, message = result });
+                if (!ValidData(teacher, out var message))
+                    return BadRequest(new { status = false, message });
                 var updatedTeacher = _mapper.Map(teacher, existTeacher);
                 await _teacherService.UpdateTeacher(updatedTeacher, id);
                 return Ok(new { status = true, message = "Update teacher successfully" });

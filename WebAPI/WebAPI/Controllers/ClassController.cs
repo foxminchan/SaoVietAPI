@@ -1,8 +1,6 @@
-﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Application.Services;
 using AutoMapper;
-using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -36,6 +34,57 @@ namespace WebAPI.Controllers
             _logger = logger;
             _mapper = mapper;
             _classService = classService;
+        }
+
+        private bool ValidData(Model.Class @class, out string? message)
+        {
+            message = string.Empty;
+            if (string.IsNullOrWhiteSpace(@class.name))
+            {
+                message = "Class name is required";
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(@class.startDate) && 
+                !DateFormatRegex().IsMatch(@class.startDate))
+            {
+                message = "Start date must be match YYYY-MM-DD format";
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(@class.endDate) && 
+                !DateFormatRegex().IsMatch(@class.endDate))
+            {
+                message = "End date must be match YYYY-MM-DD format";
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(@class.startDate) && 
+                !string.IsNullOrWhiteSpace(@class.endDate) && 
+                DateTime.Parse(@class.startDate) > DateTime.Parse(@class.endDate))
+            {
+                message = "Start date must be less than end date";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(@class.id)
+                || _classService.GetClasses().Any(x => x.id == @class.id))
+            {
+                message = "Class id is exist";
+                return false;
+            }
+
+            if (@class.teacherId != null
+                && !_classService.GetTeachers().Any(x => x != null && x.id == @class.teacherId))
+            {
+                message = "Teacher id is not exist";
+                return false;
+            }
+
+            if (@class.branchId != null
+                && _classService.GetBranches().Any(x => x != null && x.id == @class.branchId)) return true;
+            message = "Branch id is not exist";
+            return false;
         }
 
         /// <summary>
@@ -91,25 +140,14 @@ namespace WebAPI.Controllers
         [HttpPost("addClass")]
         public async Task<IActionResult> AddClass([FromBody] Model.Class request)
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Model.Class, Class>());
+            if (!ValidData(request, out var message))
+                return BadRequest(new { status = false, message });
 
             try
             {
-                var classEntity = config.CreateMapper().Map<Class>(request);
-
-                if (await Task.Run(() => _classService.GetClasses().Any(x => x.id == classEntity.id)))
-                    return BadRequest(new { status = false, message = "Class id is exist" });
-                if (classEntity.startDate != null && !DateFormatRegex().IsMatch(classEntity.startDate))
-                    return BadRequest(new { status = false, message = "Start date must be match YYYY-MM-DD format" });
-                if (classEntity.endDate != null && classEntity.startDate != null && DateTime.Parse(classEntity.startDate) > DateTime.Parse(classEntity.endDate))
-                        return BadRequest(new { status = false, message = "Start date must be less than end date" });
-                if (await Task.Run(() => _classService.GetTeachers().Any(x => x != null && x.id == classEntity.teacherId)) == false)
-                    return BadRequest(new { status = false, message = "Teacher id is not exist" });
-                if (await Task.Run(() => _classService.GetBranches().Any(x => x != null && x.id == classEntity.branchId)) == false)
-                    return BadRequest(new { status = false, message = "Branch id is not exist" });
-
-                await Task.Run(() => _classService.AddClass(classEntity));
-                return Ok(new { status = true, message = "Add class successfully", data = classEntity });
+                var newClass = _mapper.Map<Domain.Entities.Class>(request);
+                await Task.Run(() => _classService.AddClass(newClass));
+                return Ok(new { status = true, message = "Add class successfully" });
             }
             catch (Exception e)
             {
@@ -143,27 +181,18 @@ namespace WebAPI.Controllers
         [HttpPut("updateClass/{id}")]
         public async Task<IActionResult> UpdateClass([FromBody] Model.Class request, [FromRoute] string id)
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Model.Class, Class>());
-
+            if (!ValidData(request, out var message))
+                return BadRequest(new { status = false, message });
+            
             try
             {
-                var classEntity = config.CreateMapper().Map<Class>(request);
-
-                if (await Task.Run(() => _classService.GetClasses().Any(x => x.id == classEntity.id)) == false)
-                    return BadRequest(new { status = false, message = "Class id is not exist" });
-                if (classEntity.startDate != null && !DateFormatRegex().IsMatch(classEntity.startDate))
-                    return BadRequest(new { status = false, message = "Start date must be match YYYY-MM-DD format" });
-                if (classEntity.endDate != null && classEntity.startDate != null && DateTime.Parse(classEntity.startDate) > DateTime.Parse(classEntity.endDate))
-                    return BadRequest(new { status = false, message = "Start date must be less than end date" });
-                if (await Task.Run(() => _classService.GetTeachers().Any(x => x != null && x.id == classEntity.teacherId)) == false)
-                    return BadRequest(new { status = false, message = "Teacher id is not exist" });
-
+                var classEntity = _mapper.Map<Domain.Entities.Class>(request);
                 await Task.Run(() => _classService.UpdateClass(classEntity, id));
                 return Ok(new { status = true, message = "Update class successfully", data = classEntity });
             }
             catch (Exception e)
             {
-                _logger.LogError("[{time}]-[{millisecond},{nanosecond}] - ERROR - ClassController.cs:{pid} - [Transaction={tid}] - error: {errorMessage}", DateTime.Now, DateTime.Now.Microsecond, DateTime.Now.Nanosecond, Environment.ProcessId, Activity.Current?.Id ?? HttpContext.TraceIdentifier, e.Message);
+                _logger.LogError(e, "Error while updating class");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -197,7 +226,7 @@ namespace WebAPI.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError("[{time}]-[{millisecond},{nanosecond}] - ERROR - ClassController.cs:{pid} - [Transaction={tid}] - error: {errorMessage}", DateTime.Now, DateTime.Now.Microsecond, DateTime.Now.Nanosecond, Environment.ProcessId, Activity.Current?.Id ?? HttpContext.TraceIdentifier, e.Message);
+                _logger.LogError(e, "Error while deleting class");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -226,17 +255,14 @@ namespace WebAPI.Controllers
                 return BadRequest(new { status = false, message = "Name is null" });
             try
             {
-                var config = new MapperConfiguration(cfg => cfg.CreateMap<Class, Model.Class>());
                 var classEntity = await Task.Run(() => _classService.FindClassByName(name));
-
-                if (classEntity.Count == 0)
-                    return NotFound(new { status = false, message = "Class is not found" });
-
-                return Ok(new { status = true, message = "Find class successfully", data = config.CreateMapper().Map<Model.Class>(classEntity) });
+                return !classEntity.Any()
+                    ? NotFound(new { status = false, message = "Class is not found" })
+                    : Ok(new { status = true, message = "Find class successfully", data = classEntity });
             }
             catch (Exception e)
             {
-                _logger.LogError("[{time}]-[{millisecond},{nanosecond}] - ERROR - ClassController.cs:{pid} - [Transaction={tid}] - error: {errorMessage}", DateTime.Now, DateTime.Now.Microsecond, DateTime.Now.Nanosecond, Environment.ProcessId, Activity.Current?.Id ?? HttpContext.TraceIdentifier, e.Message);
+                _logger.LogError(e, "Error while finding class by name");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -272,17 +298,14 @@ namespace WebAPI.Controllers
 
             try
             {
-                var config = new MapperConfiguration(cfg => cfg.CreateMap<Class, Model.Class>());
                 var classEntity = await Task.Run(() => _classService.GetClassesByStatus(status));
-
-                if (classEntity.Count == 0)
-                    return NoContent();
-
-                return Ok(new { status = true, message = "Find class successfully", data = config.CreateMapper().Map<Model.Class>(classEntity) });
+                return (!classEntity.Any())
+                    ? NoContent()
+                    : Ok(new { status = true, message = "Find class successfully", data = classEntity });
             }
             catch (Exception e)
             {
-                _logger.LogError("[{time}]-[{millisecond},{nanosecond}] - ERROR - ClassController.cs:{pid} - [Transaction={tid}] - error: {errorMessage}", DateTime.Now, DateTime.Now.Microsecond, DateTime.Now.Nanosecond, Environment.ProcessId, Activity.Current?.Id ?? HttpContext.TraceIdentifier, e.Message);
+                _logger.LogError(e, "Error while finding class by status");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
