@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Application.Services;
 using AutoMapper;
 using Domain.Entities;
@@ -23,16 +24,18 @@ namespace WebAPI.Controllers
     public partial class ClassController : ControllerBase
     {
         private readonly ILogger<TeacherController> _logger;
+        private readonly IMapper _mapper;
         private readonly ClassService _classService;
 
         [GeneratedRegex("^\\d{4}-\\d{2}-\\d{2}$")]
         private static partial Regex DateFormatRegex();
 
         /// <inheritdoc />
-        public ClassController(ClassService classService, ILogger<TeacherController> logger)
+        public ClassController(ClassService classService, ILogger<TeacherController> logger, IMapper mapper)
         {
-            _classService = classService;
             _logger = logger;
+            _mapper = mapper;
+            _classService = classService;
         }
 
         /// <summary>
@@ -53,12 +56,13 @@ namespace WebAPI.Controllers
             try
             {
                 var classes = await Task.Run(_classService.GetClasses);
-                if (classes.Count == 0)
-                    return NoContent();
-                return Ok(new { status = true, message = "Get data successfully", data = classes });
+                if (classes.Count != 0)
+                    return Ok(new { status = true, message = "Get data successfully", data = classes });
+                return NoContent();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.LogError(e, "Error while get all class");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -101,12 +105,15 @@ namespace WebAPI.Controllers
                         return BadRequest(new { status = false, message = "Start date must be less than end date" });
                 if (await Task.Run(() => _classService.GetTeachers().Any(x => x != null && x.id == classEntity.teacherId)) == false)
                     return BadRequest(new { status = false, message = "Teacher id is not exist" });
-                
+                if (await Task.Run(() => _classService.GetBranches().Any(x => x != null && x.id == classEntity.branchId)) == false)
+                    return BadRequest(new { status = false, message = "Branch id is not exist" });
+
                 await Task.Run(() => _classService.AddClass(classEntity));
                 return Ok(new { status = true, message = "Add class successfully", data = classEntity });
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.LogError(e, "Error while adding class");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -154,8 +161,9 @@ namespace WebAPI.Controllers
                 await Task.Run(() => _classService.UpdateClass(classEntity, id));
                 return Ok(new { status = true, message = "Update class successfully", data = classEntity });
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.LogError("[{time}]-[{millisecond},{nanosecond}] - ERROR - ClassController.cs:{pid} - [Transaction={tid}] - error: {errorMessage}", DateTime.Now, DateTime.Now.Microsecond, DateTime.Now.Nanosecond, Environment.ProcessId, Activity.Current?.Id ?? HttpContext.TraceIdentifier, e.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -187,8 +195,9 @@ namespace WebAPI.Controllers
                 await Task.Run(() => _classService.DeleteClass(id));
                 return Ok(new { status = true, message = "Delete class successfully" });
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.LogError("[{time}]-[{millisecond},{nanosecond}] - ERROR - ClassController.cs:{pid} - [Transaction={tid}] - error: {errorMessage}", DateTime.Now, DateTime.Now.Microsecond, DateTime.Now.Nanosecond, Environment.ProcessId, Activity.Current?.Id ?? HttpContext.TraceIdentifier, e.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -225,8 +234,9 @@ namespace WebAPI.Controllers
 
                 return Ok(new { status = true, message = "Find class successfully", data = config.CreateMapper().Map<Model.Class>(classEntity) });
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.LogError("[{time}]-[{millisecond},{nanosecond}] - ERROR - ClassController.cs:{pid} - [Transaction={tid}] - error: {errorMessage}", DateTime.Now, DateTime.Now.Microsecond, DateTime.Now.Nanosecond, Environment.ProcessId, Activity.Current?.Id ?? HttpContext.TraceIdentifier, e.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -270,8 +280,9 @@ namespace WebAPI.Controllers
 
                 return Ok(new { status = true, message = "Find class successfully", data = config.CreateMapper().Map<Model.Class>(classEntity) });
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.LogError("[{time}]-[{millisecond},{nanosecond}] - ERROR - ClassController.cs:{pid} - [Transaction={tid}] - error: {errorMessage}", DateTime.Now, DateTime.Now.Microsecond, DateTime.Now.Nanosecond, Environment.ProcessId, Activity.Current?.Id ?? HttpContext.TraceIdentifier, e.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }

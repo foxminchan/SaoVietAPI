@@ -17,5 +17,7 @@ namespace Infrastructure.Repositories
         public BranchRepository(ApplicationDbContext context) : base(context)
         {
         }
+
+        public Branch? GetBranchById(string? id) => id == null ? null : GetById(id);
     }
 }

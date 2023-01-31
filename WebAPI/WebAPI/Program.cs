@@ -32,7 +32,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ELK Stack Configuration
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+#region ELK Stack
 ConfigureLogging();
 builder.Host.UseSerilog();
 
@@ -65,12 +67,16 @@ ElasticsearchSinkOptions ConfigureElasticSink(IConfiguration configuration, stri
         IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name?.ToLower(System.Globalization.CultureInfo.CurrentCulture).Replace(".", "-")}-{environment?.ToLower(System.Globalization.CultureInfo.CurrentCulture).Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
     };
 }
+#endregion
 
+#region Services
 builder.Services.AddTransient<TeacherService>();
 builder.Services.AddTransient<ClassService>();
+#endregion
 
 var app = builder.Build();
 
+#region Swagger
 var info = new OpenApiInfo
 {
     Title = "Sao Việt API",
@@ -133,6 +139,7 @@ if (app.Environment.IsDevelopment())
     });
     app.UseDeveloperExceptionPage();
 }
+#endregion
 
 app.UseRouting();
 app.UseHttpMetrics();

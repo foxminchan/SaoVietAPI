@@ -56,5 +56,12 @@ namespace Application.Services
             var teacherIds = _classRepository.GetClasses().Select(x => x.teacherId).ToList();
             return teacherIds.Select(teacherService.GetTeacherById).ToList();
         }
+
+        public IEnumerable<Branch?> GetBranches()
+        {
+            var branchService = new BranchService(_context);
+            var branchIds = _classRepository.GetClasses().Select(x => x.branchId).ToList();
+            return branchIds.Select(branchService.GetBranchById).ToList();
+        }
     }
 }

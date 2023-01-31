@@ -13,6 +13,6 @@ namespace Domain.Interfaces
 
     public interface IBranchRepository : IGenericRepository<Branch>
     {
-
+        public Branch? GetBranchById(string? id);
     }
 }
