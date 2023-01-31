@@ -87,9 +87,9 @@ namespace WebAPI.Controllers
             try
             {
                 var teachers = await Task.Run(_teacherService.GetTeachers);
-                if (teachers.Count != 0)
-                    return Ok(new { status = true, message = "Get data successfully", data = teachers });
-                return NoContent();
+                return teachers.Any() 
+                    ? Ok(new { status = true, message = "Get data successfully", data = teachers }) 
+                    : NoContent();
             }
             catch (Exception e)
             {
@@ -120,9 +120,9 @@ namespace WebAPI.Controllers
             try
             {
                 var teachers = await Task.Run(() => _teacherService.FindTeacherByName(name));
-                if (teachers.Count != 0)
-                    return Ok(new { status = true, message = "Get data successfully", data = teachers });
-                return NoContent();
+                return teachers.Any()
+                    ? Ok(new { status = true, message = "Get data successfully", data = teachers })
+                    : NoContent();
             }
             catch (Exception e)
             {
@@ -153,9 +153,9 @@ namespace WebAPI.Controllers
             try
             {
                 var teacher = await Task.Run(() => _teacherService.GetTeacherById(id));
-                if (teacher != null)
-                    return Ok(new { status = true, message = "Get data successfully", data = teacher });
-                return NoContent();
+                return teacher != null
+                    ? Ok(new { status = true, message = "Get data successfully", data = teacher })
+                    : NoContent();
             }
             catch (Exception e)
             {

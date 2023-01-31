@@ -104,10 +104,10 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var classes = await Task.Run(_classService.GetClasses);
-                if (classes.Count != 0)
-                    return Ok(new { status = true, message = "Get data successfully", data = classes });
-                return NoContent();
+                var classes = await Task.Run(_classService.GetClasses); ;
+                return classes.Any()
+                    ? Ok(new { status = true, message = "Get data successfully", data = classes })
+                    : NoContent();
             }
             catch (Exception e)
             {
