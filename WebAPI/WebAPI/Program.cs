@@ -20,7 +20,14 @@ builder.Services.AddSwaggerGen(options =>
         options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
     });
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseLoggerFactory(LoggerFactory.Create(log => log.AddConsole()));
+    options.EnableSensitiveDataLogging();
+    options.EnableDetailedErrors();
+    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    options.EnableThreadSafetyChecks();
+});
 
 builder.Services.AddCors(options =>
 {
@@ -72,6 +79,7 @@ ElasticsearchSinkOptions ConfigureElasticSink(IConfiguration configuration, stri
 #region Services
 builder.Services.AddTransient<TeacherService>();
 builder.Services.AddTransient<ClassService>();
+builder.Services.AddTransient<BranchService>();
 #endregion
 
 var app = builder.Build();
@@ -86,6 +94,7 @@ var info = new OpenApiInfo
     {
         Name = "Nguyễn Xuân Nhân",
         Email = "nguyenxuannhan407@gmail.com",
+        Url = new Uri("https://www.facebook.com/FoxMinChan/")
     },
     License = new OpenApiLicense
     {
@@ -101,24 +110,33 @@ var externalDocs = new OpenApiExternalDocs
     Url = new Uri("https://blogdaytinhoc.com/"),
 };
 
+var findOutMore = new OpenApiExternalDocs
+{
+    Description = "Tìm hiểu thêm về Swagger",
+    Url = new Uri("https://swagger.io/"),
+};
+
 var teacherTag = new OpenApiTag
 {
     Name = "Teacher",
-    Description = "Quản lý thông tin giáo viên"
+    Description = "Quản lý thông tin giáo viên",
+    ExternalDocs = findOutMore
 };
 
 var classTag = new OpenApiTag
 {
     Name = "Class",
-    Description = "Quản lý thông tin lớp học"
+    Description = "Quản lý thông tin lớp học",
+    ExternalDocs = findOutMore
 };
 
 var branchTag = new OpenApiTag
 {
     Name = "Branch",
-    Description = "Quản lý thông tin chi nhánh"
+    Description = "Quản lý thông tin chi nhánh",
+    ExternalDocs = findOutMore
 };
-
+app.UseStaticFiles();
 app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
@@ -135,6 +153,13 @@ if (app.Environment.IsDevelopment())
             swagger.Info = info;
             swagger.ExternalDocs = externalDocs;
             swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag };
+            swagger.Servers = new List<OpenApiServer>
+            {
+                new()
+                {
+                    Url = $"{httpReq.Scheme}://{httpReq.Host.Value}"
+                }
+            };
         });
 
     });
@@ -142,6 +167,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sao Việt API v1");
+        c.InjectStylesheet("/css/swagger-ui.css");
+        c.InjectJavascript("/js/swagger-ui.js");
     });
     app.UseDeveloperExceptionPage();
 }

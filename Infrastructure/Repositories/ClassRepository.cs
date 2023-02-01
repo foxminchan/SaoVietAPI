@@ -43,5 +43,4 @@ namespace Infrastructure.Repositories
 
         public void DeleteClass(string id) => Delete(x => x.id == id);
     }
-
 }

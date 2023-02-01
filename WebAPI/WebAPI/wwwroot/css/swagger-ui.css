@@ -1,0 +1,63 @@
+﻿.swagger-ui .topbar {
+    padding: 8px 30px;
+    background-color: #8338ec;
+}
+
+.swagger-ui .topbar .topbar-wrapper {
+  -ms-flex-align: center;
+}
+
+.swagger-ui .topbar .topbar-wrapper,
+.swagger-ui .topbar a {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+}
+
+.swagger-ui .topbar a {
+  font-size: 1.5em;
+  font-weight: 700;
+  text-decoration: none;
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  -ms-flex-align: center;
+  font-family: Titillium Web, sans-serif;
+  color: #fff;
+}
+
+.swagger-ui .topbar a span {
+  margin: 0;
+  padding: 0 10px;
+}
+
+.swagger-ui .topbar .download-url-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.swagger-ui .topbar .download-url-wrapper label.select-label span {
+  color: white;
+}
+
+.swagger-ui .topbar .download-url-wrapper input[type='text'] {
+  min-width: 350px;
+  margin: 0;
+  border: 2px solid #547f00;
+  border-radius: 4px 0 0 4px;
+  outline: none;
+}
+
+.swagger-ui .topbar .download-url-wrapper .download-url-button {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 4px 40px;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  background: #547f00;
+  font-family: Titillium Web, sans-serif;
+  color: #fff;
+}

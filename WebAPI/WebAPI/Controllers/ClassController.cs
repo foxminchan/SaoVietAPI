@@ -178,6 +178,12 @@ namespace WebAPI.Controllers
         [HttpGet("findByStatus/{status:regex(Expired|Active|Upcoming)}")]
         public async Task<IActionResult> FindClassByStatus([FromRoute] string? status)
         {
+            var statusList = new List<string> { "Expired", "Active", "Upcoming" };
+            if (string.IsNullOrEmpty(status))
+                return BadRequest(new { status = false, message = "Status is null" });
+            if (!statusList.Contains(status))
+                return BadRequest(new { status = false, message = "Status is not valid" });
+
             try
             {
                 var classEntity = await Task.Run(() => _classService.GetClassesByStatus(status));
