@@ -23,6 +23,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore WebAPI/WebAPI.sln
+      run: dotnet build --no-restore SaoVietAPI/WebAPI/WebAPI.sln
     - name: Test
       run: dotnet test --no-build --verbosity normal
