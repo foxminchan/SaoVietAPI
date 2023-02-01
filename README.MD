@@ -182,6 +182,8 @@ Sau đó, bạn cần thiết lập các thành phần như Elastic Stack, Prome
 docker-compose -f docker-compose.yml -f redis.yml up -d
 ```
 
+Để sử dụng được các thành phần này, vui lòng tham khảo tạo trang [Wiki](https://github.com/foxminchan/SaoVietAPI/wiki).
+
 ## Cấu hình kết nối với SQL Server
 
 Sau khi khởi động API, bạn có thể truy cập vào giao diện người dùng của API tại địa chỉ `http://localhost:(port)/swagger`. Với port được thiết lập trong file `appsettings.json`.
