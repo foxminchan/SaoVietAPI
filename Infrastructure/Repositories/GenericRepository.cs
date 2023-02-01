@@ -58,7 +58,7 @@ namespace Infrastructure.Repositories
 
         public virtual int Count(Expression<Func<T, bool>> where) => _dbSet.Count(where);
 
-        public virtual T GetById(object? id) => _dbSet.Find(id) ?? throw new ArgumentNullException(nameof(id));
+        public virtual T? GetById(object? id) => _dbSet.Find(id);
 
         public virtual IEnumerable<T> GetList(
             Expression<Func<T, bool>>? filter = null,

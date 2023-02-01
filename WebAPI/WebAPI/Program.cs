@@ -26,8 +26,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseLoggerFactory(LoggerFactory.Create(log => log.AddConsole()));
     options.EnableSensitiveDataLogging();
     options.EnableDetailedErrors();
-    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-    options.EnableThreadSafetyChecks();
 });
 
 builder.Services.AddCors(options =>
