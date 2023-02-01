@@ -29,6 +29,8 @@ namespace Infrastructure
         {
         }
 
+        public IEnumerable<string> GetAllId() => Users.Select(u => u.Id).ToList();
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

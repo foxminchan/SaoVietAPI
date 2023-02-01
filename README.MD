@@ -16,16 +16,15 @@ API trung tâm tin học Sao Việt
 
 - [Mục lục](#mục-lục)
 - [Tổng quan](#tổng-quan)
-	- [Giới thiệu](#giới-thiệu)
-	- [Chi tiết](#chi-tiết)
-	- [Kiến trúc](#kiến-trúc)
-	- [Repository pattern](#repository-pattern)
-	- [Môi trường phát triển](#môi-trường-phát-triển)
+  - [Giới thiệu](#giới-thiệu)
+  - [Chi tiết](#chi-tiết)
+  - [Kiến trúc](#kiến-trúc)
+  - [Repository pattern](#repository-pattern)
+  - [Môi trường phát triển](#môi-trường-phát-triển)
 - [Cài đặt](#cài-đặt)
-	- [Cài đặt môi trường phát triển](#cài-đặt-môi-trường-phát-triển)
-	- [Cài đặt các package cần thiết](#cài-đặt-các-package-cần-thiết)
-	- [Cài đặt Log, Monitor và Cache](#cài-đặt-log-monitor-và-cache)
-	- [Cấu hình kết nối với SQL Server](#cấu-hình-kết-nối-với-sql-server)
+  - [Cài đặt môi trường phát triển](#cài-đặt-môi-trường-phát-triển)
+  - [Cài đặt Log, Monitor và Cache](#cài-đặt-log-monitor-và-cache)
+  - [Cấu hình kết nối với SQL Server](#cấu-hình-kết-nối-với-sql-server)
 - [Tài liệu](#tài-liệu)
 - [Người đóng góp](#người-đóng-góp)
 - [Liên hệ](#liên-hệ)
@@ -128,51 +127,6 @@ dotnet run
 > ```bash
 > docker run -it --name dotnet7_container -p 8080:80 -v /path/to/project:/app microsoft/dotnet:7.0-runtime
 > ```
-
-## Cài đặt các package cần thiết
-
-1. `AutoMapper`: Dùng để ánh xạ dữ liệu giữa các lớp.
-   - **Project:** WebAPI
-   - **Link:** https://www.nuget.org/packages/AutoMapper
-2. `AutoMapper.Extensions.Microsoft.DependencyInjection`: Dùng để ánh xạ dữ liệu giữa các lớp.
-   - **Project:** WebAPI
-   - **Link:** https://www.nuget.org/packages/AutoMapper.Extensions.Microsoft.DependencyInjection
-3. `Microsoft.AspNetCore.Identity.EntityFrameworkCore`: Dùng để tạo Identity.
-   - **Project:** WebAPI, Infrastructure, Application, Domain
-   - **Link:** https://www.nuget.org/packages/Microsoft.AspNetCore.Identity.EntityFrameworkCore
-4. `Microsoft.AspNetCore.OpenApi`: Dùng để tạo Swagger.
-   - **Project:** WebAPI
-   - **Link:** https://www.nuget.org/packages/Microsoft.AspNetCore.OpenApi
-5. `Microsoft.EntityFrameworkCore`: Dùng để tương tác với SQL Server.
-   - **Project:** Infrastructure, WebAPI
-   - **Link:** https://www.nuget.org/packages/Microsoft.EntityFrameworkCore
-6. `Microsoft.EntityFrameworkCore.Design`: Dùng để tương tác với SQL Server.
-   - **Project:** Infrastructure, WebAPI
-   - **Link:** https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Design
-7. `Microsoft.EntityFrameworkCore.SqlServer`: Dùng để tương tác với SQL Server.
-   - **Project:** Infrastructure, WebAPI
-   - **Link:** https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.SqlServer
-8. `Microsoft.EntityFrameworkCore.Tools`: Dùng để tương tác với SQL Server.
-   - **Project:** Infrastructure, WebAPI
-   - **Link:** https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Tools
-9. `prometheus-net.AspNetCore`: Dùng để tạo Prometheus.
-   - **Project:** WebAPI
-   - **Link:** https://www.nuget.org/packages/prometheus-net.AspNetCore
-10. `Serilog.AspNetCore`: Dùng để tạo Log.
-    - **Project:** WebAPI
-    - **Link:** https://www.nuget.org/packages/Serilog.AspNetCore
-11. `Serilog.Enrichers.Environment`: Dùng để tạo Log.
-    - **Project:** WebAPI
-    - **Link:** https://www.nuget.org/packages/Serilog.Enrichers.Environment
-12. `Serilog.Sinks.Debug`: Dùng để tạo Log.
-    - **Project:** WebAPI
-    - **Link:** https://www.nuget.org/packages/Serilog.Sinks.Debug
-13. `Serilog.Sinks.Elasticsearch`: Dùng để tạo Log.
-    - **Project:** WebAPI
-    - **Link:** https://www.nuget.org/packages/Serilog.Sinks.Elasticsearch
-14. `Swashbuckle.AspNetCore`: Dùng để tạo Swagger.
-    - **Project:** WebAPI
-    - **Link:** https://www.nuget.org/packages/Swashbuckle.AspNetCore
 
 ## Cài đặt Log, Monitor và Cache
 

@@ -6,6 +6,7 @@ using Application.Services;
 using Prometheus;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -169,6 +170,13 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sao Việt API v1");
         c.InjectStylesheet("/css/swagger-ui.css");
         c.InjectJavascript("/js/swagger-ui.js");
+        c.DocumentTitle = "Sao Việt API";
+        c.OAuthConfigObject = new OAuthConfigObject
+        {
+            ClientId = "swagger-ui",
+            AppName = "Swagger UI",
+            UsePkceWithAuthorizationCodeGrant = true
+        };
     });
     app.UseDeveloperExceptionPage();
 }

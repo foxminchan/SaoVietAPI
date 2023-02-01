@@ -26,7 +26,7 @@ namespace Application.Services
             _teacherRepository = new TeacherRepository(_context);
         }
 
-        public IEnumerable<string> GetAllId() => _context.Users.Select(x => x.Id).ToList();
+        public IEnumerable<string> GetAllId() => _context.GetAllId();
 
         public List<Teacher> GetTeachers() => _teacherRepository.GetTeachers();
 

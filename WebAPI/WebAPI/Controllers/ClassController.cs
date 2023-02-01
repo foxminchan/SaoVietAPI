@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
@@ -19,24 +20,21 @@ namespace WebAPI.Controllers
     /// </summary>
     [Route("api/v1/[controller]")]
     [ApiController]
-    public partial class ClassController : ControllerBase
+    public class ClassController : ControllerBase
     {
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly ClassService _classService;
 
-        [GeneratedRegex("^\\d{4}-\\d{2}-\\d{2}$")]
-        private static partial Regex DateFormatRegex();
-
         /// <inheritdoc />
         public ClassController(ClassService classService, ILogger<TeacherController> logger)
         {
             _logger = logger;
-            _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Model.Class, Domain.Entities.Class>()).CreateMapper();
+            _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Class, Domain.Entities.Class>()).CreateMapper();
             _classService = classService;
         }
 
-        private bool ValidData(Model.Class @class, out string? message)
+        private bool IsValidClass(Class @class, out string? message)
         {
             message = string.Empty;
             if (string.IsNullOrWhiteSpace(@class.name))
@@ -46,14 +44,14 @@ namespace WebAPI.Controllers
             }
 
             if (!string.IsNullOrWhiteSpace(@class.startDate) &&
-                !DateFormatRegex().IsMatch(@class.startDate))
+                !Regex.IsMatch(@class.startDate, "^\\d{4}-\\d{2}-\\d{2}$"))
             {
                 message = "Start date must be match YYYY-MM-DD format";
                 return false;
             }
 
             if (!string.IsNullOrWhiteSpace(@class.endDate) &&
-                !DateFormatRegex().IsMatch(@class.endDate))
+                !Regex.IsMatch(@class.endDate, "^\\d{4}-\\d{2}-\\d{2}$"))
             {
                 message = "End date must be match YYYY-MM-DD format";
                 return false;
@@ -257,9 +255,9 @@ namespace WebAPI.Controllers
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("addClass")]
-        public async Task<IActionResult> AddClass([FromBody] Model.Class request)
+        public async Task<IActionResult> AddClass([FromBody] Class request)
         {
-            if (!ValidData(request, out var message))
+            if (!IsValidClass(request, out var message))
                 return BadRequest(new { status = false, message });
 
             try
@@ -298,9 +296,9 @@ namespace WebAPI.Controllers
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut("updateClass/{id}")]
-        public async Task<IActionResult> UpdateClass([FromBody] Model.Class request, [FromRoute] string id)
+        public async Task<IActionResult> UpdateClass([FromBody] Class request, [FromRoute] string id)
         {
-            if (!ValidData(request, out var message))
+            if (!IsValidClass(request, out var message))
                 return BadRequest(new { status = false, message });
 
             try

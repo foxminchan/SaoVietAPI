@@ -1,4 +1,4 @@
-﻿namespace WebAPI.Model
+﻿namespace WebAPI.Models
 {
     /**
     * @Project ASP.NET Core 7.0

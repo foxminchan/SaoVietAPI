@@ -1,6 +1,7 @@
 ﻿using Application.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
@@ -28,11 +29,11 @@ namespace WebAPI.Controllers
         public BranchController(BranchService branchService, ILogger<TeacherController> logger)
         {
             _logger = logger;
-            _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Model.Branch, Domain.Entities.Branch>()).CreateMapper();
+            _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Branch, Domain.Entities.Branch>()).CreateMapper();
             _branchService = branchService;
         }
 
-        private bool ValidData(Model.Branch branch, out string message)
+        private bool IsValidBranch(Branch branch, out string message)
         {
             if (string.IsNullOrEmpty(branch.name))
             {
@@ -197,9 +198,9 @@ namespace WebAPI.Controllers
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("addBranch")]
-        public async Task<IActionResult> AddBranch([FromBody] Model.Branch branch)
+        public async Task<IActionResult> AddBranch([FromBody] Branch branch)
         {
-            if (!ValidData(branch, out var message))
+            if (!IsValidBranch(branch, out var message))
                 return BadRequest(new { status = false, message });
 
             try
@@ -235,9 +236,9 @@ namespace WebAPI.Controllers
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut("updateBranch/{id}")]
-        public async Task<IActionResult> UpdateBranch([FromBody] Model.Branch branch, [FromRoute] string id)
+        public async Task<IActionResult> UpdateBranch([FromBody] Branch branch, [FromRoute] string id)
         {
-            if (!ValidData(branch, out var message))
+            if (!IsValidBranch(branch, out var message))
                 return BadRequest(new { status = false, message });
 
             try

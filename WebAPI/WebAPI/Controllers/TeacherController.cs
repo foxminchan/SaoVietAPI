@@ -19,26 +19,21 @@ namespace WebAPI.Controllers
     /// </summary>
     [Route("api/v1/[controller]")]
     [ApiController]
-    public partial class TeacherController : ControllerBase
+    public class TeacherController : ControllerBase
     {
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly TeacherService _teacherService;
 
-        [GeneratedRegex("^([\\w\\.\\-]+)@([\\w\\-]+)((\\.(\\w){2,3})+)$")]
-        private static partial Regex EmailPattern();
-        [GeneratedRegex("^([0-9]{10})$")]
-        private static partial Regex PhonePattern();
-
         /// <inheritdoc />
         public TeacherController(TeacherService teacherService, ILogger<TeacherController> logger)
         {
             _logger = logger;
-            _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Model.Teacher, Domain.Entities.Teacher>()).CreateMapper();
+            _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Teacher, Domain.Entities.Teacher>()).CreateMapper();
             _teacherService = teacherService;
         }
 
-        private bool ValidData(Model.Teacher teacher, out string? message)
+        private bool IsValidTeacher(Models.Teacher teacher, out string? message)
         {
             message = string.Empty;
 
@@ -50,13 +45,15 @@ namespace WebAPI.Controllers
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(teacher.email) && !EmailPattern().IsMatch(teacher.email))
+            if (!string.IsNullOrWhiteSpace(teacher.email) && 
+                !Regex.IsMatch(teacher.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"))
             {
                 message = "Email is invalid";
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(teacher.phone) && !PhonePattern().IsMatch(teacher.phone))
+            if (!string.IsNullOrWhiteSpace(teacher.phone) && 
+                !Regex.IsMatch(teacher.phone, @"^([0-9]{10})$"))
             {
                 message = "Phone is invalid";
                 return false;
@@ -87,8 +84,8 @@ namespace WebAPI.Controllers
             try
             {
                 var teachers = await Task.Run(_teacherService.GetTeachers);
-                return teachers.Any() 
-                    ? Ok(new { status = true, message = "Get data successfully", data = teachers }) 
+                return teachers.Any()
+                    ? Ok(new { status = true, message = "Get data successfully", data = teachers })
                     : NoContent();
             }
             catch (Exception e)
@@ -184,9 +181,9 @@ namespace WebAPI.Controllers
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("addTeacher")]
-        public async Task<IActionResult> AddTeacher([FromBody] Model.Teacher teacher)
+        public async Task<IActionResult> AddTeacher([FromBody] Models.Teacher teacher)
         {
-            if (!ValidData(teacher, out var message))
+            if (!IsValidTeacher(teacher, out var message))
                 return BadRequest(new { status = false, message });
 
             try
@@ -225,14 +222,14 @@ namespace WebAPI.Controllers
         /// <response code="404">Không tìm thấy giáo viên</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut("updateTeacher/{id:guid}")]
-        public async Task<IActionResult> UpdateTeacher([FromBody] Model.Teacher teacher, [FromRoute] Guid id)
+        public async Task<IActionResult> UpdateTeacher([FromBody] Models.Teacher teacher, [FromRoute] Guid id)
         {
             try
             {
                 var existTeacher = await Task.Run(() => _teacherService.GetTeacherById(id));
                 if (existTeacher == null)
                     return NotFound(new { status = false, message = "Teacher not found" });
-                if (!ValidData(teacher, out var message))
+                if (!IsValidTeacher(teacher, out var message))
                     return BadRequest(new { status = false, message });
                 var updatedTeacher = _mapper.Map(teacher, existTeacher);
                 await _teacherService.UpdateTeacher(updatedTeacher, id);
