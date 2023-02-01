@@ -22,6 +22,10 @@ API trung tâm tin học Sao Việt
 	- [Repository pattern](#repository-pattern)
 	- [Môi trường phát triển](#môi-trường-phát-triển)
 - [Cài đặt](#cài-đặt)
+	- [Cài đặt môi trường phát triển](#cài-đặt-môi-trường-phát-triển)
+	- [Cài đặt các package cần thiết](#cài-đặt-các-package-cần-thiết)
+	- [Cài đặt Log, Monitor và Cache](#cài-đặt-log-monitor-và-cache)
+	- [Cấu hình kết nối với SQL Server](#cấu-hình-kết-nối-với-sql-server)
 - [Tài liệu](#tài-liệu)
 - [Người đóng góp](#người-đóng-góp)
 - [Liên hệ](#liên-hệ)
@@ -69,12 +73,15 @@ API sử dụng mô hình Repository pattern để truy xuất dữ liệu. Mô 
 Để phát triển API, bạn cần cài đặt các thành phần sau:
 
 - .NET Core 7
+- SQL Server 2022
 - ELK Stack
 - Prometheus
 - Grafana
 - Redis
 
 # Cài đặt
+
+## Cài đặt môi trường phát triển
 
 Để cài đặt môi trường cho việc phát triển API, bạn cần cài đặt các thành phần sau:
 
@@ -107,12 +114,8 @@ API sử dụng mô hình Repository pattern để truy xuất dữ liệu. Mô 
 > ```bash
 > docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d mcr.microsoft.com/mssql/server
 > ```
-
-Sau đó, bạn cần thiết lập các thành phần như Elastic Stack, Prometheus, Grafana và Redis. Để làm được điều này, bạn cần chạy lệnh sau:
-
-```bash
-docker-compose -f docker-compose.yml -f redis.yml up -d
-```
+>
+> Ngoài ra, bạn cũng có thể sử dụng [Docker Compose](https://docs.docker.com/compose/) để khởi động môi trường phát triển.
 
 Cuối cùng, bạn cần khởi động API bằng cách chạy lệnh sau:
 
@@ -126,7 +129,92 @@ dotnet run
 > docker run -it --name dotnet7_container -p 8080:80 -v /path/to/project:/app microsoft/dotnet:7.0-runtime
 > ```
 
+## Cài đặt các package cần thiết
+
+1. `AutoMapper`: Dùng để ánh xạ dữ liệu giữa các lớp.
+   - **Project:** WebAPI
+   - **Link:** https://www.nuget.org/packages/AutoMapper
+2. `AutoMapper.Extensions.Microsoft.DependencyInjection`: Dùng để ánh xạ dữ liệu giữa các lớp.
+   - **Project:** WebAPI
+   - **Link:** https://www.nuget.org/packages/AutoMapper.Extensions.Microsoft.DependencyInjection
+3. `Microsoft.AspNetCore.Identity.EntityFrameworkCore`: Dùng để tạo Identity.
+   - **Project:** WebAPI, Infrastructure, Application, Domain
+   - **Link:** https://www.nuget.org/packages/Microsoft.AspNetCore.Identity.EntityFrameworkCore
+4. `Microsoft.AspNetCore.OpenApi`: Dùng để tạo Swagger.
+   - **Project:** WebAPI
+   - **Link:** https://www.nuget.org/packages/Microsoft.AspNetCore.OpenApi
+5. `Microsoft.EntityFrameworkCore`: Dùng để tương tác với SQL Server.
+   - **Project:** Infrastructure, WebAPI
+   - **Link:** https://www.nuget.org/packages/Microsoft.EntityFrameworkCore
+6. `Microsoft.EntityFrameworkCore.Design`: Dùng để tương tác với SQL Server.
+   - **Project:** Infrastructure, WebAPI
+   - **Link:** https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Design
+7. `Microsoft.EntityFrameworkCore.SqlServer`: Dùng để tương tác với SQL Server.
+   - **Project:** Infrastructure, WebAPI
+   - **Link:** https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.SqlServer
+8. `Microsoft.EntityFrameworkCore.Tools`: Dùng để tương tác với SQL Server.
+   - **Project:** Infrastructure, WebAPI
+   - **Link:** https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Tools
+9. `prometheus-net.AspNetCore`: Dùng để tạo Prometheus.
+   - **Project:** WebAPI
+   - **Link:** https://www.nuget.org/packages/prometheus-net.AspNetCore
+10. `Serilog.AspNetCore`: Dùng để tạo Log.
+    - **Project:** WebAPI
+    - **Link:** https://www.nuget.org/packages/Serilog.AspNetCore
+11. `Serilog.Enrichers.Environment`: Dùng để tạo Log.
+    - **Project:** WebAPI
+    - **Link:** https://www.nuget.org/packages/Serilog.Enrichers.Environment
+12. `Serilog.Sinks.Debug`: Dùng để tạo Log.
+    - **Project:** WebAPI
+    - **Link:** https://www.nuget.org/packages/Serilog.Sinks.Debug
+13. `Serilog.Sinks.Elasticsearch`: Dùng để tạo Log.
+    - **Project:** WebAPI
+    - **Link:** https://www.nuget.org/packages/Serilog.Sinks.Elasticsearch
+14. `Swashbuckle.AspNetCore`: Dùng để tạo Swagger.
+    - **Project:** WebAPI
+    - **Link:** https://www.nuget.org/packages/Swashbuckle.AspNetCore
+
+## Cài đặt Log, Monitor và Cache
+
+Sau đó, bạn cần thiết lập các thành phần như Elastic Stack, Prometheus, Grafana và Redis. Để làm được điều này, bạn cần chạy lệnh sau:
+
+```bash
+docker-compose -f docker-compose.yml -f redis.yml up -d
+```
+
+## Cấu hình kết nối với SQL Server
+
 Sau khi khởi động API, bạn có thể truy cập vào giao diện người dùng của API tại địa chỉ `http://localhost:(port)/swagger`. Với port được thiết lập trong file `appsettings.json`.
+
+Sau đó tiến hành cấu hình kết nối với SQL Server.
+
+Đầu tiên thay đổi chuỗi kết nối trong file [`appsettings.json`](./WebAPI/WebAPI/appsettings.json)
+
+```json
+"ConnectionStrings": {
+    "DefaultConnection": "Data Source=your_server;Initial Catalog=your_database;User ID=your_username;Password=your_password; Integrated Security=True; TrustServerCertificate=True"
+}
+```
+
+Xoá các Migration cũ:
+
+```bash
+dotnet ef migrations remove
+```
+
+Tạo Migration mới:
+
+```bash
+dotnet ef migrations add InitialCreate
+```
+
+`Lưu ý:` Cơ sở dữ liệu cần được tạo trước khi chạy lệnh này.
+
+Cuối cùng, cập nhật cơ sở dữ liệu:
+
+```bash
+dotnet ef database update
+```
 
 # Tài liệu
 
@@ -143,8 +231,8 @@ Sao Việt API là một dự án mã nguồn mở và được phát triển b�
 <table align="center">
   <tbody>
 	<tr>
-      <td align="center"><a href="https://github.com/foxminchan"><img src="https://avatars.githubusercontent.com/u/56079798?v=4?s=100" width="100px;" alt="Nguyễn Xuân Nhân"/><br /><sub><b>Nguyễn Xuân Nhân</b></sub></a><br /><a href="https://github.com/foxminchan/SaoVietAPI/commits?author=foxminchan" title="Code">💻</a></td>
-            <td align="center"><a href="https://github.com/lycaphe8x"><img src="https://avatars.githubusercontent.com/u/3860060?v=4?s=100" width="100px;" alt="Nguyễn Xuân Nhân"/><br /><sub><b>Nguyễn Đình Ánh</b></sub></a><br /><a href="#" title="Guide">📝</a></td>
+		<td align="center"><a href="https://github.com/foxminchan"><img src="https://avatars.githubusercontent.com/u/56079798?v=4?s=100" width="100px;" alt="Nguyễn Xuân Nhân"/><br /><sub><b>Nguyễn Xuân Nhân</b></sub></a><br /><a href="https://github.com/foxminchan/SaoVietAPI/commits?author=foxminchan" title="Code">💻</a></td>
+		<td align="center"><a href="https://github.com/lycaphe8x"><img src="https://avatars.githubusercontent.com/u/3860060?v=4?s=100" width="100px;" alt="Nguyễn Xuân Nhân"/><br /><sub><b>Nguyễn Đình Ánh</b></sub></a><br /><a href="#" title="Guide">📝</a></td>
 	</tr>
   </tbody>
 </table>
@@ -159,3 +247,5 @@ Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với tôi qua 
 # Giấy phép
 
 Sao Việt API được phát hành theo giấy phép [MIT](./LICENSE).
+
+@Copyright (C) 2023 4FT. All rights reserved
