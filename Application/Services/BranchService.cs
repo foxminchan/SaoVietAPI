@@ -19,14 +19,13 @@ namespace Application.Services
     {
         private readonly IBranchRepository _branchRepository;
 
-        public BranchService(ApplicationDbContext context) : base(context)
-        {
-            _branchRepository = new BranchRepository(context);
-        }
+        public BranchService(ApplicationDbContext context) : base(context) => _branchRepository = new BranchRepository(context);
 
         public List<Branch> GetBranches() => _branchRepository.GetBranches();
 
         public List<Branch> GetBranchesByNames(string? name) => _branchRepository.GetBranchesByNames(name);
+
+        public List<Branch> GetBranchesByZone(string? zone) => _branchRepository.GetBranchesByZone(zone);
 
         public Branch? GetBranchById(string? id) => _branchRepository.GetBranchById(id);
 

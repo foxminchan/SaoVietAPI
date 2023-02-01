@@ -28,6 +28,10 @@ namespace Application.Services
 
         public List<Class> GetClasses() => _classRepository.GetClasses();
 
+        public List<Class> FindClassByName(string? name) => _classRepository.FindClassByName(name);
+
+        public List<Class> GetClassesByStatus(string? status) => _classRepository.GetClassesByStatus(status);
+
         public Task AddClass(Class newClass)
         {
             _classRepository.AddClass(newClass);
@@ -45,10 +49,6 @@ namespace Application.Services
             _classRepository.DeleteClass(id);
             return SaveAsync();
         }
-
-        public List<Class> FindClassByName(string? name) => _classRepository.FindClassByName(name);
-
-        public List<Class> GetClassesByStatus(string? status) => _classRepository.GetClassesByStatus(status);
 
         public IEnumerable<Teacher?> GetTeachers()
         {

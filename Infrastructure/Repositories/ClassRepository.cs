@@ -20,12 +20,6 @@ namespace Infrastructure.Repositories
 
         public List<Class> GetClasses() => GetAll().ToList();
 
-        public void AddClass(Class newClass) => Insert(newClass);
-
-        public void UpdateClass(Class newClass, string id) => Update(newClass, x => x.id == id);
-
-        public void DeleteClass(string id) => Delete(x => x.id == id);
-
         public List<Class> FindClassByName(string? name) => GetList(filter: x => name != null && x.name != null && x.name.Contains(name)).ToList();
 
         public List<Class> GetClassesByStatus(string? status)
@@ -41,6 +35,11 @@ namespace Infrastructure.Repositories
             return classes;
         }
 
+        public void AddClass(Class newClass) => Insert(newClass);
+
+        public void UpdateClass(Class newClass, string id) => Update(newClass, x => x.id == id);
+
+        public void DeleteClass(string id) => Delete(x => x.id == id);
     }
 
 }

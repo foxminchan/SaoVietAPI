@@ -4,6 +4,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
 {
+    /**
+    * @Project ASP.NET Core 7.0
+    * @Author: Nguyen Xuan Nhan
+    * @Team: 4FT
+    * @Copyright (C) 2023 4FT. All rights reserved
+    * @License MIT
+    * @Create date Mon 23 Jan 2023 00:00:00 AM +07
+    */
+
     /// <summary>
     /// Quản lý chi nhánh
     /// </summary>
@@ -132,6 +141,39 @@ namespace WebAPI.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while getting branch by id");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Lấy chi nhánh theo khu vực
+        /// </summary>
+        /// <param name="zone">Khu vực</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /api/v1/branch/findByZone/string
+        ///     {
+        ///         "zone": "string"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Lấy chi nhánh thành công</response>
+        /// <response code="204">Không có chi nhánh nào</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpGet("findByZone/{zone}")]
+        public async Task<IActionResult> GetBranchByZone(string? zone)
+        {
+            try
+            {
+                var branch = await Task.Run(() => _branchService.GetBranchesByZone(zone));
+                return branch.Any()
+                    ? Ok(new { status = true, message = "Get data successfully", data = branch })
+                    : NoContent();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while getting branch by zone");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }

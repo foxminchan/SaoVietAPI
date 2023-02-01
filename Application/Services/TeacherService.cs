@@ -30,6 +30,10 @@ namespace Application.Services
 
         public List<Teacher> GetTeachers() => _teacherRepository.GetTeachers();
 
+        public List<Teacher> FindTeacherByName(string name) => _teacherRepository.FindTeacherByName(name);
+
+        public Teacher? GetTeacherById(Guid? id) => _teacherRepository.GetTeacherById(id);
+
         public Task AddTeacher(Teacher newTeacher)
         {
             _teacherRepository.AddTeacher(newTeacher);
@@ -47,9 +51,5 @@ namespace Application.Services
             _teacherRepository.DeleteTeacher(id);
             return SaveAsync();
         }
-
-        public List<Teacher> FindTeacherByName(string name) => _teacherRepository.FindTeacherByName(name);
-
-        public Teacher? GetTeacherById(Guid? id) => _teacherRepository.GetTeacherById(id);
     }
 }

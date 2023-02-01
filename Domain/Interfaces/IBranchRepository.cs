@@ -15,6 +15,7 @@ namespace Domain.Interfaces
     {
         public List<Branch> GetBranches();
         public List<Branch> GetBranchesByNames(string? name);
+        public List<Branch> GetBranchesByZone(string? zone);
         public Branch? GetBranchById(string? id);
         public void AddBranch(Branch branch);
         public void UpdateBranch(Branch branch, string id);

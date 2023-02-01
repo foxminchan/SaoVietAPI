@@ -185,7 +185,7 @@ namespace WebAPI.Controllers
             try
             {
                 var classEntity = await Task.Run(() => _classService.GetClassesByStatus(status));
-                return (!classEntity.Any())
+                return !classEntity.Any()
                     ? NoContent()
                     : Ok(new { status = true, message = "Find class successfully", data = classEntity });
             }

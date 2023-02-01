@@ -22,6 +22,8 @@ namespace Infrastructure.Repositories
 
         public List<Branch> GetBranchesByNames(string? name) => GetList(filter: x => name != null && x.name != null && x.name.Contains(name)).ToList();
 
+        public List<Branch> GetBranchesByZone(string? zone) => GetList(filter: x => x.address != null && zone != null && x.address.Contains(zone)).ToList();
+
         public Branch? GetBranchById(string? id) => id == null ? null : GetById(id);
 
         public void AddBranch(Branch branch) => Insert(branch);

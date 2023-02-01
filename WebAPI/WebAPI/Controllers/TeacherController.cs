@@ -147,7 +147,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Lấy giáo viên thành công</response>
         /// <response code="204">Không có giáo viên nào</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("getTeacherById/{id:guid}")]
+        [HttpGet("findById/{id:guid}")]
         public async Task<IActionResult> GetTeacherById([FromRoute] Guid id)
         {
             try
