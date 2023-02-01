@@ -27,33 +27,84 @@ namespace Infrastructure.Repositories
 
         public virtual void Insert(T entity)
         {
-            _dbSet.Add(entity);
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                _dbSet.Add(entity);
+                transaction.Commit();
+            }
+            catch (DbUpdateException e)
+            {
+                transaction.Rollback();
+                throw new Exception("Error inserting entity into the database.", e);
+            }
         }
 
         public virtual void Update(T entity)
         {
-            _dbSet.Attach(entity);
-            _context.Entry(entity).State = EntityState.Modified;
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                _dbSet.Attach(entity);
+                _context.Entry(entity).State = EntityState.Modified;
+                transaction.Commit();
+            }
+            catch (DbUpdateException e)
+            {
+                transaction.Rollback();
+                throw new Exception("Error updating entity in the database.", e);
+            }
         }
 
         public virtual void Update(T entity, Expression<Func<T, bool>> where)
         {
-            var obj = _dbSet.Where(where).FirstOrDefault() ?? throw new InvalidOperationException();
-            _context.Entry(obj).CurrentValues.SetValues(entity);
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                var obj = _dbSet.FirstOrDefault(where);
+                if (obj == null) return;
+                _context.Entry(obj).CurrentValues.SetValues(entity);
+                transaction.Commit();
+            }
+            catch (DbUpdateException e)
+            {
+                transaction.Rollback();
+                throw new Exception("Error updating entity in the database.", e);
+            }
         }
 
         public virtual void Delete(T entity)
         {
-            if (_context.Entry(entity).State == EntityState.Detached)
-                _dbSet.Attach(entity);
-            _dbSet.Remove(entity);
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                if (_context.Entry(entity).State == EntityState.Detached)
+                    _dbSet.Attach(entity);
+                _dbSet.Remove(entity);
+                transaction.Commit();
+            }
+            catch (DbUpdateException e)
+            {
+                transaction.Rollback();
+                throw new Exception("Error deleting entity from the database.", e);
+            }
         }
 
         public virtual void Delete(Expression<Func<T, bool>> where)
         {
-            var objects = _dbSet.Where(where).AsEnumerable();
-            foreach (T obj in objects)
-                _dbSet.Remove(obj);
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                var objects = _dbSet.Where(where).AsEnumerable();
+                foreach (var obj in objects)
+                    _dbSet.Remove(obj);
+                transaction.Commit();
+            }
+            catch (DbUpdateException e)
+            {
+                transaction.Rollback();
+                throw new Exception("Error deleting entity from the database.", e);
+            }
         }
 
         public virtual int Count(Expression<Func<T, bool>> where) => _dbSet.Count(where);

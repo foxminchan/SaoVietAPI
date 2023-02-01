@@ -87,7 +87,7 @@ var app = builder.Build();
 var info = new OpenApiInfo
 {
     Title = "Sao Việt API",
-    Version = "v1",
+    Version = "1.0.0",
     Description = "API cho ứng dụng quản lý trung tâm tin học Sao Việt. Mọi thắc mắc xin liên hệ theo địa chỉ email nguyenxuannhan407@gmail.com hoặc nd.anh@hutech.edu.vn",
     Contact = new OpenApiContact
     {
