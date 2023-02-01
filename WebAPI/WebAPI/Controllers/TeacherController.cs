@@ -93,7 +93,7 @@ namespace WebAPI.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while get all teacher");
+                _logger.LogError(e, "Error while getting all teacher");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -126,7 +126,7 @@ namespace WebAPI.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while get teacher by name");
+                _logger.LogError(e, "Error while getting teacher by name");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -159,7 +159,7 @@ namespace WebAPI.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while get teacher by id");
+                _logger.LogError(e, "Error while getting teacher by id");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }

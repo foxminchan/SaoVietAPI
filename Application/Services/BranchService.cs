@@ -17,15 +17,35 @@ namespace Application.Services
     
     public class BranchService : BaseService
     {
-        private readonly ApplicationDbContext _context;
         private readonly IBranchRepository _branchRepository;
 
         public BranchService(ApplicationDbContext context) : base(context)
         {
-            _context = context;
             _branchRepository = new BranchRepository(context);
         }
 
+        public List<Branch> GetBranches() => _branchRepository.GetBranches();
+
+        public List<Branch> GetBranchesByNames(string? name) => _branchRepository.GetBranchesByNames(name);
+
         public Branch? GetBranchById(string? id) => _branchRepository.GetBranchById(id);
+
+        public Task AddBranch(Branch branch)
+        {
+            _branchRepository.AddBranch(branch);
+            return SaveAsync();
+        }
+
+        public Task UpdateBranch(Branch branch, string id)
+        {
+            _branchRepository.UpdateBranch(branch, id);
+            return SaveAsync();
+        }
+
+        public Task DeleteBranch(string id)
+        {
+            _branchRepository.DeleteBranch(id);
+            return SaveAsync();
+        }
     }   
 }

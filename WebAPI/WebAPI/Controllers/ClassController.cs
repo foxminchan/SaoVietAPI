@@ -1,7 +1,7 @@
-﻿using System.Text.RegularExpressions;
-using Application.Services;
+﻿using Application.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace WebAPI.Controllers
 {
@@ -45,22 +45,22 @@ namespace WebAPI.Controllers
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(@class.startDate) && 
+            if (!string.IsNullOrWhiteSpace(@class.startDate) &&
                 !DateFormatRegex().IsMatch(@class.startDate))
             {
                 message = "Start date must be match YYYY-MM-DD format";
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(@class.endDate) && 
+            if (!string.IsNullOrWhiteSpace(@class.endDate) &&
                 !DateFormatRegex().IsMatch(@class.endDate))
             {
                 message = "End date must be match YYYY-MM-DD format";
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(@class.startDate) && 
-                !string.IsNullOrWhiteSpace(@class.endDate) && 
+            if (!string.IsNullOrWhiteSpace(@class.startDate) &&
+                !string.IsNullOrWhiteSpace(@class.endDate) &&
                 DateTime.Parse(@class.startDate) > DateTime.Parse(@class.endDate))
             {
                 message = "Start date must be less than end date";
@@ -112,122 +112,7 @@ namespace WebAPI.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while get all class");
-                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
-            }
-        }
-
-        /// <summary>
-        /// Thêm lớp học
-        /// </summary>
-        /// <param name="request">Đối tượng lớp học</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Sample request:
-        ///
-        ///     POST /api/v1/class/getClasses
-        ///     {
-        ///         "id": "string",
-        ///         "name": "string",
-        ///         "startDate": "yyyy-MM-dd",
-        ///         "endDate": "yyyy-MM-dd",
-        ///         "teacherId": "uuid",
-        ///         "branchId": "string"
-        ///     }
-        /// </remarks>
-        /// <response code="200">Thêm lớp học thành công</response>
-        /// <response code="400">Lỗi dữ liệu đầu vào</response>
-        /// <response code="500">Lỗi server</response>
-        [HttpPost("addClass")]
-        public async Task<IActionResult> AddClass([FromBody] Model.Class request)
-        {
-            if (!ValidData(request, out var message))
-                return BadRequest(new { status = false, message });
-
-            try
-            {
-                var newClass = _mapper.Map<Domain.Entities.Class>(request);
-                await Task.Run(() => _classService.AddClass(newClass));
-                return Ok(new { status = true, message = "Add class successfully" });
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error while adding class");
-                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
-            }
-        }
-
-        /// <summary>
-        /// Cập nhật thông tin lớp học
-        /// </summary>
-        /// <param name="request">Đối tượng lớp học</param>
-        /// <param name="id">Mã lớp</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Sample request:
-        ///
-        ///     PUT /api/v1/class/updateClass/string
-        ///     {
-        ///         "id": "string",
-        ///         "name": "string",
-        ///         "startDate": "yyyy-MM-dd",
-        ///         "endDate": "yyyy-MM-dd",
-        ///         "teacherId": "uuid",
-        ///         "branchId": "string"
-        ///     }
-        /// </remarks>
-        /// <response code="200">Cập nhật thông tin lớp học thành công</response>
-        /// <response code="400">Lỗi dữ liệu đầu vào</response>
-        /// <response code="500">Lỗi server</response>
-        [HttpPut("updateClass/{id}")]
-        public async Task<IActionResult> UpdateClass([FromBody] Model.Class request, [FromRoute] string id)
-        {
-            if (!ValidData(request, out var message))
-                return BadRequest(new { status = false, message });
-            
-            try
-            {
-                var classEntity = _mapper.Map<Domain.Entities.Class>(request);
-                await Task.Run(() => _classService.UpdateClass(classEntity, id));
-                return Ok(new { status = true, message = "Update class successfully", data = classEntity });
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error while updating class");
-                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
-            }
-        }
-
-        /// <summary>
-        /// Xóa lớp học
-        /// </summary>
-        /// <param name="id">Mã lớp học</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Sample request:
-        ///
-        ///     DELETE /api/v1/class/deleteClass/string
-        ///     {
-        ///         "id": "string"
-        ///     }
-        /// </remarks>
-        /// <response code="200">Xóa lớp học thành công</response>
-        /// <response code="400">Lỗi dữ liệu đầu vào</response>
-        /// <response code="500">Lỗi server</response>
-        [HttpDelete("deleteClass/{id}")]
-        public async Task<IActionResult> DeleteClass([FromRoute] string id)
-        {
-            try
-            {
-                if (await Task.Run(() => _classService.GetClasses().Any(x => x.id == id)) == false)
-                    return BadRequest(new { status = false, message = "Class id is not exist" });
-
-                await Task.Run(() => _classService.DeleteClass(id));
-                return Ok(new { status = true, message = "Delete class successfully" });
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error while deleting class");
+                _logger.LogError(e, "Error while getting all class");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
@@ -307,6 +192,120 @@ namespace WebAPI.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while finding class by status");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Thêm lớp học
+        /// </summary>
+        /// <param name="request">Đối tượng lớp học</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /api/v1/class/getClasses
+        ///     {
+        ///         "id": "string",
+        ///         "name": "string",
+        ///         "startDate": "yyyy-MM-dd",
+        ///         "endDate": "yyyy-MM-dd",
+        ///         "teacherId": "uuid",
+        ///         "branchId": "string"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Thêm lớp học thành công</response>
+        /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpPost("addClass")]
+        public async Task<IActionResult> AddClass([FromBody] Model.Class request)
+        {
+            if (!ValidData(request, out var message))
+                return BadRequest(new { status = false, message });
+
+            try
+            {
+                var newClass = _mapper.Map<Domain.Entities.Class>(request);
+                await Task.Run(() => _classService.AddClass(newClass));
+                return Ok(new { status = true, message = "Add class successfully" });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while adding class");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Cập nhật thông tin lớp học
+        /// </summary>
+        /// <param name="request">Đối tượng lớp học</param>
+        /// <param name="id">Mã lớp</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /api/v1/class/updateClass/string
+        ///     {
+        ///         "id": "string",
+        ///         "name": "string",
+        ///         "startDate": "yyyy-MM-dd",
+        ///         "endDate": "yyyy-MM-dd",
+        ///         "teacherId": "uuid",
+        ///         "branchId": "string"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Cập nhật thông tin lớp học thành công</response>
+        /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpPut("updateClass/{id}")]
+        public async Task<IActionResult> UpdateClass([FromBody] Model.Class request, [FromRoute] string id)
+        {
+            if (!ValidData(request, out var message))
+                return BadRequest(new { status = false, message });
+
+            try
+            {
+                var classEntity = _mapper.Map<Domain.Entities.Class>(request);
+                await Task.Run(() => _classService.UpdateClass(classEntity, id));
+                return Ok(new { status = true, message = "Update class successfully", data = classEntity });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while updating class");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Xóa lớp học
+        /// </summary>
+        /// <param name="id">Mã lớp học</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /api/v1/class/deleteClass/string
+        ///     {
+        ///         "id": "string"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Xóa lớp học thành công</response>
+        /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpDelete("deleteClass/{id}")]
+        public async Task<IActionResult> DeleteClass([FromRoute] string id)
+        {
+            try
+            {
+                if (await Task.Run(() => _classService.GetClasses().Any(x => x.id == id)) == false)
+                    return BadRequest(new { status = false, message = "Class id is not exist" });
+                await Task.Run(() => _classService.DeleteClass(id));
+                return Ok(new { status = true, message = "Delete class successfully" });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while deleting class");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }

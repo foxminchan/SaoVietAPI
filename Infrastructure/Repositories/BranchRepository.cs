@@ -18,6 +18,16 @@ namespace Infrastructure.Repositories
         {
         }
 
+        public List<Branch> GetBranches() => GetAll().ToList();
+
+        public List<Branch> GetBranchesByNames(string? name) => GetList(filter: x => name != null && x.name != null && x.name.Contains(name)).ToList();
+
         public Branch? GetBranchById(string? id) => id == null ? null : GetById(id);
+
+        public void AddBranch(Branch branch) => Insert(branch);
+
+        public void UpdateBranch(Branch branch, string id) => Update(branch, x => x.id == id);
+
+        public void DeleteBranch(string id) => Delete(x => x.id == id);
     }
 }

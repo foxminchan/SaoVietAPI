@@ -20,14 +20,14 @@ namespace Infrastructure.Repositories
 
         public List<Teacher> GetTeachers() => GetAll().ToList();
 
+        public List<Teacher> FindTeacherByName(string name) => GetList(filter: x => x.fullName != null && x.fullName.Contains(name)).ToList();
+
+        public Teacher? GetTeacherById(Guid? id) => id == null ? null : GetById(id);
+
         public void AddTeacher(Teacher teacher) => Insert(teacher);
 
         public void UpdateTeacher(Teacher teacher, Guid id) => Update(teacher, x => x.id == id);
 
         public void DeleteTeacher(Guid id) => Delete(x => x.id == id);
-
-        public List<Teacher> FindTeacherByName(string name) => GetList(filter: x => x.fullName != null && x.fullName.Contains(name)).ToList();
-
-        public Teacher? GetTeacherById(Guid? id) => id == null ? null : GetById(id);
     }
 }

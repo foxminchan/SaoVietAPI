@@ -13,6 +13,11 @@ namespace Domain.Interfaces
 
     public interface IBranchRepository : IGenericRepository<Branch>
     {
+        public List<Branch> GetBranches();
+        public List<Branch> GetBranchesByNames(string? name);
         public Branch? GetBranchById(string? id);
+        public void AddBranch(Branch branch);
+        public void UpdateBranch(Branch branch, string id);
+        public void DeleteBranch(string id);
     }
 }

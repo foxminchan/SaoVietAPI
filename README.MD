@@ -5,11 +5,12 @@ API trung tâm tin học Sao Việt
 
 <p align="center">Xây dựng API mã nguồn mở trên nền tảng .NET Core 7, sử dụng <b>Clean architecture</b> và <b>Repository pattern</b></p>
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-![.NET](https://img.shields.io/badge/.NET%20Core-7.0-%238338ec?style=for-the-badge&logo=appveyor)
-![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg?style=for-the-badge&logo=appveyor)
-![Swagger](https://img.shields.io/badge/swagger-valid-green?style=for-the-badge&logo=appveyor)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge&logo=appveyor)](https://opensource.org/licenses/MIT)
+<p align="center">
+	<img src="https://img.shields.io/badge/.NET%20Core-7.0-%238338ec?style=for-the-badge&logo=appveyor">
+	<img src="https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg?style=for-the-badge&logo=appveyor">
+	<img src="https://img.shields.io/badge/swagger-valid-green?style=for-the-badge&logo=appveyor">
+	<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge&logo=appveyor"></a>
+</p>
 
 # Mục lục
 
@@ -133,6 +134,7 @@ Sau khi khởi động API, bạn có thể truy cập vào giao diện người
 - Xem Các thay đổi tại trang [CHANGELOG](./CHANGELOG.md)
 - Xem tài liệu về cách sử dụng API tại trang [API Documentation](#)
 - Xem quy tắc ứng xử tại trang [Contributor Covenant Code of Conduct](./CODE_OF_CONDUCT.md)
+- Xem đóng góp tại trang [CONTRIBUTING](./CONTRIBUTING.md)
 
 # Người đóng góp
 

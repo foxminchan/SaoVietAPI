@@ -113,6 +113,12 @@ var classTag = new OpenApiTag
     Description = "Quản lý thông tin lớp học"
 };
 
+var branchTag = new OpenApiTag
+{
+    Name = "Branch",
+    Description = "Quản lý thông tin chi nhánh"
+};
+
 app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
@@ -128,7 +134,7 @@ if (app.Environment.IsDevelopment())
                 throw new ArgumentNullException(nameof(httpReq));
             swagger.Info = info;
             swagger.ExternalDocs = externalDocs;
-            swagger.Tags = new List<OpenApiTag> { teacherTag, classTag };
+            swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag };
         });
 
     });
