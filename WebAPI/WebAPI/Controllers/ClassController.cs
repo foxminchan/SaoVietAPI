@@ -175,13 +175,9 @@ namespace WebAPI.Controllers
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="204">Không tìm thấy lớp</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findByStatus/{status}")]
+        [HttpGet("findByStatus/{status:regex(Expired|Active|Upcoming)}")]
         public async Task<IActionResult> FindClassByStatus([FromRoute] string? status)
         {
-            List<string?> statusList = new() { "Expired", "Active", "Upcoming" };
-            if (statusList.Contains(status) == false)
-                return BadRequest(new { status = false, message = "Status is not valid" });
-
             try
             {
                 var classEntity = await Task.Run(() => _classService.GetClassesByStatus(status));
@@ -192,6 +188,43 @@ namespace WebAPI.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while finding class by status");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Liệt kê lớp theo giáo viên
+        /// </summary>
+        /// <param name="teacherId">Mã giáo viên</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /api/v1/class/getClassesByTeacherId/Guid
+        ///     {
+        ///         "teacherId": "Guid"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Liệt kê lớp theo giáo viên thành công</response>
+        /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="404">Không tìm thấy lớp</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpGet("findByTeacher/{teacherId:Guid}")]
+        public async Task<IActionResult> GetClassesByTeacherId([FromRoute] Guid? teacherId)
+        {
+            if (teacherId == null)
+                return BadRequest(new { status = false, message = "TeacherId is null" });
+            
+            try
+            {
+                var classEntity = await Task.Run(() => _classService.FindClassByTeacher(teacherId));
+                return !classEntity.Any()
+                    ? NotFound(new { status = false, message = "Class is not found" })
+                    : Ok(new { status = true, message = "Find class successfully", data = classEntity });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while finding class by teacherId");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }

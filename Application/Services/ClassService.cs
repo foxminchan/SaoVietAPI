@@ -32,6 +32,8 @@ namespace Application.Services
 
         public List<Class> GetClassesByStatus(string? status) => _classRepository.GetClassesByStatus(status);
 
+        public List<Class> FindClassByTeacher(Guid? teacherId) => _classRepository.FindClassByTeacher(teacherId);
+
         public Task AddClass(Class newClass)
         {
             _classRepository.AddClass(newClass);
