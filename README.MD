@@ -175,7 +175,7 @@ dotnet ef database update
 # Tài liệu
 
 - Xem tài liệu API tại trang [Wiki](https://github.com/foxminchan/SaoVietAPI/wiki)
-- Xem Các thay đổi tại trang [CHANGELOG](./CHANGELOG.md)
+- Xem Các thay đổi tại trang [Changelog](./CHANGELOG.md)
 - Xem tài liệu về cách sử dụng API tại trang [API Documentation](#)
 - Xem quy tắc ứng xử tại trang [Contributor Covenant Code of Conduct](./CODE_OF_CONDUCT.md)
 - Xem đóng góp tại trang [Contributing](./CONTRIBUTING.md)

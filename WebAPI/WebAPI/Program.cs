@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Application.Services;
+using AspNetCoreRateLimit;
 using Prometheus;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
@@ -20,6 +21,33 @@ builder.Services.AddSwaggerGen(options =>
         var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
         options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
     });
+
+#region Request Throttling
+// set the maximum number of concurrent requests
+builder.Services.AddMemoryCache();
+builder.Services.Configure<IpRateLimitOptions>(options =>
+{
+    options.EnableEndpointRateLimiting = true;
+    options.StackBlockedRequests = false;
+    options.HttpStatusCode = 429;
+    options.RealIpHeader = "X-Real-IP";
+    options.ClientIdHeader = "X-ClientId";
+    options.GeneralRules = new List<RateLimitRule>
+    {
+        new()
+        {
+            Endpoint = "*",
+            Period = "10s",
+            Limit = 2,
+        }
+    };
+});
+builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
+builder.Services.AddInMemoryRateLimiting();
+#endregion
 
 #region DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -197,7 +225,7 @@ app.UseRouting();
 app.UseHttpMetrics();
 
 app.UseAuthorization();
-
+app.UseIpRateLimiting();
 app.MapControllers();
 
 app.MapMetrics();

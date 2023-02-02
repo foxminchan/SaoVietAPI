@@ -62,6 +62,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy danh sách chi nhánh thành công</response>
         /// <response code="204">Không có chi nhánh nào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getBranches")]
         public async Task<IActionResult> GetBranches()
@@ -95,6 +96,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy chi nhánh thành công</response>
         /// <response code="204">Không có chi nhánh nào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByName/{name}")]
         public async Task<IActionResult> GetBranchesByNames(string? name)
@@ -128,6 +130,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy chi nhánh thành công</response>
         /// <response code="404">Không tìm thấy chi nhánh</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findById/{id}")]
         public async Task<IActionResult> GetBranchById(string? id)
@@ -161,6 +164,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy chi nhánh thành công</response>
         /// <response code="204">Không có chi nhánh nào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByZone/{zone}")]
         public async Task<IActionResult> GetBranchByZone(string? zone)
@@ -196,6 +200,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Thêm chi nhánh thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("addBranch")]
         public async Task<IActionResult> AddBranch([FromBody] Branch branch)
@@ -234,6 +239,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Cập nhật chi nhánh thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut("updateBranch/{id}")]
         public async Task<IActionResult> UpdateBranch([FromBody] Branch branch, [FromRoute] string id)
@@ -269,6 +275,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Xóa chi nhánh thành công</response>
         /// <response code="404">Không tìm thấy chi nhánh</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("deleteBranch/{id}")]
         public async Task<IActionResult> DeleteBranch([FromRoute] string id)

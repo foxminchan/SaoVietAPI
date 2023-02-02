@@ -97,6 +97,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy danh sách lớp học thành công</response>
         /// <response code="204">Không có lớp học nào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getClasses")]
         public async Task<IActionResult> GetClasses()
@@ -131,6 +132,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Tìm lớp theo tên thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="404">Không tìm thấy lớp</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByName/{name}")]
         public async Task<IActionResult> FindClassByName([FromRoute] string? name)
@@ -172,6 +174,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Tìm lớp theo trạng thái thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="204">Không tìm thấy lớp</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByStatus/{status:regex(Expired|Active|Upcoming)}")]
         public async Task<IActionResult> FindClassByStatus([FromRoute] string? status)
@@ -209,6 +212,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Liệt kê lớp theo giáo viên thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="404">Không tìm thấy lớp</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByTeacher/{teacherId:Guid}")]
         public async Task<IActionResult> GetClassesByTeacherId([FromRoute] Guid? teacherId)
@@ -250,6 +254,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Thêm lớp học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("addClass")]
         public async Task<IActionResult> AddClass([FromBody] Class request)
@@ -291,6 +296,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Cập nhật thông tin lớp học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut("updateClass/{id}")]
         public async Task<IActionResult> UpdateClass([FromBody] Class request, [FromRoute] string id)
@@ -326,6 +332,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Xóa lớp học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("deleteClass/{id}")]
         public async Task<IActionResult> DeleteClass([FromRoute] string id)

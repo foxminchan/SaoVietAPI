@@ -77,6 +77,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy danh sách học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getStudents")]
         public async Task<IActionResult> GetStudents()
@@ -110,6 +111,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByName/{name}")]
         public async Task<IActionResult> GetStudentsByName([FromRoute] string? name)
@@ -143,6 +145,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByPhone/{phone:regex(^\\d{{10}}$)}")]
         public async Task<IActionResult> GetStudentsByPhone([FromRoute] string? phone)
@@ -176,6 +179,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findById/{id:guid}")]
         public async Task<IActionResult> GetStudentById([FromRoute] Guid? id)
@@ -213,6 +217,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Thêm mới học viên thành công</response>
         /// <response code="400">Thông tin học viên không hợp lệ</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("addStudent")]
         public async Task<IActionResult> AddStudent([FromBody] Models.Student student)
@@ -250,6 +255,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Cập nhật thông tin học viên thành công</response>
         /// <response code="400">Thông tin học viên không hợp lệ</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut("updateStudent/{id:guid}")]
         public async Task<IActionResult> UpdateStudent([FromBody] Models.Student student, [FromRoute] Guid id)
@@ -288,6 +294,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Xóa học viên thành công</response>
         /// <response code="400">Học viên không tồn tại</response>
+        /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("deleteStudent/{id:guid}")]
         public async Task<IActionResult> DeleteStudent([FromRoute] Guid id)
