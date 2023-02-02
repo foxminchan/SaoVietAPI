@@ -37,10 +37,11 @@ builder.Services.Configure<IpRateLimitOptions>(options =>
         new()
         {
             Endpoint = "*",
-            Period = "10s",
-            Limit = 2,
+            Period = "1m",
+            Limit = 20,
         }
     };
+    options.ClientWhitelist.Add("127.0.0.1");
 });
 builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
 builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
