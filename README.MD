@@ -179,7 +179,7 @@ dotnet ef database update
 - Xem tài liệu về cách sử dụng API tại trang [API Documentation](#)
 - Xem quy tắc ứng xử tại trang [Contributor Covenant Code of Conduct](./CODE_OF_CONDUCT.md)
 - Xem đóng góp tại trang [Contributing](./CONTRIBUTING.md)
-- Xem chính sách bảo mật tại trang [Privacy Policy](./PRIVACY_POLICY.md)
+- Xem chính sách bảo mật tại trang [Privacy Policy](./SECURITY.md)
 
 # Người đóng góp
 
