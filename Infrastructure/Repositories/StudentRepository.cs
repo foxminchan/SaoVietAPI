@@ -17,5 +17,19 @@ namespace Infrastructure.Repositories
         public StudentRepository(ApplicationDbContext context) : base(context)
         {
         }
+
+        public List<Student> GetStudents() => GetAll().ToList();
+
+        public List<Student> GetStudentsByNames(string? name) => GetList(filter: s => name != null && s.fullName != null && s.fullName.Contains(name)).ToList();
+
+        public List<Student> GetStudentsByPhone(string? phone) => GetList(filter: s => phone != null && s.phone != null && s.phone.Contains(phone)).ToList();
+
+        public Student? GetStudentById(Guid? id) => GetById(id);
+
+        public void AddStudent(Student student) => Insert(student);
+
+        public void UpdateStudent(Student student, Guid id) => Update(student, x => x.id == id);
+
+        public void DeleteStudent(Guid id) => Delete(x => x.id == id);
     }
 }

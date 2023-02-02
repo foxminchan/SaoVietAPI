@@ -76,7 +76,7 @@ namespace WebAPI.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while getting branch");
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
 
@@ -109,7 +109,7 @@ namespace WebAPI.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while getting branch by name");
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
 

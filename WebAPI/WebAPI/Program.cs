@@ -20,6 +20,8 @@ builder.Services.AddSwaggerGen(options =>
         var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
         options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
     });
+
+#region DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -27,16 +29,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.EnableSensitiveDataLogging();
     options.EnableDetailedErrors();
 });
+#endregion
 
+#region CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", cors =>
     {
         cors.AllowAnyOrigin()
-        .AllowAnyMethod()
+            .AllowAnyMethod()
             .AllowAnyHeader();
     });
 });
+#endregion
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -79,6 +84,7 @@ ElasticsearchSinkOptions ConfigureElasticSink(IConfiguration configuration, stri
 builder.Services.AddTransient<TeacherService>();
 builder.Services.AddTransient<ClassService>();
 builder.Services.AddTransient<BranchService>();
+builder.Services.AddTransient<StudentService>();
 #endregion
 
 var app = builder.Build();
@@ -135,6 +141,13 @@ var branchTag = new OpenApiTag
     Description = "Quản lý thông tin chi nhánh",
     ExternalDocs = findOutMore
 };
+
+var studentTag = new OpenApiTag
+{
+    Name = "Student",
+    Description = "Quản lý thông tin học viên",
+    ExternalDocs = findOutMore
+};
 app.UseStaticFiles();
 app.UseCors("AllowAll");
 
@@ -151,7 +164,7 @@ if (app.Environment.IsDevelopment())
                 throw new ArgumentNullException(nameof(httpReq));
             swagger.Info = info;
             swagger.ExternalDocs = externalDocs;
-            swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag };
+            swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag, studentTag };
             swagger.Servers = new List<OpenApiServer>
             {
                 new()

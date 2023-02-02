@@ -13,6 +13,12 @@ namespace Domain.Interfaces
 
     public interface IStudentRepository : IGenericRepository<Student>
     {
-
+        public List<Student> GetStudents();
+        public List<Student> GetStudentsByNames(string? name);
+        public List<Student> GetStudentsByPhone(string? phone);
+        public Student? GetStudentById(Guid? id);
+        public void AddStudent(Student student);
+        public void UpdateStudent(Student student, Guid id);
+        public void DeleteStudent(Guid id);
     }
 }

@@ -23,7 +23,7 @@ namespace Infrastructure.Repositories
             _dbSet = _context.Set<T>();
         }
 
-        public virtual IEnumerable<T> GetAll() => _dbSet.ToList();
+        public virtual IEnumerable<T> GetAll() => _dbSet.AsNoTracking().ToList();
 
         public virtual void Insert(T entity)
         {
@@ -36,7 +36,7 @@ namespace Infrastructure.Repositories
             catch (DbUpdateException e)
             {
                 transaction.Rollback();
-                throw new Exception("Error inserting entity into the database.", e);
+                throw new Exception("Error while inserting entity into the database.", e);
             }
         }
 
@@ -52,7 +52,7 @@ namespace Infrastructure.Repositories
             catch (DbUpdateException e)
             {
                 transaction.Rollback();
-                throw new Exception("Error updating entity in the database.", e);
+                throw new Exception("Error while updating entity in the database.", e);
             }
         }
 
@@ -69,7 +69,7 @@ namespace Infrastructure.Repositories
             catch (DbUpdateException e)
             {
                 transaction.Rollback();
-                throw new Exception("Error updating entity in the database.", e);
+                throw new Exception("Error while updating entity in the database.", e);
             }
         }
 
@@ -86,7 +86,7 @@ namespace Infrastructure.Repositories
             catch (DbUpdateException e)
             {
                 transaction.Rollback();
-                throw new Exception("Error deleting entity from the database.", e);
+                throw new Exception("Error while deleting entity from the database.", e);
             }
         }
 
@@ -103,7 +103,7 @@ namespace Infrastructure.Repositories
             catch (DbUpdateException e)
             {
                 transaction.Rollback();
-                throw new Exception("Error deleting entity from the database.", e);
+                throw new Exception("Error while deleting entity from the database.", e);
             }
         }
 

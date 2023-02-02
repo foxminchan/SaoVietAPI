@@ -263,7 +263,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                if (await Task.Run(() => _teacherService.GetTeachers().FirstOrDefault(x => x.id == id)) == null)
+                if (await Task.Run(() => _teacherService.GetTeacherById(id)) == null)
                     return NotFound(new { status = false, message = "Teacher not found" });
                 await _teacherService.DeleteTeacher(id);
                 return Ok(new { status = true, message = "Delete teacher successfully" });
