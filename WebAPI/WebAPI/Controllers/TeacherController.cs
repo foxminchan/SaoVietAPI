@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using Application.Messages;
 
 namespace WebAPI.Controllers
 {
@@ -24,13 +25,15 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly TeacherService _teacherService;
-
+        private readonly IRabbitMqService _rabbitMqService;
+                
         /// <inheritdoc />
         public TeacherController(TeacherService teacherService, ILogger<TeacherController> logger)
         {
             _logger = logger;
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Teacher, Domain.Entities.Teacher>()).CreateMapper();
             _teacherService = teacherService;
+            _rabbitMqService = new RabbitMqService("teacherPublisher");
         }
 
         private bool IsValidTeacher(Models.Teacher teacher, out string? message)
@@ -195,6 +198,7 @@ namespace WebAPI.Controllers
                 var newTeacher = _mapper.Map<Domain.Entities.Teacher>(teacher);
                 newTeacher.id = new Guid();
                 await _teacherService.AddTeacher(newTeacher);
+                //await Task.Run(() => _rabbitMqService.SendClassMessage(newTeacher));
                 return Ok(new { status = true, message = "Add teacher successfully" });
             }
             catch (Exception e)
