@@ -17,5 +17,13 @@ namespace Infrastructure.Repositories
         public ClassStudentRepository(ApplicationDbContext context) : base(context)
         {
         }
+
+        public int CountStudentInClass(string? classId) => Count(x => x.classId == classId);
+
+        public int CountClassByStudent(Guid? studentId) => Count(x => x.studentId == studentId);
+
+        public List<Guid?> GetAllStudentIdByClassId(string? classId) => GetList(x => x.classId == classId).Select(x => x.studentId).ToList();
+
+        public List<string?> GetAllClassIdByStudentId(Guid? studentId) => GetList(x => x.studentId == studentId).Select(x => x.classId).ToList();
     }
 }

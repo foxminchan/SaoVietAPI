@@ -17,6 +17,7 @@ namespace Domain.Interfaces
         public List<Class> FindClassByName(string? name);
         public List<Class> GetClassesByStatus(string? status);
         public List<Class> FindClassByTeacher(Guid? teacherId);
+        public Class? FindClassById(string? id);
         public void AddClass(Class entity);
         public void UpdateClass(Class entity, string id);
         public void DeleteClass(string id);

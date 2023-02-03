@@ -3,6 +3,7 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure;
 using Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services
 {
@@ -17,10 +18,12 @@ namespace Application.Services
 
     public class StudentService : BaseService
     {
+        private readonly ApplicationDbContext _context;
         private readonly IStudentRepository _studentRepository;
         
         public StudentService(ApplicationDbContext context) : base(context)
         {
+            _context = context;
             _studentRepository = new StudentRepository(context);
         }
 
@@ -48,6 +51,15 @@ namespace Application.Services
         {
             _studentRepository.DeleteStudent(id);
             return SaveAsync();
+        }
+
+        public int CountClassByStudent(Guid? studentId) => new ClassStudentService(_context).CountClassByStudent(studentId);
+
+        public List<Class?> GetClassesByStudentId(Guid? studentId)
+        {
+            var classService = new ClassService(_context);
+            var classIds = new ClassStudentService(_context).GetAllClassIdByStudentId(studentId);
+            return classIds.Select(classId => classService.FindClassById(classId)).ToList();
         }
     }
 }

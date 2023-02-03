@@ -23,7 +23,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 
 #region Request Throttling
-// set the maximum number of concurrent requests
 builder.Services.AddMemoryCache();
 builder.Services.Configure<IpRateLimitOptions>(options =>
 {
@@ -41,7 +40,6 @@ builder.Services.Configure<IpRateLimitOptions>(options =>
             Limit = 20,
         }
     };
-    options.ClientWhitelist.Add("127.0.0.1");
 });
 builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
 builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
@@ -114,6 +112,7 @@ builder.Services.AddTransient<TeacherService>();
 builder.Services.AddTransient<ClassService>();
 builder.Services.AddTransient<BranchService>();
 builder.Services.AddTransient<StudentService>();
+builder.Services.AddTransient<ClassStudentService>();
 #endregion
 
 var app = builder.Build();
@@ -224,11 +223,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 app.UseHttpMetrics();
-
 app.UseAuthorization();
 app.UseIpRateLimiting();
 app.MapControllers();
-
 app.MapMetrics();
-
 app.Run();

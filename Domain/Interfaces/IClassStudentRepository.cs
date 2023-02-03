@@ -13,6 +13,9 @@ namespace Domain.Interfaces
 
     public interface IClassStudentRepository : IGenericRepository<ClassStudent>
     {
-
+        public int CountStudentInClass(string? classId);
+        public int CountClassByStudent(Guid? studentId);
+        public List<Guid?> GetAllStudentIdByClassId(string? classId);
+        public List<string?> GetAllClassIdByStudentId(Guid? studentId);
     }
 }

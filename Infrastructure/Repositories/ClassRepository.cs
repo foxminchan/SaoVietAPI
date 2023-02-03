@@ -36,7 +36,9 @@ namespace Infrastructure.Repositories
         }
 
         public List<Class> FindClassByTeacher(Guid? teacherId) => GetList(filter: x => teacherId != null && x.teacherId == teacherId).ToList();
-        
+
+        public Class? FindClassById(string? id) => GetById(id);
+
         public void AddClass(Class newClass) => Insert(newClass);
 
         public void UpdateClass(Class newClass, string id) => Update(newClass, x => x.id == id);

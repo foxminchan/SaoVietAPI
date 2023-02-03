@@ -34,6 +34,8 @@ namespace Application.Services
 
         public List<Class> FindClassByTeacher(Guid? teacherId) => _classRepository.FindClassByTeacher(teacherId);
 
+        public Class? FindClassById(string? id) => _classRepository.FindClassById(id);
+
         public Task AddClass(Class newClass)
         {
             _classRepository.AddClass(newClass);
@@ -64,6 +66,15 @@ namespace Application.Services
             var branchService = new BranchService(_context);
             var branchIds = _classRepository.GetClasses().Select(x => x.branchId).ToList();
             return branchIds.Select(branchService.GetBranchById).ToList();
+        }
+
+        public int CountStudentInClass(string? classId) => new ClassStudentService(_context).CountStudentInClass(classId);
+
+        public List<Student?> GetStudentsInClass(string? classId)
+        {
+            var studentService = new StudentService(_context);
+            var studentIds = new ClassStudentService(_context).GetAllStudentIdByClassId(classId);
+            return studentIds.Select(studentService.GetStudentById).ToList();
         }
     }
 }

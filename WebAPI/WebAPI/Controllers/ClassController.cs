@@ -117,6 +117,46 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
+        /// Tìm kiếm lớp theo mã lớp
+        /// </summary>
+        /// <param name="id">Mã lớp</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /findById/string
+        ///     {
+        ///         "id": "string"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Lấy lớp học thành công</response>
+        /// <response code="400">Mã lớp không hợp lệ</response>
+        /// <response code="404">Không tìm thấy lớp học</response>
+        /// <response code="429">Request quá nhiều</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpGet("findById/{id}")]
+        public async Task<IActionResult> FindClassById([FromRoute] string? id)
+        {
+            if (id == null)
+                return BadRequest(new { status = false, message = "Class id is required" });
+            try
+            {
+                if (_classService.GetClasses().All(x => x.id != id))
+                    return BadRequest(new { status = false, message = "Class id is not exist" });
+                var @class = await Task.Run(() => _classService.FindClassById(id));
+                return @class != null
+                    ? Ok(new { status = true, message = "Get data successfully", data = @class })
+                    : NotFound(new { status = false, message = "Class not found" });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while getting class by id");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+
+        /// <summary>
         /// Tìm lớp theo tên
         /// </summary>
         /// <param name="name">Tên lớp</param>
@@ -230,6 +270,81 @@ namespace WebAPI.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while finding class by teacherId");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Lấy số lượng học viên trong lớp
+        /// </summary>
+        /// <param name="classId">Mã lớp</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /api/v1/class/getStudentAmount/string
+        ///     {
+        ///         "classId": "string"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Lấy số lượng học viên trong lớp thành công</response>
+        /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="429">Request quá nhiều</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpGet("getStudentAmount/{classId}")]
+        public async Task<IActionResult> GetStudentAmount([FromRoute] string? classId)
+        {
+            if (string.IsNullOrEmpty(classId))
+                return BadRequest(new { status = false, message = "ClassId is null" });
+
+            try
+            {
+                var studentAmount = await Task.Run(() => _classService.CountStudentInClass(classId));
+                return Ok(new { status = true, message = "Get student amount successfully", data = studentAmount });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while getting student amount");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        /// <summary>
+        /// Lấy danh sách học viên trong lớp
+        /// </summary>
+        /// <param name="classId">Mã lớp</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /api/v1/class/getStudentList/string
+        ///     {
+        ///         "classId": "string"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Lấy danh sách học viên trong lớp thành công</response>
+        /// <response code="204">Không có dữ liệu</response>
+        /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="429">Request quá nhiều</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpGet("getStudentList/{classId}")]
+        public async Task<IActionResult> GetStudentList([FromRoute] string? classId)
+        {
+            if (string.IsNullOrEmpty(classId))
+                return BadRequest(new { status = false, message = "ClassId is null" });
+
+            try
+            {
+                if (await Task.Run(() => _classService.GetClasses().Any(x => x.id == classId)) == false)
+                    return BadRequest(new { status = false, message = "Class id is not exist" });
+                var studentList = await Task.Run(() => _classService.GetStudentsInClass(classId));
+                return !studentList.Any()
+                    ? NoContent()
+                    : Ok(new { status = true, message = "Get student list successfully", data = studentList });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while getting student list");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
