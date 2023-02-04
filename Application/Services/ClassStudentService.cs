@@ -1,4 +1,5 @@
 ﻿using Application.Common;
+using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure;
 using Infrastructure.Repositories;
@@ -23,8 +24,12 @@ namespace Application.Services
         
         public int CountClassByStudent(Guid? studentId) => _classStudentRepository.CountClassByStudent(studentId);
         
-        public List<Guid?> GetAllStudentIdByClassId(string? classId) => _classStudentRepository.GetAllStudentIdByClassId(classId);
+        public IEnumerable<Guid?> GetAllStudentIdByClassId(string? classId) => _classStudentRepository.GetAllStudentIdByClassId(classId);
         
-        public List<string?> GetAllClassIdByStudentId(Guid? studentId) => _classStudentRepository.GetAllClassIdByStudentId(studentId);
+        public IEnumerable<string?> GetAllClassIdByStudentId(Guid? studentId) => _classStudentRepository.GetAllClassIdByStudentId(studentId);
+
+        public void AddClassStudent(ClassStudent classStudent) => _classStudentRepository.AddClassStudent(classStudent);
+
+        public void DeleteClassStudent(ClassStudent classStudent) => _classStudentRepository.DeleteClassStudent(classStudent);
     }
 }

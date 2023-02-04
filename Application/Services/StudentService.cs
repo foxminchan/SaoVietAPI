@@ -3,7 +3,6 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure;
 using Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services
 {
@@ -55,11 +54,13 @@ namespace Application.Services
 
         public int CountClassByStudent(Guid? studentId) => new ClassStudentService(_context).CountClassByStudent(studentId);
 
-        public List<Class?> GetClassesByStudentId(Guid? studentId)
+        public IEnumerable<Class?> GetClassesByStudentId(Guid? studentId)
         {
             var classService = new ClassService(_context);
             var classIds = new ClassStudentService(_context).GetAllClassIdByStudentId(studentId);
-            return classIds.Select(classId => classService.FindClassById(classId)).ToList();
+            return classIds.Select(classService.FindClassById).ToList();
         }
+
+        public void AddClassStudent(ClassStudent classStudent) => new ClassStudentService(_context).AddClassStudent(classStudent);
     }
 }

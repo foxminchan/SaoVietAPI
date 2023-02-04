@@ -22,8 +22,12 @@ namespace Infrastructure.Repositories
 
         public int CountClassByStudent(Guid? studentId) => Count(x => x.studentId == studentId);
 
-        public List<Guid?> GetAllStudentIdByClassId(string? classId) => GetList(x => x.classId == classId).Select(x => x.studentId).ToList();
+        public IEnumerable<Guid?> GetAllStudentIdByClassId(string? classId) => GetList(x => x.classId == classId).Select(x => x.studentId).ToList();
 
-        public List<string?> GetAllClassIdByStudentId(Guid? studentId) => GetList(x => x.studentId == studentId).Select(x => x.classId).ToList();
+        public IEnumerable<string?> GetAllClassIdByStudentId(Guid? studentId) => GetList(x => x.studentId == studentId).Select(x => x.classId).ToList();
+
+        public void AddClassStudent(ClassStudent classStudent) => Insert(classStudent);
+
+        public void DeleteClassStudent(ClassStudent classStudent) => Delete(classStudent);
     }
 }

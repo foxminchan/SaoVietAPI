@@ -199,40 +199,6 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
-        /// Lấy số lượng lớp học của học viên
-        /// </summary>
-        /// <param name="id">Mã học viên</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Sample request:
-        ///
-        ///     GET /api/v1/student/countClassByStudentId/guid
-        ///     {
-        ///         "id": guid
-        ///     }
-        /// </remarks>
-        /// <response code="200">Lấy số lượng lớp học của học viên thành công</response>
-        /// <response code="400">Lỗi dữ liệu đầu vào</response>
-        /// <response code="429">Request quá nhiều</response>
-        /// <response code="500">Lỗi server</response>
-        [HttpGet("countClassByStudentId/{id:guid}")]
-        public async Task<IActionResult> CountClassByStudentId([FromRoute] Guid? id)
-        {
-            if (id == null)
-                return BadRequest(new { status = false, message = "Id is required" });
-            try
-            {
-                var count = await Task.Run(() => _studentService.CountClassByStudent(id));
-                return Ok(new { status = true, message = "Get data successfully", data = count });
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error while getting all teacher");
-                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
-            }
-        }
-
-        /// <summary>
         /// Lấy danh sách lớp học của học viên
         /// </summary>
         /// <param name="id">Mã học viên</param>
@@ -257,10 +223,11 @@ namespace WebAPI.Controllers
                 return BadRequest(new { status = false, message = "Id is required" });
             try
             {
-                var classes = await Task.Run(() => _studentService.GetClassesByStudentId(id));
-                return classes.Any()
-                    ? Ok(new { status = true, message = "Get data successfully", data = classes })
-                    : NoContent();
+                var count = await Task.Run(() => _studentService.CountClassByStudent(id));
+                if (count == 0)
+                    return NoContent();
+                var classes = await Task.Run(() => _studentService.GetClassesByStudentId(id).ToList());
+                return Ok(new { status = true, message = "Get data successfully", amount = count, data = classes });
             }
             catch (Exception e)
             {
@@ -309,6 +276,7 @@ namespace WebAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
+
 
         /// <summary>
         /// Cập nhật thông tin học viên

@@ -15,7 +15,9 @@ namespace Domain.Interfaces
     {
         public int CountStudentInClass(string? classId);
         public int CountClassByStudent(Guid? studentId);
-        public List<Guid?> GetAllStudentIdByClassId(string? classId);
-        public List<string?> GetAllClassIdByStudentId(Guid? studentId);
+        public IEnumerable<Guid?> GetAllStudentIdByClassId(string? classId);
+        public IEnumerable<string?> GetAllClassIdByStudentId(Guid? studentId);
+        public void AddClassStudent(ClassStudent classStudent);
+        public void DeleteClassStudent(ClassStudent classStudent);
     }
 }

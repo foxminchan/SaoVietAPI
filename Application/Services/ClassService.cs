@@ -76,5 +76,8 @@ namespace Application.Services
             var studentIds = new ClassStudentService(_context).GetAllStudentIdByClassId(classId);
             return studentIds.Select(studentService.GetStudentById).ToList();
         }
+
+        public void DeleteStudentFromClass(ClassStudent classStudent) => new ClassStudentService(_context).DeleteClassStudent(classStudent);
+        
     }
 }
