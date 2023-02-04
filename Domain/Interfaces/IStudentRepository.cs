@@ -20,5 +20,6 @@ namespace Domain.Interfaces
         public void AddStudent(Student student);
         public void UpdateStudent(Student student, Guid id);
         public void DeleteStudent(Guid id);
+        public bool StudentExists(Guid? id);
     }
 }

@@ -61,6 +61,16 @@ namespace Application.Services
             return classIds.Select(classService.FindClassById).ToList();
         }
 
-        public void AddClassStudent(ClassStudent classStudent) => new ClassStudentService(_context).AddClassStudent(classStudent);
+        public bool CheckStudentExists(Guid? id) => _studentRepository.StudentExists(id);
+
+        public bool CheckClassExists(string? id) => new ClassService(_context).CheckClassIdExist(id);
+
+        public bool IsAlreadyInClass(Guid? studentId, string? classId) => new ClassStudentService(_context).IsExistClassStudent(classId, studentId);
+
+        public Task AddClassStudent(ClassStudent classStudent)
+        {
+            new ClassStudentService(_context).AddClassStudent(classStudent);
+            return SaveAsync();
+        }
     }
 }

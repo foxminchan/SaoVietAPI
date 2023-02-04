@@ -29,5 +29,8 @@ namespace Infrastructure.Repositories
         public void AddClassStudent(ClassStudent classStudent) => Insert(classStudent);
 
         public void DeleteClassStudent(ClassStudent classStudent) => Delete(classStudent);
+
+        public bool IsExistClassStudent(string? classId, Guid? studentId) => Any(x => x.classId == classId && x.studentId == studentId);
+
     }
 }

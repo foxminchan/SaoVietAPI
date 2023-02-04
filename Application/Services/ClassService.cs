@@ -77,7 +77,14 @@ namespace Application.Services
             return studentIds.Select(studentService.GetStudentById).ToList();
         }
 
-        public void DeleteStudentFromClass(ClassStudent classStudent) => new ClassStudentService(_context).DeleteClassStudent(classStudent);
-        
+        public bool CheckStudentInClass(string? classId, Guid? studentId) => new ClassStudentService(_context).IsExistClassStudent(classId, studentId);
+
+        public Task DeleteStudentFromClass(ClassStudent classStudent)
+        {
+            new ClassStudentService(_context).DeleteClassStudent(classStudent);
+            return SaveAsync();
+        }
+
+        public bool CheckClassIdExist(string? classId) => _classRepository.ClassExists(classId);
     }
 }

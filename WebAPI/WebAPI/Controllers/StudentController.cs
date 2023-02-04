@@ -277,6 +277,50 @@ namespace WebAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Thêm học viên vào lớp học
+        /// </summary>
+        /// <param name="studentId">Mã học viên</param>
+        /// <param name="classId">Mã lớp</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /api/v1/student/addStudentToClass/guid/string
+        ///     {
+        ///         "studentId": guid,
+        ///         "classId": string
+        ///     }
+        /// </remarks>
+        /// <response code="200">Thêm học viên vào lớp học thành công</response>
+        /// <response code="400">Thông tin học viên không hợp lệ</response>
+        /// <response code="429">Request quá nhiều</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpPut("addStudentToClass/{studentId:guid}/{classId}")]
+        public async Task<IActionResult> AddStudentToClass([FromRoute] Guid? studentId, [FromRoute] string classId)
+        {
+            if (studentId == null || string.IsNullOrEmpty(classId))
+                return BadRequest(new { status = false, message = "Student id and class id are required" });
+
+            try
+            {
+                if (!_studentService.CheckStudentExists(studentId.Value))
+                    return BadRequest(new { status = false, message = "Student id is not exists" });
+                if (!_studentService.CheckClassExists(classId))
+                    return BadRequest(new { status = false, message = "Class id is not exists" });
+                if (_studentService.IsAlreadyInClass(studentId.Value, classId))
+                    return BadRequest(new { status = false, message = "Student is already in class" });
+                await _studentService.AddClassStudent(new Domain.Entities.ClassStudent
+                { classId = classId, studentId = studentId.Value });
+                return Ok(new { status = true, message = "Add student to class successfully" });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while adding student to class");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
+
 
         /// <summary>
         /// Cập nhật thông tin học viên

@@ -19,5 +19,6 @@ namespace Domain.Interfaces
         public IEnumerable<string?> GetAllClassIdByStudentId(Guid? studentId);
         public void AddClassStudent(ClassStudent classStudent);
         public void DeleteClassStudent(ClassStudent classStudent);
+        public bool IsExistClassStudent(string? classId, Guid? studentId);
     }
 }

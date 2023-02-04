@@ -21,5 +21,6 @@ namespace Domain.Interfaces
         public void AddClass(Class entity);
         public void UpdateClass(Class entity, string id);
         public void DeleteClass(string id);
+        public bool ClassExists(string? id);
     }
 }

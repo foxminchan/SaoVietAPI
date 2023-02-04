@@ -31,5 +31,7 @@ namespace Application.Services
         public void AddClassStudent(ClassStudent classStudent) => _classStudentRepository.AddClassStudent(classStudent);
 
         public void DeleteClassStudent(ClassStudent classStudent) => _classStudentRepository.DeleteClassStudent(classStudent);
+
+        public bool IsExistClassStudent(string? classId, Guid? studentId) => _classStudentRepository.IsExistClassStudent(classId, studentId);
     }
 }

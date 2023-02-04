@@ -44,5 +44,7 @@ namespace Infrastructure.Repositories
         public void UpdateClass(Class newClass, string id) => Update(newClass, x => x.id == id);
 
         public void DeleteClass(string id) => Delete(x => x.id == id);
+
+        public bool ClassExists(string? id) => Any(x => x.id == id);
     }
 }

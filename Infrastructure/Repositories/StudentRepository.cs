@@ -31,5 +31,7 @@ namespace Infrastructure.Repositories
         public void UpdateStudent(Student student, Guid id) => Update(student, x => x.id == id);
 
         public void DeleteStudent(Guid id) => Delete(x => x.id == id);
+
+        public bool StudentExists(Guid? id) => Any(x => x.id == id);
     }
 }

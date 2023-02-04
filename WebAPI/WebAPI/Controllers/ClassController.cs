@@ -432,5 +432,44 @@ namespace WebAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
             }
         }
+
+        /// <summary>
+        /// Xóa học viên khỏi lớp học
+        /// </summary>
+        /// <param name="classId">Mã lớp</param>
+        /// <param name="studentId">Mã học viên</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /api/v1/class/deleteStudentFromClass/string/guid
+        ///     {
+        ///         "classId": "string",
+        ///         "studentId": "guid"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Xóa học viên khỏi lớp học thành công</response>
+        /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="429">Request quá nhiều</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpDelete("deleteStudentFromClass/{classId}/{studentId:guid}")]
+        public async Task<IActionResult> DeleteStudentFromClass([FromRoute] string classId, [FromRoute] Guid studentId)
+        {
+            if (string.IsNullOrEmpty(classId) && studentId == Guid.Empty)
+                return BadRequest(new { status = false, message = "Class id and student id are required" });
+            
+            try
+            {
+                if (!_classService.CheckStudentInClass(classId, studentId))
+                    return BadRequest(new { status = false, message = "Class id is not exist" });
+                await _classService.DeleteStudentFromClass(new Domain.Entities.ClassStudent { classId = classId, studentId = studentId });
+                return Ok(new { status = true, message = "Delete student from class successfully" });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while deleting student from class");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
+        }
     }
 }
