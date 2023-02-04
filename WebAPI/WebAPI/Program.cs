@@ -2,7 +2,6 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
-using Application.Messages;
 using Application.Services;
 using AspNetCoreRateLimit;
 using Prometheus;
@@ -114,11 +113,6 @@ builder.Services.AddTransient<ClassService>();
 builder.Services.AddTransient<BranchService>();
 builder.Services.AddTransient<StudentService>();
 builder.Services.AddTransient<ClassStudentService>();
-#endregion
-
-#region RabbitMQ
-builder.Services.AddScoped<IRabbitMqService, RabbitMqService>();
-builder.Services.AddSingleton(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException());
 #endregion
 
 var app = builder.Build();
