@@ -10,7 +10,7 @@
     */
 
     /// <summary>
-    /// Quản lý lớp học
+    /// Quan hệ lớp học
     /// </summary>
     public class Class
     {

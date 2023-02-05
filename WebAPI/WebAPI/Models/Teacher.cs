@@ -10,7 +10,7 @@
     */
 
     /// <summary>
-    /// Quản lý giáo viên
+    /// Quan hệ giáo viên
     /// </summary>
     public class Teacher
     {

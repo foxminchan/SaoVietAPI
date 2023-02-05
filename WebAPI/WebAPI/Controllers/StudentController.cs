@@ -296,7 +296,7 @@ namespace WebAPI.Controllers
         /// <response code="400">Thông tin học viên không hợp lệ</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("addStudentToClass/{studentId:guid}/{classId}")]
+        [HttpPost("addStudentToClass/{studentId:guid}/{classId}")]
         public async Task<IActionResult> AddStudentToClass([FromRoute] Guid? studentId, [FromRoute] string classId)
         {
             if (studentId == null || string.IsNullOrEmpty(classId))

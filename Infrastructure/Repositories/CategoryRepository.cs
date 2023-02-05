@@ -17,5 +17,18 @@ namespace Infrastructure.Repositories
         public CategoryRepository(ApplicationDbContext context) : base(context)
         {
         }
+
+        public List<Category> GetCategories() => GetAll().ToList();
+
+        public Category? GetCategoryById(string? id) => GetById(id);
+
+        public void AddCategory(Category category) => Insert(category);
+
+        public void UpdateCategory(Category category, string id) => Update(category, x => x.id == id);
+
+        public void DeleteCategory(string id) => Delete(x => x.id == id);
+
+        public bool CategoryExists(string id) => Any(x => x.id == id);
+
     }
 }

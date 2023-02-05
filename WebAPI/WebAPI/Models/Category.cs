@@ -8,26 +8,21 @@
     * @License MIT
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
-
+    
     /// <summary>
-    /// Quan hệ chi nhánh
+    /// Quan hệ danh mục
     /// </summary>
-    public class Branch
+    public class Category
     {
         /// <summary>
-        /// Mã chi nhánh
+        /// Mã danh mục
         /// </summary>
-        /// <example>TMBH0</example>
+        /// <example>DM001</example>
         public string? id { get; set; }
         /// <summary>
-        /// Tên chi nhánh
+        /// Tên danh mục
         /// </summary>
-        /// <example>Tân Mai Biên Hoà</example>
+        /// <example>Tin học văn phòng</example>
         public string? name { get; set; }
-        /// <summary>
-        /// Địa chỉ chi nhánh
-        /// </summary>
-        /// <example>Số 46B/3, KP 2, Phường Tân Mai, Thành Phố Biên Hòa</example>
-        public string? address { get; set; }
     }
 }

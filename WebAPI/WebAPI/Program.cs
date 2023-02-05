@@ -113,6 +113,7 @@ builder.Services.AddTransient<ClassService>();
 builder.Services.AddTransient<BranchService>();
 builder.Services.AddTransient<StudentService>();
 builder.Services.AddTransient<ClassStudentService>();
+builder.Services.AddTransient<CategoryService>();
 #endregion
 
 var app = builder.Build();
@@ -176,6 +177,13 @@ var studentTag = new OpenApiTag
     Description = "Quản lý thông tin học viên",
     ExternalDocs = findOutMore
 };
+var categoryTag = new OpenApiTag
+{
+    Name = "Category",
+    Description = "Quản lý thông tin danh mục",
+    ExternalDocs = findOutMore
+};
+
 app.UseStaticFiles();
 app.UseCors("AllowAll");
 
@@ -192,7 +200,7 @@ if (app.Environment.IsDevelopment())
                 throw new ArgumentNullException(nameof(httpReq));
             swagger.Info = info;
             swagger.ExternalDocs = externalDocs;
-            swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag, studentTag };
+            swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag, studentTag, categoryTag };
             swagger.Servers = new List<OpenApiServer>
             {
                 new()

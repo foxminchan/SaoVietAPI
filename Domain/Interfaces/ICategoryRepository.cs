@@ -13,6 +13,11 @@ namespace Domain.Interfaces
 
     public interface ICategoryRepository : IGenericRepository<Category>
     {
-
+        public List<Category> GetCategories();
+        public Category? GetCategoryById(string? id);
+        public void AddCategory(Category category);
+        public void UpdateCategory(Category category, string id);
+        public void DeleteCategory(string id);
+        public bool CategoryExists(string id);
     }
 }

@@ -10,7 +10,7 @@
     */
 
     /// <summary>
-    /// Quản lý học viên
+    /// Quan hệ học viên
     /// </summary>
     public class Student
     {
