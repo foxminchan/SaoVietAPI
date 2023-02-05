@@ -17,5 +17,19 @@ namespace Infrastructure.Repositories
         public CourseRepository(ApplicationDbContext context) : base(context)
         {
         }
+
+        public List<Course> GetCourses() => GetAll().ToList();
+
+        public List<Course> GetCoursesByNames(string? name) => GetList(filter: x => name != null && x.name != null && x.name.Contains(name)).ToList();
+
+        public Course? GetCourseById(string? id) => id == null ? null : GetById(id);
+
+        public void AddCourse(Course course) => Insert(course);
+
+        public void UpdateCourse(Course course, string id) => Update(course, x => x.id == id);
+
+        public void DeleteCourse(string id) => Delete(x => x.id == id);
+
+        public bool CourseExists(string id) => Any(x => x.id == id);
     }
 }

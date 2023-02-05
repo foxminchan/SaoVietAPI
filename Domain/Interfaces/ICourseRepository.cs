@@ -13,6 +13,12 @@ namespace Domain.Interfaces
 
     public interface ICourseRepository : IGenericRepository<Course>
     {
-
+        public List<Course> GetCourses();
+        public List<Course> GetCoursesByNames(string? name);
+        public Course? GetCourseById(string? id);
+        public void AddCourse(Course course);
+        public void UpdateCourse(Course course, string id);
+        public void DeleteCourse(string id);
+        public bool CourseExists(string id);
     }
 }

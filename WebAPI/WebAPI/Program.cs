@@ -114,6 +114,7 @@ builder.Services.AddTransient<BranchService>();
 builder.Services.AddTransient<StudentService>();
 builder.Services.AddTransient<ClassStudentService>();
 builder.Services.AddTransient<CategoryService>();
+builder.Services.AddTransient<CourseService>();
 #endregion
 
 var app = builder.Build();
