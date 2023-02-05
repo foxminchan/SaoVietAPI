@@ -47,6 +47,13 @@ namespace WebAPI.Controllers
                 return false;
             }
 
+            if (!string.IsNullOrEmpty(course.categoryId) && 
+                !_courseService.IsValidCategoryId(course.categoryId))
+            {
+                message = "Category id not exists";
+                return false;
+            }
+
             message = string.Empty;
             return true;
         }

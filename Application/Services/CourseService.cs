@@ -18,8 +18,14 @@ namespace Application.Services
     public class CourseService : BaseService
     {
         private readonly ICourseRepository _courseRepository;
-        
-        public CourseService(ApplicationDbContext context) : base(context) => _courseRepository = new CourseRepository(context);
+
+        private readonly ApplicationDbContext _context;
+
+        public CourseService(ApplicationDbContext context) : base(context)
+        {
+            _context = context;
+            _courseRepository = new CourseRepository(context);
+        }
 
         public List<Course> GetCourses() => _courseRepository.GetCourses();
 
@@ -46,5 +52,7 @@ namespace Application.Services
         }
 
         public bool CourseExists(string id) => _courseRepository.CourseExists(id);
+
+        public bool IsValidCategoryId(string id) => new CategoryService(_context).CategoryExists(id);
     }
 }

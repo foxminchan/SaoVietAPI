@@ -210,7 +210,6 @@ if (app.Environment.IsDevelopment())
                 }
             };
         });
-
     });
 
     app.UseSwaggerUI(c =>

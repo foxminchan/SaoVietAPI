@@ -23,7 +23,7 @@ API trung tâm tin học Sao Việt
   - [Môi trường phát triển](#môi-trường-phát-triển)
 - [Cài đặt](#cài-đặt)
   - [Cài đặt môi trường phát triển](#cài-đặt-môi-trường-phát-triển)
-  - [Cài đặt Log, Monitor và Cache](#cài-đặt-log-monitor-và-cache)
+  - [Cài đặt Log và Monitor](#cài-đặt-log-và-monitor)
   - [Cấu hình kết nối với SQL Server](#cấu-hình-kết-nối-với-sql-server)
 - [Tài liệu](#tài-liệu)
 - [Người đóng góp](#người-đóng-góp)
@@ -76,7 +76,6 @@ API sử dụng mô hình Repository pattern để truy xuất dữ liệu. Mô 
 - ELK Stack
 - Prometheus
 - Grafana
-- Redis
 
 # Cài đặt
 
@@ -128,12 +127,12 @@ dotnet run
 > docker run -it --name dotnet7_container -p 8080:80 -v /path/to/project:/app microsoft/dotnet:7.0-runtime
 > ```
 
-## Cài đặt Log, Monitor và Cache
+## Cài đặt Log và Monitor
 
-Sau đó, bạn cần thiết lập các thành phần như Elastic Stack, Prometheus, Grafana và Redis. Để làm được điều này, bạn cần chạy lệnh sau:
+Sau đó, bạn cần thiết lập các thành phần như Elastic Stack, Prometheus và Grafana. Để làm được điều này, bạn cần chạy lệnh sau:
 
 ```bash
-docker-compose -f docker-compose.yml -f redis.yml up -d
+docker-compose up -d
 ```
 
 Để sử dụng được các thành phần này, vui lòng tham khảo tạo trang [Wiki](https://github.com/foxminchan/SaoVietAPI/wiki).
