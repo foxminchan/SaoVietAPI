@@ -21,28 +21,28 @@ namespace Application.Services
 
         public CategoryService(ApplicationDbContext context) : base(context) => _categoryRepository = new CategoryRepository(context);
 
-        public List<Category> GetCategories() => _categoryRepository.GetCategories();
+        public async Task<List<Category>> GetCategories() => await _categoryRepository.GetCategories();
 
-        public Category? GetCategoryById(string? id) => _categoryRepository.GetCategoryById(id);
+        public async Task<Category?> GetCategoryById(string? id) => await _categoryRepository.GetCategoryById(id);
 
-        public bool CategoryExists(string id) => _categoryRepository.CategoryExists(id);
+        public async Task<bool> CategoryExists(string id) => await _categoryRepository.CategoryExists(id);
 
-        public Task AddCategory(Category newCategory)
+        public async Task AddCategory(Category newCategory)
         {
-            _categoryRepository.AddCategory(newCategory);
-            return SaveAsync();
+            await _categoryRepository.AddCategory(newCategory);
+            await SaveAsync();
         }
 
-        public Task UpdateCategory(Category newCategory, string id)
+        public async Task UpdateCategory(Category newCategory, string id)
         {
-            _categoryRepository.UpdateCategory(newCategory, id);
-            return SaveAsync();
+            await _categoryRepository.UpdateCategory(newCategory, id);
+            await SaveAsync();
         }
 
-        public Task DeleteCategory(string id)
+        public async Task DeleteCategory(string id)
         {
-            _categoryRepository.DeleteCategory(id);
-            return SaveAsync();
+            await _categoryRepository.DeleteCategory(id);
+            await SaveAsync();
         }
     }
 }

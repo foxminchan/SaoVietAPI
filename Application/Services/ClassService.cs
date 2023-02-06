@@ -26,65 +26,69 @@ namespace Application.Services
             _classRepository = new ClassRepository(context);
         }
 
-        public List<Class> GetClasses() => _classRepository.GetClasses();
+        public async Task<List<Class>> GetClasses() => await _classRepository.GetClasses();
 
-        public List<Class> FindClassByName(string? name) => _classRepository.FindClassByName(name);
+        public async Task<List<Class>> FindClassByName(string? name) => await _classRepository.FindClassByName(name);
 
-        public List<Class> GetClassesByStatus(string? status) => _classRepository.GetClassesByStatus(status);
+        public async Task<List<Class>> GetClassesByStatus(string? status) => await _classRepository.GetClassesByStatus(status);
 
-        public List<Class> FindClassByTeacher(Guid? teacherId) => _classRepository.FindClassByTeacher(teacherId);
+        public async Task<List<Class>> FindClassByTeacher(Guid? teacherId) => await _classRepository.FindClassByTeacher(teacherId);
 
-        public Class? FindClassById(string? id) => _classRepository.FindClassById(id);
+        public async Task<Class?> FindClassById(string? id) => await _classRepository.FindClassById(id);
 
-        public Task AddClass(Class newClass)
+        public async Task AddClass(Class newClass)
         {
-            _classRepository.AddClass(newClass);
-            return SaveAsync();
+            await _classRepository.AddClass(newClass);
+            await SaveAsync();
         }
 
-        public Task UpdateClass(Class newClass, string id)
+        public async Task UpdateClass(Class newClass, string id)
         {
-            _classRepository.UpdateClass(newClass, id);
-            return SaveAsync();
+            await _classRepository.UpdateClass(newClass, id);
+            await SaveAsync();
         }
 
-        public Task DeleteClass(string id)
+        public async Task DeleteClass(string id)
         {
-            _classRepository.DeleteClass(id);
-            return SaveAsync();
+            await _classRepository.DeleteClass(id);
+            await SaveAsync();
         }
 
-        public IEnumerable<Teacher?> GetTeachers()
+        public async Task<IEnumerable<Teacher?>> GetTeachers()
         {
             var teacherService = new TeacherService(_context);
-            var teacherIds = _classRepository.GetClasses().Select(x => x.teacherId).ToList();
-            return teacherIds.Select(teacherService.GetTeacherById).ToList();
+            var teacherIds = await _classRepository.GetClasses();
+            return Task.WhenAll(teacherIds.Select(x => teacherService.GetTeacherById(x.teacherId))).Result;
         }
 
-        public IEnumerable<Branch?> GetBranches()
+        public async Task<IEnumerable<Branch?>> GetBranches()
         {
             var branchService = new BranchService(_context);
-            var branchIds = _classRepository.GetClasses().Select(x => x.branchId).ToList();
-            return branchIds.Select(branchService.GetBranchById).ToList();
+            var branchIds = await _classRepository.GetClasses();
+            return Task.WhenAll(branchIds.Select(x => branchService.GetBranchById(x.branchId))).Result;
         }
 
-        public int CountStudentInClass(string? classId) => new ClassStudentService(_context).CountStudentInClass(classId);
+        public async Task<int> CountStudentInClass(string? classId)
+        {
+            var classStudentService = new ClassStudentService(_context);
+            return await classStudentService.CountStudentInClass(classId);
+        }
 
-        public List<Student?> GetStudentsInClass(string? classId)
+        public async Task<List<Student?>> GetStudentsInClass(string? classId)
         {
             var studentService = new StudentService(_context);
-            var studentIds = new ClassStudentService(_context).GetAllStudentIdByClassId(classId);
-            return studentIds.Select(studentService.GetStudentById).ToList();
+            var studentIds = await new ClassStudentService(_context).GetAllStudentIdByClassId(classId);
+            return Task.WhenAll(studentIds.Select(studentService.GetStudentById)).Result.ToList();
         }
 
-        public bool CheckStudentInClass(string? classId, Guid? studentId) => new ClassStudentService(_context).IsExistClassStudent(classId, studentId);
+        public async Task<bool> CheckStudentInClass(string? classId, Guid? studentId) => await new ClassStudentService(_context).IsExistClassStudent(classId, studentId);
 
-        public Task DeleteStudentFromClass(ClassStudent classStudent)
+        public async Task DeleteStudentFromClass(ClassStudent classStudent)
         {
-            new ClassStudentService(_context).DeleteClassStudent(classStudent);
-            return SaveAsync();
+            await new ClassStudentService(_context).DeleteClassStudent(classStudent);
+            await SaveAsync();
         }
 
-        public bool CheckClassIdExist(string? classId) => _classRepository.ClassExists(classId);
+        public async Task<bool> CheckClassIdExist(string? classId) => await _classRepository.ClassExists(classId);
     }
 }

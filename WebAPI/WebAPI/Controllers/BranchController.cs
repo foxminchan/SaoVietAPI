@@ -33,22 +33,12 @@ namespace WebAPI.Controllers
             _branchService = branchService;
         }
 
-        private bool IsValidBranch(Branch branch, out string message)
+        private async Task<(bool, string?)> IsValidBranch(Branch branch)
         {
             if (string.IsNullOrEmpty(branch.name))
-            {
-                message = "Name of branch is required";
-                return false;
-            }
+                return (false, "Name of branch is required");
 
-            if (_branchService.GetBranchById(branch.id) != null)
-            {
-                message = "Id of branch is duplicate";
-                return false;
-            }
-
-            message = string.Empty;
-            return true;
+            return await _branchService.GetBranchById(branch.id) != null ? (false, "Id of branch is duplicate") : (true, null);
         }
 
         /// <summary>
@@ -69,7 +59,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var branches = await Task.Run(_branchService.GetBranches);
+                var branches = await _branchService.GetBranches();
                 return branches.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = branches })
                     : NoContent();
@@ -103,7 +93,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var branches = await Task.Run(() => _branchService.GetBranchesByNames(name));
+                var branches = await _branchService.GetBranchesByNames(name);
                 return branches.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = branches })
                     : NoContent();
@@ -137,7 +127,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var branch = await Task.Run(() => _branchService.GetBranchById(id));
+                var branch = await _branchService.GetBranchById(id);
                 return branch != null
                     ? Ok(new { status = true, message = "Get data successfully", data = branch })
                     : NotFound(new { status = false, message = "No branch was found" });
@@ -171,7 +161,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var branch = await Task.Run(() => _branchService.GetBranchesByZone(zone));
+                var branch = await _branchService.GetBranchesByZone(zone);
                 return branch.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = branch })
                     : NoContent();
@@ -205,13 +195,14 @@ namespace WebAPI.Controllers
         [HttpPost("addBranch")]
         public async Task<IActionResult> AddBranch([FromBody] Branch branch)
         {
-            if (!IsValidBranch(branch, out var message))
+            var (isValid, message) = await IsValidBranch(branch);
+            if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var branchEntity = _mapper.Map<Domain.Entities.Branch>(branch);
-                await Task.Run(() => _branchService.AddBranch(branchEntity));
+                await _branchService.AddBranch(branchEntity);
                 return Ok(new { status = true, message = "Add branch successfully" });
             }
             catch (Exception e)
@@ -244,13 +235,14 @@ namespace WebAPI.Controllers
         [HttpPut("updateBranch/{id}")]
         public async Task<IActionResult> UpdateBranch([FromBody] Branch branch, [FromRoute] string id)
         {
-            if (!IsValidBranch(branch, out var message))
+            var (isValid, message) = await IsValidBranch(branch);
+            if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var branchEntity = _mapper.Map<Domain.Entities.Branch>(branch);
-                await Task.Run(() => _branchService.UpdateBranch(branchEntity, id));
+                await _branchService.UpdateBranch(branchEntity, id);
                 return Ok(new { status = true, message = "Update branch successfully" });
             }
             catch (Exception e)
@@ -282,9 +274,9 @@ namespace WebAPI.Controllers
         {
             try
             {
-                if (await Task.Run(() => _branchService.GetBranchById(id)) == null)
+                if (await _branchService.GetBranchById(id) == null)
                     return NotFound(new { status = false, message = "No branch was found" });
-                await Task.Run(() => _branchService.DeleteBranch(id));
+                await _branchService.DeleteBranch(id);
                 return Ok(new { status = true, message = "Delete branch successfully" });
             }
             catch (Exception e)

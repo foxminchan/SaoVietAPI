@@ -2,6 +2,7 @@
 using Infrastructure.Repositories;
 using Infrastructure;
 using Application.Common;
+using Domain.Entities;
 
 namespace Application.Services
 {
@@ -24,5 +25,31 @@ namespace Application.Services
             _context = context;
             _lessonRepository = new LessonRepository(context);
         }
+
+        public async Task<List<Lesson>> GetAllLesson() => await _lessonRepository.GetAllLesson();
+
+        public async Task<List<Lesson>> GetByNames(string? name) => await _lessonRepository.GetByNames(name);
+
+        public async Task<Lesson?> GetLessonById(string id) => await _lessonRepository.GetLessonById(id);
+
+        public async Task AddLesson(Lesson lesson)
+        {
+            await _lessonRepository.AddLesson(lesson);
+            await SaveAsync();
+        }
+
+        public async Task UpdateLesson(Lesson lesson, string? id)
+        {
+            await _lessonRepository.UpdateLesson(lesson, id);
+            await SaveAsync();
+        }
+
+        public async Task DeleteLesson(Lesson lesson)
+        {
+            await _lessonRepository.DeleteLesson(lesson);
+            await SaveAsync();
+        }
+
+        public async Task<bool> IsCourseExists(string id) => await new CourseRepository(_context).CourseExists(id);
     }
 }

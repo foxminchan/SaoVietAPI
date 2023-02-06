@@ -17,5 +17,27 @@ namespace Infrastructure.Repositories
         public LessonRepository(ApplicationDbContext context) : base(context)
         {
         }
+
+        public async Task<List<Lesson>> GetAllLesson()
+        {
+            var lessons = await GetAll();
+            return lessons.ToList();
+        }
+
+        public async Task<List<Lesson>> GetByNames(string? name)
+        {
+            var lessons = await GetList(x => name != null && x.name != null && x.name.Contains(name));
+            return lessons.ToList();
+        }
+
+        public async Task<Lesson?> GetLessonById(string id) => await GetById(id);
+
+        public async Task AddLesson(Lesson lesson) => await Insert(lesson);
+
+        public async Task UpdateLesson(Lesson lesson, string? id) => await Update(lesson, x => x.id == id);
+
+        public async Task DeleteLesson(Lesson lesson) => await Delete(lesson);
+
+        public async Task<bool> LessonExists(string id) => await Any(x => x.id == id);
     }
 }

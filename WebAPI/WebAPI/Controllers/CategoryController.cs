@@ -12,7 +12,7 @@ namespace WebAPI.Controllers
     * @License MIT
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
-    
+
     /// <summary>
     /// Quản lý danh mục
     /// </summary>
@@ -32,22 +32,14 @@ namespace WebAPI.Controllers
             _studentService = studentService;
         }
 
-        private static bool IsValidCategory(Models.Category category, out string message)
+        private static async Task<(bool, string?)> IsValidCategory(Models.Category category)
         {
+            await Task.Delay(0);
+            
             if (string.IsNullOrEmpty(category.id))
-            {
-                message = "Category id is required";
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(category.name))
-            {
-                message = "Category name is required";
-                return false;
-            }
-
-            message = string.Empty;
-            return true;
+                return (false, "Category id is required");
+            
+            return string.IsNullOrEmpty(category.name) ? (false, "Category name is required") : (true, null);
         }
 
         /// <summary>
@@ -68,7 +60,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var categories = await Task.Run(_studentService.GetCategories);
+                var categories = await _studentService.GetCategories();
                 return categories.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = categories })
                     : NoContent();
@@ -102,7 +94,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var category = await Task.Run(() => _studentService.GetCategoryById(id));
+                var category = await _studentService.GetCategoryById(id);
                 return category != null
                     ? Ok(new { status = true, message = "Get data successfully", data = category })
                     : NotFound(new { status = false, message = "Category not found" });
@@ -135,12 +127,13 @@ namespace WebAPI.Controllers
         [HttpPost("addCategory")]
         public async Task<IActionResult> AddCategory([FromBody] Models.Category category)
         {
-            if (!IsValidCategory(category, out var message))
+            var (isValid, message) = await IsValidCategory(category);
+            if (!isValid)
                 return BadRequest(new { status = false, message });
-            
+
             try
             {
-                if (!await Task.Run(() => category.id != null && _studentService.CategoryExists(category.id)))
+                if (category.id != null && !await _studentService.CategoryExists(category.id))
                     return BadRequest(new { status = false, message = "Category id already exists" });
                 var categoryEntity = _mapper.Map<Domain.Entities.Category>(category);
                 await _studentService.AddCategory(categoryEntity);
@@ -175,12 +168,13 @@ namespace WebAPI.Controllers
         [HttpPut("updateCategory/{id}")]
         public async Task<IActionResult> UpdateCategory([FromBody] Models.Category category, [FromRoute] string? id)
         {
-            if (!IsValidCategory(category, out var message))
+            var (isValid, message) = await IsValidCategory(category);
+            if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
             {
-                if (await Task.Run(() => category.id != null && _studentService.CategoryExists(category.id)))
+                if (category.id != null && await _studentService.CategoryExists(category.id))
                     return BadRequest(new { status = false, message = "Category id is not exists" });
                 var categoryEntity = _mapper.Map<Domain.Entities.Category>(category);
                 if (id != null) await _studentService.UpdateCategory(categoryEntity, id);
@@ -215,7 +209,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                if (await Task.Run(() => id != null && _studentService.CategoryExists(id)))
+                if (id != null && await _studentService.CategoryExists(id))
                     return BadRequest(new { status = false, message = "Category id is not exists" });
                 if (id != null) await _studentService.DeleteCategory(id);
                 return Ok(new { status = true, message = "Delete category successfully" });

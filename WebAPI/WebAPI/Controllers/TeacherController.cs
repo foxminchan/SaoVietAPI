@@ -33,36 +33,25 @@ namespace WebAPI.Controllers
             _teacherService = teacherService;
         }
 
-        private bool IsValidTeacher(Models.Teacher teacher, out string? message)
+        private async Task<(bool, string?)> IsValidTeacher(Models.Teacher teacher)
         {
-            message = string.Empty;
-
             if (string.IsNullOrWhiteSpace(teacher.fullName) &&
                 string.IsNullOrWhiteSpace(teacher.email) &&
                 string.IsNullOrWhiteSpace(teacher.phone))
-            {
-                message = "Full name, email and phone are required";
-                return false;
-            }
-
+                return (false, "Full name, email and phone are required");
+            
             if (!string.IsNullOrWhiteSpace(teacher.email) && 
                 !Regex.IsMatch(teacher.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"))
-            {
-                message = "Email is invalid";
-                return false;
-            }
+                return (false, "Email is invalid");
 
             if (!string.IsNullOrWhiteSpace(teacher.phone) && 
-                !Regex.IsMatch(teacher.phone, @"^([0-9]{10})$"))
-            {
-                message = "Phone is invalid";
-                return false;
-            }
-
+                    !Regex.IsMatch(teacher.phone, @"^([0-9]{10})$"))
+                return (false, "Phone is invalid");
+            
+            var allId = await _teacherService.GetAllId();
             if (string.IsNullOrWhiteSpace(teacher.customerId)
-                || _teacherService.GetAllId().Contains(teacher.customerId)) return true;
-            message = "Customer id is not exists";
-            return false;
+                || allId.Contains(teacher.customerId)) return (true, null);
+            return (false, "Customer id is not exists");
 
         }
 
@@ -84,7 +73,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var teachers = await Task.Run(_teacherService.GetTeachers);
+                var teachers = await _teacherService.GetTeachers();
                 return teachers.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = teachers })
                     : NoContent();
@@ -118,7 +107,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var teachers = await Task.Run(() => _teacherService.FindTeacherByName(name));
+                var teachers = await _teacherService.FindTeacherByName(name);
                 return teachers.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = teachers })
                     : NoContent();
@@ -152,7 +141,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var teacher = await Task.Run(() => _teacherService.GetTeacherById(id));
+                var teacher = await _teacherService.GetTeacherById(id);
                 return teacher != null
                     ? Ok(new { status = true, message = "Get data successfully", data = teacher })
                     : NoContent();
@@ -187,7 +176,8 @@ namespace WebAPI.Controllers
         [HttpPost("addTeacher")]
         public async Task<IActionResult> AddTeacher([FromBody] Models.Teacher teacher)
         {
-            if (!IsValidTeacher(teacher, out var message))
+            var(isValid, message) = await IsValidTeacher(teacher);
+            if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
@@ -231,10 +221,11 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var existTeacher = await Task.Run(() => _teacherService.GetTeacherById(id));
+                var existTeacher = await _teacherService.GetTeacherById(id);
                 if (existTeacher == null)
                     return NotFound(new { status = false, message = "Teacher not found" });
-                if (!IsValidTeacher(teacher, out var message))
+                var (isValid, message) = await IsValidTeacher(teacher);
+                if (!isValid)
                     return BadRequest(new { status = false, message });
                 var updatedTeacher = _mapper.Map(teacher, existTeacher);
                 await _teacherService.UpdateTeacher(updatedTeacher, id);
@@ -269,7 +260,8 @@ namespace WebAPI.Controllers
         {
             try
             {
-                if (await Task.Run(() => _teacherService.GetTeacherById(id)) == null)
+                var teacher = await _teacherService.GetTeacherById(id);
+                if (teacher == null)
                     return NotFound(new { status = false, message = "Teacher not found" });
                 await _teacherService.DeleteTeacher(id);
                 return Ok(new { status = true, message = "Delete teacher successfully" });

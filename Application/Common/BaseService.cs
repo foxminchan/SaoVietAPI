@@ -16,7 +16,7 @@ namespace Application.Common
         private readonly ApplicationDbContext _context;
 
         protected BaseService(ApplicationDbContext context) => _context = context;
-        
-        public virtual async Task SaveAsync() => await _context.SaveChangesAsync();
+
+        protected virtual async Task SaveAsync() => await _context.SaveChangesAsync();
     }
 }

@@ -1,7 +1,7 @@
-﻿using System.Text.RegularExpressions;
-using Application.Services;
+﻿using Application.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace WebAPI.Controllers
 {
@@ -33,36 +33,26 @@ namespace WebAPI.Controllers
             _studentService = studentService;
         }
 
-        private static bool IsValidStudent(Models.Student student, out string? message)
+        private static async Task<(bool, string?)> IsValidStudent(Models.Student student)
         {
-            message = string.Empty;
+            await Task.Delay(1);
 
             if (string.IsNullOrEmpty(student.fullName) &&
                 string.IsNullOrEmpty(student.dob) &&
                 string.IsNullOrEmpty(student.phone))
-            {
-                message = "Full name, date of birth and phone number are required";
-                return false;
-            }
+                return (false, "Full name, date of birth and phone number are required");
 
             if (!string.IsNullOrWhiteSpace(student.email) &&
                 !Regex.IsMatch(student.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"))
-            {
-                message = "Email is invalid";
-                return false;
-            }
+                return (false, "Email is invalid");
 
             if (!string.IsNullOrWhiteSpace(student.phone) &&
                 !Regex.IsMatch(student.phone, @"^([0-9]{10})$"))
-            {
-                message = "Phone is invalid";
-                return false;
-            }
+                return (false, "Phone is invalid");
 
             if (string.IsNullOrWhiteSpace(student.dob) ||
-                Regex.IsMatch(student.dob, "^\\d{4}-\\d{2}-\\d{2}$")) return true;
-            message = "Start date must be match YYYY-MM-DD format";
-            return false;
+                Regex.IsMatch(student.dob, "^\\d{4}-\\d{2}-\\d{2}$")) return (true, null);
+            return (false, "Start date must be match YYYY-MM-DD format");
 
         }
 
@@ -84,7 +74,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var students = await Task.Run(_studentService.GetStudents);
+                var students = await _studentService.GetStudents();
                 return students.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = students })
                     : NoContent();
@@ -118,7 +108,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var students = await Task.Run(() => _studentService.GetStudentsByNames(name));
+                var students = await _studentService.GetStudentsByNames(name);
                 return students.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = students })
                     : NoContent();
@@ -152,7 +142,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var students = await Task.Run(() => _studentService.GetStudentsByPhone(phone));
+                var students = await _studentService.GetStudentsByPhone(phone);
                 return students.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = students })
                     : NoContent();
@@ -186,7 +176,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var student = await Task.Run(() => _studentService.GetStudentById(id));
+                var student = await _studentService.GetStudentById(id);
                 return student != null
                     ? Ok(new { status = true, message = "Get data successfully", data = student })
                     : NoContent();
@@ -223,10 +213,10 @@ namespace WebAPI.Controllers
                 return BadRequest(new { status = false, message = "Id is required" });
             try
             {
-                var count = await Task.Run(() => _studentService.CountClassByStudent(id));
+                var count = await _studentService.CountClassByStudent(id);
                 if (count == 0)
                     return NoContent();
-                var classes = await Task.Run(() => _studentService.GetClassesByStudentId(id).ToList());
+                var classes = await _studentService.GetClassesByStudentId(id);
                 return Ok(new { status = true, message = "Get data successfully", amount = count, data = classes });
             }
             catch (Exception e)
@@ -260,14 +250,15 @@ namespace WebAPI.Controllers
         [HttpPost("addStudent")]
         public async Task<IActionResult> AddStudent([FromBody] Models.Student student)
         {
-            if (!IsValidStudent(student, out var message))
+            var (isValid, message) = await IsValidStudent(student);
+            if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var newStudent = _mapper.Map<Domain.Entities.Student>(student);
                 newStudent.id = Guid.NewGuid();
-                await Task.Run(() => _studentService.AddStudent(newStudent));
+                await _studentService.AddStudent(newStudent);
                 return Ok(new { status = true, message = "Add student successfully" });
             }
             catch (Exception e)
@@ -304,11 +295,11 @@ namespace WebAPI.Controllers
 
             try
             {
-                if (!_studentService.CheckStudentExists(studentId.Value))
+                if (!await _studentService.CheckStudentExists(studentId.Value))
                     return BadRequest(new { status = false, message = "Student id is not exists" });
-                if (!_studentService.CheckClassExists(classId))
+                if (!await _studentService.CheckClassExists(classId))
                     return BadRequest(new { status = false, message = "Class id is not exists" });
-                if (_studentService.IsAlreadyInClass(studentId.Value, classId))
+                if (await _studentService.IsAlreadyInClass(studentId.Value, classId))
                     return BadRequest(new { status = false, message = "Student is already in class" });
                 await _studentService.AddClassStudent(new Domain.Entities.ClassStudent
                 { classId = classId, studentId = studentId.Value });
@@ -345,10 +336,11 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var existStudent = await Task.Run(() => _studentService.GetStudentById(id));
+                var existStudent = await _studentService.GetStudentById(id);
                 if (existStudent == null)
                     return BadRequest(new { status = false, message = "Student not found" });
-                if (!IsValidStudent(student, out var message))
+                var (isValid, message) = await IsValidStudent(student);
+                if (!isValid)
                     return BadRequest(new { status = false, message });
                 var newStudent = _mapper.Map<Domain.Entities.Student>(student);
                 newStudent.id = id;
@@ -384,7 +376,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var existStudent = await Task.Run(() => _studentService.GetStudentById(id));
+                var existStudent = await _studentService.GetStudentById(id);
                 if (existStudent == null)
                     return BadRequest(new { status = false, message = "Student not found" });
                 await _studentService.DeleteStudent(id);

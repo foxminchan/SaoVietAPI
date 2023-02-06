@@ -18,17 +18,21 @@ namespace Infrastructure.Repositories
         {
         }
 
-        public List<Category> GetCategories() => GetAll().ToList();
+        public async Task<List<Category>> GetCategories()
+        {
+            var categories = await GetAll();
+            return categories.ToList();
+        }
 
-        public Category? GetCategoryById(string? id) => GetById(id);
+        public async Task<Category?> GetCategoryById(string? id) => await GetById(id);
 
-        public void AddCategory(Category category) => Insert(category);
+        public async Task AddCategory(Category category) => await Insert(category);
 
-        public void UpdateCategory(Category category, string id) => Update(category, x => x.id == id);
+        public async Task UpdateCategory(Category category, string id) => await Update(category, x => x.id == id);
 
-        public void DeleteCategory(string id) => Delete(x => x.id == id);
+        public async Task DeleteCategory(string id) => await Delete(x => x.id == id);
 
-        public bool CategoryExists(string id) => Any(x => x.id == id);
+        public async Task<bool> CategoryExists(string id) => await Any(x => x.id == id);
 
     }
 }

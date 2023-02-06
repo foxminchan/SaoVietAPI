@@ -18,18 +18,30 @@ namespace Infrastructure.Repositories
         {
         }
 
-        public List<Branch> GetBranches() => GetAll().ToList();
+        public async Task<List<Branch>> GetBranches()
+        {
+            var branches = await GetAll();
+            return branches.ToList();
+        }
 
-        public List<Branch> GetBranchesByNames(string? name) => GetList(filter: x => name != null && x.name != null && x.name.Contains(name)).ToList();
+        public async Task<List<Branch>> GetBranchesByNames(string? name)
+        {
+            var branches = await GetList(filter: x => name != null && x.name != null && x.name.Contains(name));
+            return branches.ToList();
+        }
 
-        public List<Branch> GetBranchesByZone(string? zone) => GetList(filter: x => x.address != null && zone != null && x.address.Contains(zone)).ToList();
+        public async Task<List<Branch>> GetBranchesByZone(string? zone)
+        {
+            var branches = await GetList(filter: x => x.address != null && zone != null && x.address.Contains(zone));
+            return branches.ToList();
+        }
 
-        public Branch? GetBranchById(string? id) => id == null ? null : GetById(id);
+        public async Task<Branch?> GetBranchById(string? id) => id == null ? null : await GetById(id);
 
-        public void AddBranch(Branch branch) => Insert(branch);
+        public async Task AddBranch(Branch branch) => await Insert(branch);
 
-        public void UpdateBranch(Branch branch, string id) => Update(branch, x => x.id == id);
+        public async Task UpdateBranch(Branch branch, string id) => await Update(branch, x => x.id == id);
 
-        public void DeleteBranch(string id) => Delete(x => x.id == id);
+        public async Task DeleteBranch(string id) => await Delete(x => x.id == id);
     }
 }

@@ -27,32 +27,32 @@ namespace Application.Services
             _courseRepository = new CourseRepository(context);
         }
 
-        public List<Course> GetCourses() => _courseRepository.GetCourses();
+        public async Task<List<Course>> GetCourses() => await _courseRepository.GetCourses();
 
-        public List<Course> GetCoursesByNames(string? name) => _courseRepository.GetCoursesByNames(name);
+        public async Task<List<Course>> GetCoursesByNames(string? name) => await _courseRepository.GetCoursesByNames(name);
 
-        public Course? GetCourseById(string? id) => _courseRepository.GetCourseById(id);
+        public async Task<Course?> GetCourseById(string? id) => await _courseRepository.GetCourseById(id);
 
-        public Task AddCourse(Course course)
+        public async Task AddCourse(Course course)
         {
-            _courseRepository.AddCourse(course);
-            return SaveAsync();
+            await _courseRepository.AddCourse(course);
+            await SaveAsync();
         }
 
-        public Task UpdateCourse(Course course, string id)
+        public async Task UpdateCourse(Course course, string id)
         {
-            _courseRepository.UpdateCourse(course, id);
-            return SaveAsync();
+            await _courseRepository.UpdateCourse(course, id);
+            await SaveAsync();
         }
 
-        public Task DeleteCourse(string id)
+        public async Task DeleteCourse(string id)
         {
-            _courseRepository.DeleteCourse(id);
-            return SaveAsync();
+            await _courseRepository.DeleteCourse(id);
+            await SaveAsync();
         }
 
-        public bool CourseExists(string id) => _courseRepository.CourseExists(id);
+        public async Task<bool> CourseExists(string id) => await _courseRepository.CourseExists(id);
 
-        public bool IsValidCategoryId(string id) => new CategoryService(_context).CategoryExists(id);
+        public async Task<bool> IsValidCategoryId(string id) => await new CategoryService(_context).CategoryExists(id);
     }
 }

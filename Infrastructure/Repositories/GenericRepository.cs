@@ -23,95 +23,95 @@ namespace Infrastructure.Repositories
             _dbSet = _context.Set<T>();
         }
 
-        public virtual IEnumerable<T> GetAll() => _dbSet.AsNoTracking().ToList();
+        public virtual async Task<IEnumerable<T>> GetAll() => await _dbSet.AsNoTracking().ToListAsync();
 
-        public virtual void Insert(T entity)
+        public virtual async Task Insert(T entity)
         {
-            using var transaction = _context.Database.BeginTransaction();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                _dbSet.Add(entity);
-                transaction.Commit();
+                await _dbSet.AddAsync(entity);
+                await transaction.CommitAsync();
             }
             catch (DbUpdateException e)
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 throw new Exception("Error while inserting entity into the database.", e);
             }
         }
 
-        public virtual void Update(T entity)
+        public virtual async Task Update(T entity)
         {
-            using var transaction = _context.Database.BeginTransaction();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 _dbSet.Attach(entity);
                 _context.Entry(entity).State = EntityState.Modified;
-                transaction.Commit();
+                await transaction.CommitAsync();
             }
             catch (DbUpdateException e)
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 throw new Exception("Error while updating entity in the database.", e);
             }
         }
 
-        public virtual void Update(T entity, Expression<Func<T, bool>> where)
+        public virtual async Task Update(T entity, Expression<Func<T, bool>> where)
         {
-            using var transaction = _context.Database.BeginTransaction();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var obj = _dbSet.FirstOrDefault(where);
+                var obj = await _dbSet.FirstOrDefaultAsync(where);
                 if (obj == null) return;
                 _context.Entry(obj).CurrentValues.SetValues(entity);
-                transaction.Commit();
+                await transaction.CommitAsync();
             }
             catch (DbUpdateException e)
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 throw new Exception("Error while updating entity in the database.", e);
             }
         }
 
-        public virtual void Delete(T entity)
+        public virtual async Task Delete(T entity)
         {
-            using var transaction = _context.Database.BeginTransaction();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 if (_context.Entry(entity).State == EntityState.Detached)
                     _dbSet.Attach(entity);
                 _dbSet.Remove(entity);
-                transaction.Commit();
+                await transaction.CommitAsync();
             }
             catch (DbUpdateException e)
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 throw new Exception("Error while deleting entity from the database.", e);
             }
         }
 
-        public virtual void Delete(Expression<Func<T, bool>> where)
+        public virtual async Task Delete(Expression<Func<T, bool>> where)
         {
-            using var transaction = _context.Database.BeginTransaction();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var objects = _dbSet.Where(where).AsEnumerable();
                 foreach (var obj in objects)
                     _dbSet.Remove(obj);
-                transaction.Commit();
+                await transaction.CommitAsync();
             }
             catch (DbUpdateException e)
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 throw new Exception("Error while deleting entity from the database.", e);
             }
         }
 
-        public virtual int Count(Expression<Func<T, bool>> where) => _dbSet.Count(where);
+        public virtual async Task<int> Count(Expression<Func<T, bool>> where) => await _dbSet.CountAsync(where);
 
-        public virtual T? GetById(object? id) => _dbSet.Find(id);
+        public virtual async Task<T?> GetById(object? id) => await _dbSet.FindAsync(id);
 
-        public virtual IEnumerable<T> GetList(
+        public virtual async Task<IEnumerable<T>> GetList(
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             string includeProperties = "",
@@ -133,12 +133,12 @@ namespace Infrastructure.Repositories
             if (take != 0)
                 _ = query.Take(take);
 
-            return query.ToList();
+            return await query.ToListAsync();
         }
 
-        public virtual IEnumerable<T> GetMany(Expression<Func<T, bool>> where) => _dbSet.Where(where).ToList();
+        public virtual async Task<IEnumerable<T>> GetMany(Expression<Func<T, bool>> where) => await _dbSet.Where(where).ToListAsync();
 
-        public virtual bool Any(Expression<Func<T, bool>> where) => _dbSet.Any(where);
+        public virtual async Task<bool> Any(Expression<Func<T, bool>> where) => await _dbSet.AnyAsync(where);
 
     }
 }

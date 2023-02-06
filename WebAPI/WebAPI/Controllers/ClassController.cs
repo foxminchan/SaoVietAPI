@@ -2,7 +2,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
-using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
@@ -30,60 +29,41 @@ namespace WebAPI.Controllers
         public ClassController(ClassService classService, ILogger<TeacherController> logger)
         {
             _logger = logger;
-            _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Class, Domain.Entities.Class>()).CreateMapper();
+            _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Class, Domain.Entities.Class>()).CreateMapper();
             _classService = classService;
         }
 
-        private bool IsValidClass(Class @class, out string? message)
+        private async Task<(bool, string?)> IsValidClass(Models.Class @class)
         {
-            message = string.Empty;
             if (string.IsNullOrWhiteSpace(@class.name))
-            {
-                message = "Class name is required";
-                return false;
-            }
+                return (false, "Class name is required");
 
             if (!string.IsNullOrWhiteSpace(@class.startDate) &&
                 !Regex.IsMatch(@class.startDate, "^\\d{4}-\\d{2}-\\d{2}$"))
-            {
-                message = "Start date must be match YYYY-MM-DD format";
-                return false;
-            }
+                return (false, "Start date must be match YYYY-MM-DD format");
 
             if (!string.IsNullOrWhiteSpace(@class.endDate) &&
                 !Regex.IsMatch(@class.endDate, "^\\d{4}-\\d{2}-\\d{2}$"))
-            {
-                message = "End date must be match YYYY-MM-DD format";
-                return false;
-            }
+                return (false, "End date must be match YYYY-MM-DD format");
 
             if (!string.IsNullOrWhiteSpace(@class.startDate) &&
                 !string.IsNullOrWhiteSpace(@class.endDate) &&
                 DateTime.Parse(@class.startDate) > DateTime.Parse(@class.endDate))
-            {
-                message = "Start date must be less than end date";
-                return false;
-            }
+                return (false, "Start date must be less than end date");
 
             if (string.IsNullOrWhiteSpace(@class.id)
-                || _classService.GetClasses().Any(x => x.id == @class.id))
-            {
-                message = "Class id is exist";
-                return false;
-            }
+                || await _classService.CheckClassIdExist(@class.id))
+                return (false, "Class id is exist");
 
+            var teachers = await _classService.GetTeachers();
             if (@class.teacherId != null
-                && !_classService.GetTeachers().Any(x => x != null && x.id == @class.teacherId))
-            {
-                message = "Teacher id is not exist";
-                return false;
-            }
+                && ! teachers.Any(x => x != null && x.id == @class.teacherId))
+                return (false, "Teacher id is not exist");
 
+            var branches = await _classService.GetBranches();
             if (@class.branchId == null
-                || _classService.GetBranches().Any(x => x != null && x.id == @class.branchId)) return true;
-            message = "Branch id is not exist";
-            return false;
-
+                || branches.Any(x => x != null && x.id == @class.branchId)) return (true, null);
+            return (false, "Branch id is not exist");
         }
 
         /// <summary>
@@ -104,7 +84,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var classes = await Task.Run(_classService.GetClasses);
+                var classes = await _classService.GetClasses();
                 return classes.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = classes })
                     : NoContent();
@@ -141,9 +121,10 @@ namespace WebAPI.Controllers
                 return BadRequest(new { status = false, message = "Class id is required" });
             try
             {
-                if (_classService.GetClasses().All(x => x.id != id))
+                var classes = await _classService.GetClasses();
+                if (classes.All(x => x.id != id))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
-                var @class = await Task.Run(() => _classService.FindClassById(id));
+                var @class = await _classService.FindClassById(id);
                 return @class != null
                     ? Ok(new { status = true, message = "Get data successfully", data = @class })
                     : NotFound(new { status = false, message = "Class not found" });
@@ -181,7 +162,7 @@ namespace WebAPI.Controllers
                 return BadRequest(new { status = false, message = "Name is null" });
             try
             {
-                var classEntity = await Task.Run(() => _classService.FindClassByName(name));
+                var classEntity = await _classService.FindClassByName(name);
                 return !classEntity.Any()
                     ? NotFound(new { status = false, message = "Class is not found" })
                     : Ok(new { status = true, message = "Find class successfully", data = classEntity });
@@ -224,7 +205,7 @@ namespace WebAPI.Controllers
 
             try
             {
-                var classEntity = await Task.Run(() => _classService.GetClassesByStatus(status));
+                var classEntity = await _classService.GetClassesByStatus(status);
                 return !classEntity.Any()
                     ? NotFound(new { status = false, message = "No classes found with the given status" })
                     : Ok(new { status = true, message = "Find class successfully", data = classEntity });
@@ -262,7 +243,7 @@ namespace WebAPI.Controllers
             
             try
             {
-                var classEntity = await Task.Run(() => _classService.FindClassByTeacher(teacherId));
+                var classEntity = await _classService.FindClassByTeacher(teacherId);
                 return !classEntity.Any()
                     ? NotFound(new { status = false, message = "Class is not found" })
                     : Ok(new { status = true, message = "Find class successfully", data = classEntity });
@@ -300,12 +281,13 @@ namespace WebAPI.Controllers
 
             try
             {
-                if (await Task.Run(() => _classService.GetClasses().Any(x => x.id == classId)) == false)
+                var classes = await _classService.GetClasses();
+                if (classes.All(x => x.id != classId))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
-                var studentAmount = await Task.Run(() => _classService.CountStudentInClass(classId));
+                var studentAmount = await _classService.CountStudentInClass(classId);
                 if (studentAmount == 0)
                     return NoContent();
-                var studentList = await Task.Run(() => _classService.GetStudentsInClass(classId));
+                var studentList = await _classService.GetStudentsInClass(classId);
                 return Ok(new { status = true, message = "Get student list successfully", amount = studentAmount, data = studentList });
 
             }
@@ -339,15 +321,16 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("addClass")]
-        public async Task<IActionResult> AddClass([FromBody] Class request)
+        public async Task<IActionResult> AddClass([FromBody] Models.Class request)
         {
-            if (!IsValidClass(request, out var message))
+            var (isValid, message) = await IsValidClass(request);
+            if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var newClass = _mapper.Map<Domain.Entities.Class>(request);
-                await Task.Run(() => _classService.AddClass(newClass));
+                await _classService.AddClass(newClass);
                 return Ok(new { status = true, message = "Add class successfully" });
             }
             catch (Exception e)
@@ -381,15 +364,16 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut("updateClass/{id}")]
-        public async Task<IActionResult> UpdateClass([FromBody] Class request, [FromRoute] string id)
+        public async Task<IActionResult> UpdateClass([FromBody] Models.Class request, [FromRoute] string id)
         {
-            if (!IsValidClass(request, out var message))
+            var (isValid, message) = await IsValidClass(request);
+            if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var classEntity = _mapper.Map<Domain.Entities.Class>(request);
-                await Task.Run(() => _classService.UpdateClass(classEntity, id));
+                await _classService.UpdateClass(classEntity, id);
                 return Ok(new { status = true, message = "Update class successfully", data = classEntity });
             }
             catch (Exception e)
@@ -421,9 +405,10 @@ namespace WebAPI.Controllers
         {
             try
             {
-                if (await Task.Run(() => _classService.GetClasses().Any(x => x.id == id)) == false)
+                var classes = await _classService.GetClasses();
+                if (classes.Any(x => x.id != id))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
-                await Task.Run(() => _classService.DeleteClass(id));
+                await _classService.DeleteClass(id);
                 return Ok(new { status = true, message = "Delete class successfully" });
             }
             catch (Exception e)
@@ -460,7 +445,7 @@ namespace WebAPI.Controllers
             
             try
             {
-                if (!_classService.CheckStudentInClass(classId, studentId))
+                if (!await _classService.CheckStudentInClass(classId, studentId))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
                 await _classService.DeleteStudentFromClass(new Domain.Entities.ClassStudent { classId = classId, studentId = studentId });
                 return Ok(new { status = true, message = "Delete student from class successfully" });

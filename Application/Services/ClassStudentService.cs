@@ -18,20 +18,29 @@ namespace Application.Services
     public class ClassStudentService : BaseService
     {
         private readonly IClassStudentRepository _classStudentRepository;
+        
         public ClassStudentService(ApplicationDbContext context) : base(context) => _classStudentRepository = new ClassStudentRepository(context);
 
-        public int CountStudentInClass(string? classId) => _classStudentRepository.CountStudentInClass(classId);
+        public async Task<int> CountStudentInClass(string? classId) => await _classStudentRepository.CountStudentInClass(classId);
         
-        public int CountClassByStudent(Guid? studentId) => _classStudentRepository.CountClassByStudent(studentId);
+        public async Task<int> CountClassByStudent(Guid? studentId) => await _classStudentRepository.CountClassByStudent(studentId);
+
+        public async Task<IEnumerable<Guid?>> GetAllStudentIdByClassId(string? classId)
+        {
+            var studentIds = await _classStudentRepository.GetAllStudentIdByClassId(classId);
+            return studentIds;
+        }
+
+        public async Task<IEnumerable<string?>> GetAllClassIdByStudentId(Guid? studentId)
+        {
+            var classIds = await _classStudentRepository.GetAllClassIdByStudentId(studentId);
+            return classIds;
+        } 
         
-        public IEnumerable<Guid?> GetAllStudentIdByClassId(string? classId) => _classStudentRepository.GetAllStudentIdByClassId(classId);
-        
-        public IEnumerable<string?> GetAllClassIdByStudentId(Guid? studentId) => _classStudentRepository.GetAllClassIdByStudentId(studentId);
+        public async Task AddClassStudent(ClassStudent classStudent) => await _classStudentRepository.AddClassStudent(classStudent);
 
-        public void AddClassStudent(ClassStudent classStudent) => _classStudentRepository.AddClassStudent(classStudent);
+        public async Task DeleteClassStudent(ClassStudent classStudent) => await _classStudentRepository.DeleteClassStudent(classStudent);
 
-        public void DeleteClassStudent(ClassStudent classStudent) => _classStudentRepository.DeleteClassStudent(classStudent);
-
-        public bool IsExistClassStudent(string? classId, Guid? studentId) => _classStudentRepository.IsExistClassStudent(classId, studentId);
+        public async Task<bool> IsExistClassStudent(string? classId, Guid? studentId) => await _classStudentRepository.IsExistClassStudent(classId, studentId);
     }
 }

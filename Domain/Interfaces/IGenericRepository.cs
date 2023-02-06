@@ -13,21 +13,21 @@ namespace Domain.Interfaces
 
     public interface IGenericRepository<T> where T : class
     {
-        void Insert(T entity);
-        void Update(T entity);
-        void Update(T entity, Expression<Func<T, bool>> where);
-        void Delete(T entity);
-        void Delete(Expression<Func<T, bool>> where);
-        int Count(Expression<Func<T, bool>> where);
-        T? GetById(object? id);
-        IEnumerable<T> GetList(
+        Task Insert(T entity);
+        Task Update(T entity);
+        Task Update(T entity, Expression<Func<T, bool>> where);
+        Task Delete(T entity);
+        Task Delete(Expression<Func<T, bool>> where);
+        Task<int> Count(Expression<Func<T, bool>> where);
+        Task<T?> GetById(object? id);
+        Task<IEnumerable<T>> GetList(
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             string includeProperties = "",
             int skip = 0,
             int take = 0);
-        IEnumerable<T> GetAll();
-        IEnumerable<T> GetMany(Expression<Func<T, bool>> where);
-        bool Any(Expression<Func<T, bool>> where);
+        Task<IEnumerable<T>> GetAll();
+        Task<IEnumerable<T>> GetMany(Expression<Func<T, bool>> where);
+        Task<bool> Any(Expression<Func<T, bool>> where);
     }
 }

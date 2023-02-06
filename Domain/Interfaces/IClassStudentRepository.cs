@@ -13,12 +13,12 @@ namespace Domain.Interfaces
 
     public interface IClassStudentRepository : IGenericRepository<ClassStudent>
     {
-        public int CountStudentInClass(string? classId);
-        public int CountClassByStudent(Guid? studentId);
-        public IEnumerable<Guid?> GetAllStudentIdByClassId(string? classId);
-        public IEnumerable<string?> GetAllClassIdByStudentId(Guid? studentId);
-        public void AddClassStudent(ClassStudent classStudent);
-        public void DeleteClassStudent(ClassStudent classStudent);
-        public bool IsExistClassStudent(string? classId, Guid? studentId);
+        public Task<int> CountStudentInClass(string? classId);
+        public Task<int> CountClassByStudent(Guid? studentId);
+        public Task<IEnumerable<Guid?>> GetAllStudentIdByClassId(string? classId);
+        public Task<IEnumerable<string?>> GetAllClassIdByStudentId(Guid? studentId);
+        public Task AddClassStudent(ClassStudent classStudent);
+        public Task DeleteClassStudent(ClassStudent classStudent);
+        public Task<bool> IsExistClassStudent(string? classId, Guid? studentId);
     }
 }

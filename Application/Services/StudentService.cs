@@ -19,58 +19,58 @@ namespace Application.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IStudentRepository _studentRepository;
-        
+
         public StudentService(ApplicationDbContext context) : base(context)
         {
             _context = context;
             _studentRepository = new StudentRepository(context);
         }
 
-        public List<Student> GetStudents() => _studentRepository.GetStudents();
+        public async Task<List<Student>> GetStudents() => await _studentRepository.GetStudents();
 
-        public List<Student> GetStudentsByNames(string? name) => _studentRepository.GetStudentsByNames(name);
+        public async Task<List<Student>> GetStudentsByNames(string? name) => await _studentRepository.GetStudentsByNames(name);
 
-        public List<Student> GetStudentsByPhone(string? phone) => _studentRepository.GetStudentsByPhone(phone);
+        public async Task<List<Student>> GetStudentsByPhone(string? phone) => await _studentRepository.GetStudentsByPhone(phone);
 
-        public Student? GetStudentById(Guid? id) => _studentRepository.GetStudentById(id);
+        public async Task<Student?> GetStudentById(Guid? id) => await _studentRepository.GetStudentById(id);
 
-        public Task AddStudent(Student student)
+        public async Task AddStudent(Student student)
         {
-            _studentRepository.AddStudent(student);
-            return SaveAsync();
+            await _studentRepository.AddStudent(student);
+            await SaveAsync();
         }
 
-        public Task UpdateStudent(Student student, Guid id)
+        public async Task UpdateStudent(Student student, Guid id)
         {
-            _studentRepository.UpdateStudent(student, id);
-            return SaveAsync();
+            await _studentRepository.UpdateStudent(student, id);
+            await SaveAsync();
         }
 
-        public Task DeleteStudent(Guid id)
+        public async Task DeleteStudent(Guid id)
         {
-            _studentRepository.DeleteStudent(id);
-            return SaveAsync();
+            await _studentRepository.DeleteStudent(id);
+            await SaveAsync();
         }
 
-        public int CountClassByStudent(Guid? studentId) => new ClassStudentService(_context).CountClassByStudent(studentId);
+        public async Task<int> CountClassByStudent(Guid? studentId) => await new ClassStudentService(_context).CountClassByStudent(studentId);
 
-        public IEnumerable<Class?> GetClassesByStudentId(Guid? studentId)
+        public async Task<IEnumerable<Class?>> GetClassesByStudentId(Guid? studentId)
         {
             var classService = new ClassService(_context);
-            var classIds = new ClassStudentService(_context).GetAllClassIdByStudentId(studentId);
-            return classIds.Select(classService.FindClassById).ToList();
+            var classIds = await new ClassStudentService(_context).GetAllClassIdByStudentId(studentId);
+            return await Task.WhenAll(classIds.Select(classService.FindClassById));
         }
 
-        public bool CheckStudentExists(Guid? id) => _studentRepository.StudentExists(id);
+        public async Task<bool> CheckStudentExists(Guid? id) => await _studentRepository.StudentExists(id);
 
-        public bool CheckClassExists(string? id) => new ClassService(_context).CheckClassIdExist(id);
+        public async Task<bool> CheckClassExists(string? id) => await new ClassService(_context).CheckClassIdExist(id);
 
-        public bool IsAlreadyInClass(Guid? studentId, string? classId) => new ClassStudentService(_context).IsExistClassStudent(classId, studentId);
+        public async Task<bool> IsAlreadyInClass(Guid? studentId, string? classId) => await new ClassStudentService(_context).IsExistClassStudent(classId, studentId);
 
-        public Task AddClassStudent(ClassStudent classStudent)
+        public async Task AddClassStudent(ClassStudent classStudent)
         {
-            new ClassStudentService(_context).AddClassStudent(classStudent);
-            return SaveAsync();
+            await new ClassStudentService(_context).AddClassStudent(classStudent);
+            await SaveAsync();
         }
     }
 }
