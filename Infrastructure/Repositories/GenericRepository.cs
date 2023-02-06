@@ -36,7 +36,7 @@ namespace Infrastructure.Repositories
             catch (DbUpdateException e)
             {
                 await transaction.RollbackAsync();
-                throw new Exception("Error while inserting entity into the database.", e);
+                throw new DbUpdateException("Error while inserting entity into the database.", e);
             }
         }
 
@@ -52,7 +52,7 @@ namespace Infrastructure.Repositories
             catch (DbUpdateException e)
             {
                 await transaction.RollbackAsync();
-                throw new Exception("Error while updating entity in the database.", e);
+                throw new DbUpdateException("Error while updating entity in the database.", e);
             }
         }
 
@@ -69,7 +69,7 @@ namespace Infrastructure.Repositories
             catch (DbUpdateException e)
             {
                 await transaction.RollbackAsync();
-                throw new Exception("Error while updating entity in the database.", e);
+                throw new DbUpdateException("Error while updating entity in the database.", e);
             }
         }
 
@@ -86,7 +86,7 @@ namespace Infrastructure.Repositories
             catch (DbUpdateException e)
             {
                 await transaction.RollbackAsync();
-                throw new Exception("Error while deleting entity from the database.", e);
+                throw new DbUpdateException("Error while deleting entity from the database.", e);
             }
         }
 
@@ -103,7 +103,7 @@ namespace Infrastructure.Repositories
             catch (DbUpdateException e)
             {
                 await transaction.RollbackAsync();
-                throw new Exception("Error while deleting entity from the database.", e);
+                throw new DbUpdateException("Error while deleting entity from the database.", e);
             }
         }
 

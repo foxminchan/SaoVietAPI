@@ -49,9 +49,9 @@ namespace Infrastructure.Repositories
 
         public async Task<Class?> FindClassById(string? id) => await GetById(id);
 
-        public async Task AddClass(Class newClass) => await Insert(newClass);
+        public async Task AddClass(Class entity) => await Insert(entity);
 
-        public async Task UpdateClass(Class newClass, string id) => await Update(newClass, x => x.id == id);
+        public async Task UpdateClass(Class entity, string id) => await Update(entity, x => x.id == id);
 
         public async Task DeleteClass(string id) => await Delete(x => x.id == id);
 

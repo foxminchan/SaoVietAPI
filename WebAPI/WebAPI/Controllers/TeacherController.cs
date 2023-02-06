@@ -183,7 +183,7 @@ namespace WebAPI.Controllers
             try
             {
                 var newTeacher = _mapper.Map<Domain.Entities.Teacher>(teacher);
-                newTeacher.id = new Guid();
+                newTeacher.id = Guid.NewGuid();
                 await _teacherService.AddTeacher(newTeacher);
                 return Ok(new { status = true, message = "Add teacher successfully" });
             }
