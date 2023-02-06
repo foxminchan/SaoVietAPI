@@ -7,6 +7,7 @@ using AspNetCoreRateLimit;
 using Prometheus;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
+using Serilog.Sinks.SystemConsole.Themes;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -90,7 +91,8 @@ void ConfigureLogging()
         .Enrich.FromLogContext()
         .Enrich.WithEnvironmentName()
         .WriteTo.Debug()
-        .WriteTo.Console()
+        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+            theme: AnsiConsoleTheme.Literate)
         .WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment!))
         .Enrich.WithProperty("Environment", environment!)
         .ReadFrom.Configuration(configuration)
@@ -188,43 +190,44 @@ var categoryTag = new OpenApiTag
 app.UseStaticFiles();
 app.UseCors("AllowAll");
 
+app.UseSwagger(c =>
+{
+    c.RouteTemplate = "swagger/{documentName}/swagger.json";
+    c.SerializeAsV2 = true;
+    c.PreSerializeFilters.Add((swagger, httpReq) =>
+    {
+        if (httpReq is null)
+            throw new ArgumentNullException(nameof(httpReq));
+        swagger.Info = info;
+        swagger.ExternalDocs = externalDocs;
+        swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag, studentTag, categoryTag };
+        swagger.Servers = new List<OpenApiServer>
+        {
+            new()
+            {
+                Url = $"{httpReq.Scheme}://{httpReq.Host.Value}"
+            }
+        };
+    });
+});
+
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sao Việt API v1");
+    c.InjectStylesheet("/css/swagger-ui.css");
+    c.InjectJavascript("/js/swagger-ui.js");
+    c.DocumentTitle = "Sao Việt API";
+    c.OAuthConfigObject = new OAuthConfigObject
+    {
+        ClientId = "swagger-ui",
+        AppName = "Swagger UI",
+        UsePkceWithAuthorizationCodeGrant = true
+    };
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(c =>
-    {
-        c.RouteTemplate = "swagger/{documentName}/swagger.json";
-        c.SerializeAsV2 = true;
-        c.PreSerializeFilters.Add((swagger, httpReq) =>
-        {
-            if (httpReq is null)
-                throw new ArgumentNullException(nameof(httpReq));
-            swagger.Info = info;
-            swagger.ExternalDocs = externalDocs;
-            swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag, studentTag, categoryTag };
-            swagger.Servers = new List<OpenApiServer>
-            {
-                new()
-                {
-                    Url = $"{httpReq.Scheme}://{httpReq.Host.Value}"
-                }
-            };
-        });
-    });
-
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sao Việt API v1");
-        c.InjectStylesheet("/css/swagger-ui.css");
-        c.InjectJavascript("/js/swagger-ui.js");
-        c.DocumentTitle = "Sao Việt API";
-        c.OAuthConfigObject = new OAuthConfigObject
-        {
-            ClientId = "swagger-ui",
-            AppName = "Swagger UI",
-            UsePkceWithAuthorizationCodeGrant = true
-        };
-    });
     app.UseDeveloperExceptionPage();
 }
 #endregion

@@ -39,11 +39,11 @@ namespace WebAPI.Controllers
                 return (false, "Class name is required");
 
             if (!string.IsNullOrWhiteSpace(@class.startDate) &&
-                !Regex.IsMatch(@class.startDate, "^\\d{4}-\\d{2}-\\d{2}$"))
+                !Regex.IsMatch(@class.startDate, "^\\d{4}-\\d{2}-\\d{2}$", RegexOptions.None, TimeSpan.FromSeconds(2)))
                 return (false, "Start date must be match YYYY-MM-DD format");
 
             if (!string.IsNullOrWhiteSpace(@class.endDate) &&
-                !Regex.IsMatch(@class.endDate, "^\\d{4}-\\d{2}-\\d{2}$"))
+                !Regex.IsMatch(@class.endDate, "^\\d{4}-\\d{2}-\\d{2}$", RegexOptions.None, TimeSpan.FromSeconds(2)))
                 return (false, "End date must be match YYYY-MM-DD format");
 
             if (!string.IsNullOrWhiteSpace(@class.startDate) &&

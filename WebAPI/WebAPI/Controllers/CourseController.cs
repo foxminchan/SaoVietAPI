@@ -58,7 +58,7 @@ namespace WebAPI.Controllers
         ///     GET /api/v1/Course/GetCourses
         /// </remarks>
         /// <response code="200">Lấy danh sách khoá học thành công</response>
-        /// <response code="404">Không tìm thấy khoá học</response>
+        /// <response code="204">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getCourses")]

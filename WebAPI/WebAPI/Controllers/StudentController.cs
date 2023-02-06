@@ -43,15 +43,15 @@ namespace WebAPI.Controllers
                 return (false, "Full name, date of birth and phone number are required");
 
             if (!string.IsNullOrWhiteSpace(student.email) &&
-                !Regex.IsMatch(student.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"))
+                !Regex.IsMatch(student.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None, TimeSpan.FromSeconds(2)))
                 return (false, "Email is invalid");
 
             if (!string.IsNullOrWhiteSpace(student.phone) &&
-                !Regex.IsMatch(student.phone, @"^([0-9]{10})$"))
+                !Regex.IsMatch(student.phone, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
                 return (false, "Phone is invalid");
 
             if (string.IsNullOrWhiteSpace(student.dob) ||
-                Regex.IsMatch(student.dob, "^\\d{4}-\\d{2}-\\d{2}$")) return (true, null);
+                Regex.IsMatch(student.dob, "^\\d{4}-\\d{2}-\\d{2}$", RegexOptions.None, TimeSpan.FromSeconds(2))) return (true, null);
             return (false, "Start date must be match YYYY-MM-DD format");
 
         }

@@ -41,11 +41,11 @@ namespace WebAPI.Controllers
                 return (false, "Full name, email and phone are required");
             
             if (!string.IsNullOrWhiteSpace(teacher.email) && 
-                !Regex.IsMatch(teacher.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"))
+                !Regex.IsMatch(teacher.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None, TimeSpan.FromSeconds(2)))
                 return (false, "Email is invalid");
 
             if (!string.IsNullOrWhiteSpace(teacher.phone) && 
-                    !Regex.IsMatch(teacher.phone, @"^([0-9]{10})$"))
+                    !Regex.IsMatch(teacher.phone, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
                 return (false, "Phone is invalid");
             
             var allId = await _teacherService.GetAllId();
