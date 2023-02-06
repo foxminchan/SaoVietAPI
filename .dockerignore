@@ -1,0 +1,13 @@
+bin/
+obj/
+*.suo
+*.user
+*.vs
+.vs/
+.vscode/
+.git/
+.idea/
+.DS_Store
+*.log
+nuget.config
+.nuget/

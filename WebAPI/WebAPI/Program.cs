@@ -13,15 +13,60 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+#region Swagger
 builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    options.AddSecurityDefinition(name: "Bearer", securityScheme: new OpenApiSecurityScheme
     {
-        var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+        Name = "Authorization",
+        Description = "Enter the Bearer Authorization string as following: `Bearer Generated-JWT-Token`",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
+    
+    options.AddSecurityDefinition(name: "OAuth2", securityScheme: new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.OAuth2,
+        Flows = new OpenApiOAuthFlows
+        {
+            AuthorizationCode = new OpenApiOAuthFlow
+            {
+                AuthorizationUrl = new Uri("https://localhost:5000/connect/authorize"),
+                TokenUrl = new Uri("https://localhost:5000/connect/token"),
+                Scopes = new Dictionary<string, string>
+                {
+                    { "WebAPI", "WebAPI" }
+                }
+            }
+        }
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+                Reference = new OpenApiReference
+                {
+                    Id = "Bearer",
+                    Type = ReferenceType.SecurityScheme
+                }
+            },
+            new List<string>()
+        }
+    });
+});
+#endregion
 
 #region Request Throttling
 builder.Services.AddMemoryCache();
@@ -117,11 +162,12 @@ builder.Services.AddTransient<StudentService>();
 builder.Services.AddTransient<ClassStudentService>();
 builder.Services.AddTransient<CategoryService>();
 builder.Services.AddTransient<CourseService>();
+builder.Services.AddTransient<LessonService>();
 #endregion
 
 var app = builder.Build();
 
-#region Swagger
+#region Swagger UI
 var info = new OpenApiInfo
 {
     Title = "Sao Việt API",
@@ -186,6 +232,18 @@ var categoryTag = new OpenApiTag
     Description = "Quản lý thông tin danh mục",
     ExternalDocs = findOutMore
 };
+var lessonTag = new OpenApiTag
+{
+    Name = "Lesson",
+    Description = "Quản lý thông tin bài học",
+    ExternalDocs = findOutMore
+};
+var courseTag = new OpenApiTag
+{
+    Name = "Course",
+    Description = "Quản lý thông tin khoá học",
+    ExternalDocs = findOutMore
+};
 
 app.UseStaticFiles();
 app.UseCors("AllowAll");
@@ -200,7 +258,7 @@ app.UseSwagger(c =>
             throw new ArgumentNullException(nameof(httpReq));
         swagger.Info = info;
         swagger.ExternalDocs = externalDocs;
-        swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag, studentTag, categoryTag };
+        swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag, studentTag, categoryTag, courseTag, lessonTag };
         swagger.Servers = new List<OpenApiServer>
         {
             new()
@@ -219,9 +277,10 @@ app.UseSwaggerUI(c =>
     c.DocumentTitle = "Sao Việt API";
     c.OAuthConfigObject = new OAuthConfigObject
     {
-        ClientId = "swagger-ui",
-        AppName = "Swagger UI",
-        UsePkceWithAuthorizationCodeGrant = true
+        ClientId = "swagger",
+        AppName = "Swagger",
+        UsePkceWithAuthorizationCodeGrant = true,
+        UseBasicAuthenticationWithAccessCodeGrant = true
     };
 });
 
@@ -237,6 +296,7 @@ else
 }
 #endregion
 
+app.UseAuthentication();
 app.UseRouting();
 app.UseHttpMetrics();
 app.UseAuthorization();

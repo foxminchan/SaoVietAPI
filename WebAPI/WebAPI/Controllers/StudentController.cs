@@ -35,7 +35,7 @@ namespace WebAPI.Controllers
 
         private static async Task<(bool, string?)> IsValidStudent(Models.Student student)
         {
-            await Task.Delay(1);
+            await Task.Delay(0);
 
             if (string.IsNullOrEmpty(student.fullName) &&
                 string.IsNullOrEmpty(student.dob) &&

@@ -51,10 +51,6 @@ namespace WebAPI.Controllers
                 DateTime.Parse(@class.startDate) > DateTime.Parse(@class.endDate))
                 return (false, "Start date must be less than end date");
 
-            if (string.IsNullOrWhiteSpace(@class.id)
-                || await _classService.CheckClassIdExist(@class.id))
-                return (false, "Class id is exist");
-
             var teachers = await _classService.GetTeachers();
             if (@class.teacherId != null
                 && ! teachers.Any(x => x != null && x.id == @class.teacherId))
@@ -329,6 +325,9 @@ namespace WebAPI.Controllers
 
             try
             {
+                if (string.IsNullOrWhiteSpace(request.id)
+                    || await _classService.CheckClassIdExist(request.id))
+                    return BadRequest(new { status = false, message = "Class id is null or existed" });
                 var newClass = _mapper.Map<Domain.Entities.Class>(request);
                 await _classService.AddClass(newClass);
                 return Ok(new { status = true, message = "Add class successfully" });
@@ -372,6 +371,9 @@ namespace WebAPI.Controllers
 
             try
             {
+                if (string.IsNullOrWhiteSpace(request.id)
+                    || !await _classService.CheckClassIdExist(request.id))
+                    return BadRequest(new { status = false, message = "Class id is null or not exist" });
                 var classEntity = _mapper.Map<Domain.Entities.Class>(request);
                 await _classService.UpdateClass(classEntity, id);
                 return Ok(new { status = true, message = "Update class successfully", data = classEntity });
