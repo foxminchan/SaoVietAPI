@@ -17,13 +17,16 @@ namespace Application.Services
 
     public class StudentService : BaseService
     {
-        private readonly ApplicationDbContext _context;
         private readonly IStudentRepository _studentRepository;
+        private readonly IClassStudentRepository _classStudentRepository;
+        private readonly IClassRepository _classRepository;
 
         public StudentService(ApplicationDbContext context) : base(context)
         {
-            _context = context;
             _studentRepository = new StudentRepository(context);
+            _classRepository = new ClassRepository(context);
+            _classStudentRepository = new ClassStudentRepository(context);
+            
         }
 
         public async Task<List<Student>> GetStudents() => await _studentRepository.GetStudents();
@@ -52,24 +55,23 @@ namespace Application.Services
             await SaveAsync();
         }
 
-        public async Task<int> CountClassByStudent(Guid? studentId) => await new ClassStudentService(_context).CountClassByStudent(studentId);
+        public async Task<int> CountClassByStudent(Guid? studentId) => await _classStudentRepository.CountClassByStudent(studentId);
 
         public async Task<IEnumerable<Class?>> GetClassesByStudentId(Guid? studentId)
         {
-            var classService = new ClassService(_context);
-            var classIds = await new ClassStudentService(_context).GetAllClassIdByStudentId(studentId);
-            return await Task.WhenAll(classIds.Select(classService.FindClassById));
+            var classIds = await _classStudentRepository.GetAllClassIdByStudentId(studentId);
+            return await Task.WhenAll(classIds.Select(_classRepository.FindClassById));
         }
 
         public async Task<bool> CheckStudentExists(Guid? id) => await _studentRepository.StudentExists(id);
 
-        public async Task<bool> CheckClassExists(string? id) => await new ClassService(_context).CheckClassIdExist(id);
+        public async Task<bool> CheckClassExists(string? id) => await _classRepository.ClassExists(id);
 
-        public async Task<bool> IsAlreadyInClass(Guid? studentId, string? classId) => await new ClassStudentService(_context).IsExistClassStudent(classId, studentId);
+        public async Task<bool> IsAlreadyInClass(Guid? studentId, string? classId) => await _classStudentRepository.IsExistClassStudent(classId, studentId);
 
         public async Task AddClassStudent(ClassStudent classStudent)
         {
-            await new ClassStudentService(_context).AddClassStudent(classStudent);
+            await _classStudentRepository.AddClassStudent(classStudent);
             await SaveAsync();
         }
     }

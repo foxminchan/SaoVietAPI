@@ -159,7 +159,6 @@ builder.Services.AddTransient<TeacherService>();
 builder.Services.AddTransient<ClassService>();
 builder.Services.AddTransient<BranchService>();
 builder.Services.AddTransient<StudentService>();
-builder.Services.AddTransient<ClassStudentService>();
 builder.Services.AddTransient<CategoryService>();
 builder.Services.AddTransient<CourseService>();
 builder.Services.AddTransient<LessonService>();
