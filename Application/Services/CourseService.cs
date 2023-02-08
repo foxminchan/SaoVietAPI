@@ -18,13 +18,12 @@ namespace Application.Services
     public class CourseService : BaseService
     {
         private readonly ICourseRepository _courseRepository;
-
-        private readonly ApplicationDbContext _context;
+        private readonly ICategoryRepository _categoryRepository;
 
         public CourseService(ApplicationDbContext context) : base(context)
         {
-            _context = context;
             _courseRepository = new CourseRepository(context);
+            _categoryRepository = new CategoryRepository(context);
         }
 
         public async Task<List<Course>> GetCourses() => await _courseRepository.GetCourses();
@@ -53,6 +52,6 @@ namespace Application.Services
 
         public async Task<bool> CourseExists(string id) => await _courseRepository.CourseExists(id);
 
-        public async Task<bool> IsValidCategoryId(string id) => await new CategoryService(_context).CategoryExists(id);
+        public async Task<bool> IsValidCategoryId(string id) => await _categoryRepository.CategoryExists(id);
     }
 }

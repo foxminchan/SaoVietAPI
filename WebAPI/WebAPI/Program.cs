@@ -162,6 +162,7 @@ builder.Services.AddTransient<StudentService>();
 builder.Services.AddTransient<CategoryService>();
 builder.Services.AddTransient<CourseService>();
 builder.Services.AddTransient<LessonService>();
+builder.Services.AddTransient<AttendanceService>();
 #endregion
 
 var app = builder.Build();

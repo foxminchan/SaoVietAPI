@@ -17,13 +17,13 @@ namespace Application.Services
     
     public class LessonService : BaseService
     {
-        private readonly ApplicationDbContext _context;
         private readonly ILessonRepository _lessonRepository;
+        private readonly ICourseRepository _courseRepository;
 
         public LessonService(ApplicationDbContext context) : base(context)
         {
-            _context = context;
             _lessonRepository = new LessonRepository(context);
+            _courseRepository = new CourseRepository(context);
         }
 
         public async Task<List<Lesson>> GetAllLesson() => await _lessonRepository.GetAllLesson();
@@ -50,6 +50,6 @@ namespace Application.Services
             await SaveAsync();
         }
 
-        public async Task<bool> IsCourseExists(string id) => await new CourseRepository(_context).CourseExists(id);
+        public async Task<bool> IsCourseExists(string id) => await _courseRepository.CourseExists(id);
     }
 }

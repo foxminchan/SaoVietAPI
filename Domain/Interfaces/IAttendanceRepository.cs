@@ -13,6 +13,12 @@ namespace Domain.Interfaces
 
     public interface IAttendanceRepository : IGenericRepository<Attendance>
     {
-
+        public Task<List<Attendance>> GetAllAttendance();
+        public Task<List<Attendance>> GetAttendanceById(string? classId, string? lessonId);
+        public Task<List<Attendance>> GetAttendanceByClassId(string? classId);
+        public Task<List<Attendance>> SortByAttendance();
+        public Task AddAttendance(Attendance attendance);
+        public Task UpdateAttendance(Attendance attendance, string classId, string lessonId);
+        public Task DeleteAttendance(string classId, string lessonId);
     }
 }

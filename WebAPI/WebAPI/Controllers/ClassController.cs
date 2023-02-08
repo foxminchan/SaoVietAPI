@@ -85,7 +85,7 @@ namespace WebAPI.Controllers
                     ? Ok(new { status = true, message = "Get data successfully", data = classes })
                     : NoContent();
             }
-            catch (Exception e)
+            catch (Exception e) 
             {
                 _logger.LogError(e, "Error while getting all class");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
