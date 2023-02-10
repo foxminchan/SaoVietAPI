@@ -47,5 +47,8 @@ namespace Infrastructure.Repositories
         public async Task UpdateAttendance(Attendance attendance, string classId, string lessonId) => await Update(attendance, x => x.classId == classId && x.lessonId == lessonId);
 
         public async Task DeleteAttendance(string classId, string lessonId) => await Delete(x => x.classId == classId && x.lessonId == lessonId);
+
+        public async Task<bool> IsAttendanceExist(string classId, string lessonId) =>
+            await Any(x => x.classId == classId && x.lessonId == lessonId);
     }
 }

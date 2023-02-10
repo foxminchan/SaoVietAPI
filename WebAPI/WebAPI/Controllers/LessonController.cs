@@ -61,7 +61,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var lessons = await _lessonService.GetAllLesson();
+                var lessons = await Task.Run(_lessonService.GetAllLesson);
                 return lessons.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = lessons })
                     : NoContent();
@@ -82,20 +82,17 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/lesson/findByName/string
-        ///     {
-        ///         "name": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Lấy bài học thành công</response>
         /// <response code="204">Không có bài học nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByName/{name}")]
-        public async Task<IActionResult> FindByName(string name)
+        public async Task<IActionResult> FindByName([FromRoute] string name)
         {
             try
             {
-                var lessons = await _lessonService.GetByNames(name);
+                var lessons = await Task.Run(() => _lessonService.GetByNames(name));
                 return lessons.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = lessons })
                     : NoContent();
@@ -116,9 +113,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/lesson/findById/string
-        ///     {
-        ///         "id": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Lấy bài học thành công</response>
         /// <response code="404">Không có bài học nào</response>
@@ -129,7 +123,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var lesson = await _lessonService.GetLessonById(id);
+                var lesson = await Task.Run(() => _lessonService.GetLessonById(id));
                 return lesson != null
                     ? Ok(new { status = true, message = "Get data successfully", data = lesson })
                     : NotFound(new { status = false, message = "No lesson was found" });
@@ -164,15 +158,15 @@ namespace WebAPI.Controllers
         [HttpPost("addLesson")]
         public async Task<IActionResult> AddLesson([FromBody] Models.Lesson lesson)
         {
-            var (isValid, message) = await IsValidLesson(lesson);
+            var (isValid, message) = await Task.Run(() => IsValidLesson(lesson));
             if (!isValid)
                 return BadRequest(new { status = false, message });
             try
             {
-                if (lesson.id != null && await _lessonService.GetLessonById(lesson.id) != null)
+                if (lesson.id != null && await Task.Run(() => _lessonService.GetLessonById(lesson.id)) != null)
                     return BadRequest(new { status = false, message = "Lesson id is null or exists" });
                 var lessonEntity = _mapper.Map<Domain.Entities.Lesson>(lesson);
-                await _lessonService.AddLesson(lessonEntity);
+                await Task.Run(() => _lessonService.AddLesson(lessonEntity));
                 return Ok(new { status = true, message = "Add lesson successfully" });
             }
             catch (Exception e)
@@ -207,18 +201,16 @@ namespace WebAPI.Controllers
         [HttpPut("updateLesson/{id}")]
         public async Task<IActionResult> UpdateLesson([FromRoute] string id, [FromBody] Models.Lesson lesson)
         {
-            var (isValid, message) = await IsValidLesson(lesson);
+            var (isValid, message) = await Task.Run(() => IsValidLesson(lesson));
             if (!isValid)
                 return BadRequest(new { status = false, message });
             try
             {
-                var lessonEntity = await _lessonService.GetLessonById(id);
+                var lessonEntity = await Task.Run(() => _lessonService.GetLessonById(id));
                 if (lessonEntity == null)
                     return NotFound(new { status = false, message = "Lesson not found" });
-                lessonEntity.name = lesson.name;
-                lessonEntity.description = lesson.description;
-                lessonEntity.courseId = lesson.courseId;
-                await _lessonService.UpdateLesson(lessonEntity, id);
+                lessonEntity = _mapper.Map<Domain.Entities.Lesson>(lesson);
+                await Task.Run(() => _lessonService.UpdateLesson(lessonEntity, id));
                 return Ok(new { status = true, message = "Update lesson successfully" });
             }
             catch (Exception e)
@@ -237,9 +229,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     DELETE /api/v1/lesson/deleteLesson/string
-        ///     {
-        ///         "id": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Xóa bài học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
@@ -251,10 +240,10 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var lessonEntity = await _lessonService.GetLessonById(id);
+                var lessonEntity = await Task.Run(() => _lessonService.GetLessonById(id));
                 if (lessonEntity == null)
                     return NotFound(new { status = false, message = "Lesson not found" });
-                await _lessonService.DeleteLesson(lessonEntity);
+                await Task.Run(() => _lessonService.DeleteLesson(lessonEntity));
                 return Ok(new { status = true, message = "Delete lesson successfully" });
             }
             catch (Exception e)

@@ -39,15 +39,15 @@ namespace WebAPI.Controllers
                 string.IsNullOrWhiteSpace(teacher.email) &&
                 string.IsNullOrWhiteSpace(teacher.phone))
                 return (false, "Full name, email and phone are required");
-            
-            if (!string.IsNullOrWhiteSpace(teacher.email) && 
+
+            if (!string.IsNullOrWhiteSpace(teacher.email) &&
                 !Regex.IsMatch(teacher.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None, TimeSpan.FromSeconds(2)))
                 return (false, "Email is invalid");
 
-            if (!string.IsNullOrWhiteSpace(teacher.phone) && 
+            if (!string.IsNullOrWhiteSpace(teacher.phone) &&
                     !Regex.IsMatch(teacher.phone, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
                 return (false, "Phone is invalid");
-            
+
             var allId = await _teacherService.GetAllId();
             if (string.IsNullOrWhiteSpace(teacher.customerId)
                 || allId.Contains(teacher.customerId)) return (true, null);
@@ -73,7 +73,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var teachers = await _teacherService.GetTeachers();
+                var teachers = await Task.Run(_teacherService.GetTeachers);
                 return teachers.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = teachers })
                     : NoContent();
@@ -94,9 +94,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/teacher/findByName/string
-        ///     {
-        ///         "name": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Lấy danh sách giáo viên thành công</response>
         /// <response code="204">Không có giáo viên nào</response>
@@ -107,7 +104,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var teachers = await _teacherService.FindTeacherByName(name);
+                var teachers = await Task.Run(() => _teacherService.FindTeacherByName(name));
                 return teachers.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = teachers })
                     : NoContent();
@@ -128,9 +125,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/teacher/uuid
-        ///     {
-        ///         "id": "uuid
-        ///     }
         /// </remarks>
         /// <response code="200">Lấy giáo viên thành công</response>
         /// <response code="204">Không có giáo viên nào</response>
@@ -141,7 +135,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var teacher = await _teacherService.GetTeacherById(id);
+                var teacher = await Task.Run(() => _teacherService.GetTeacherById(id));
                 return teacher != null
                     ? Ok(new { status = true, message = "Get data successfully", data = teacher })
                     : NoContent();
@@ -176,7 +170,7 @@ namespace WebAPI.Controllers
         [HttpPost("addTeacher")]
         public async Task<IActionResult> AddTeacher([FromBody] Models.Teacher teacher)
         {
-            var(isValid, message) = await IsValidTeacher(teacher);
+            var (isValid, message) = await Task.Run(() => IsValidTeacher(teacher));
             if (!isValid)
                 return BadRequest(new { status = false, message });
 
@@ -184,7 +178,7 @@ namespace WebAPI.Controllers
             {
                 var newTeacher = _mapper.Map<Domain.Entities.Teacher>(teacher);
                 newTeacher.id = Guid.NewGuid();
-                await _teacherService.AddTeacher(newTeacher);
+                await Task.Run(() => _teacherService.AddTeacher(newTeacher));
                 return Ok(new { status = true, message = "Add teacher successfully" });
             }
             catch (Exception e)
@@ -221,14 +215,14 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var existTeacher = await _teacherService.GetTeacherById(id);
+                var existTeacher = await Task.Run(() => _teacherService.GetTeacherById(id));
                 if (existTeacher == null)
                     return NotFound(new { status = false, message = "Teacher not found" });
-                var (isValid, message) = await IsValidTeacher(teacher);
+                var (isValid, message) = await Task.Run(() => IsValidTeacher(teacher));
                 if (!isValid)
                     return BadRequest(new { status = false, message });
                 var updatedTeacher = _mapper.Map(teacher, existTeacher);
-                await _teacherService.UpdateTeacher(updatedTeacher, id);
+                await Task.Run(() => _teacherService.UpdateTeacher(updatedTeacher, id));
                 return Ok(new { status = true, message = "Update teacher successfully" });
             }
             catch (Exception e)
@@ -247,9 +241,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     DELETE /deleteTeacher/uuid
-        ///     {
-        ///         "id": "uuid"
-        ///     }
         /// </remarks>
         /// <response code="200">Xóa giáo viên thành công</response>
         /// <response code="404">Không tìm thấy giáo viên</response>
@@ -260,10 +251,10 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var teacher = await _teacherService.GetTeacherById(id);
+                var teacher = await Task.Run(() => _teacherService.GetTeacherById(id));
                 if (teacher == null)
                     return NotFound(new { status = false, message = "Teacher not found" });
-                await _teacherService.DeleteTeacher(id);
+                await Task.Run(() => _teacherService.DeleteTeacher(id));
                 return Ok(new { status = true, message = "Delete teacher successfully" });
             }
             catch (Exception e)

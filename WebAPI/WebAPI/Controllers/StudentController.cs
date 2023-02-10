@@ -74,7 +74,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var students = await _studentService.GetStudents();
+                var students = await Task.Run(_studentService.GetStudents);
                 return students.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = students })
                     : NoContent();
@@ -95,9 +95,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/student/findByName/string
-        ///     {
-        ///         "name": string
-        ///     }
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
@@ -108,7 +105,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var students = await _studentService.GetStudentsByNames(name);
+                var students = await Task.Run(() => _studentService.GetStudentsByNames(name));
                 return students.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = students })
                     : NoContent();
@@ -129,9 +126,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/student/findByPhone/number
-        ///     {
-        ///         "phone": number
-        ///     }
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
@@ -142,7 +136,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var students = await _studentService.GetStudentsByPhone(phone);
+                var students = await Task.Run(() => _studentService.GetStudentsByPhone(phone));
                 return students.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = students })
                     : NoContent();
@@ -163,9 +157,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/student/findById/guid
-        ///     {
-        ///         "id": guid
-        ///     }
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
@@ -176,7 +167,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var student = await _studentService.GetStudentById(id);
+                var student = await Task.Run(() => _studentService.GetStudentById(id));
                 return student != null
                     ? Ok(new { status = true, message = "Get data successfully", data = student })
                     : NoContent();
@@ -197,9 +188,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/student/getClassByStudentId/guid
-        ///     {
-        ///         "id": guid
-        ///     }
         /// </remarks>
         /// <response code="200">Lấy danh sách lớp học của học viên thành công</response>
         /// <response code="204">Không có lớp học nào</response>
@@ -213,10 +201,10 @@ namespace WebAPI.Controllers
                 return BadRequest(new { status = false, message = "Id is required" });
             try
             {
-                var count = await _studentService.CountClassByStudent(id);
+                var count = await Task.Run(() => _studentService.CountClassByStudent(id));
                 if (count == 0)
                     return NoContent();
-                var classes = await _studentService.GetClassesByStudentId(id);
+                var classes = await Task.Run(() => _studentService.GetClassesByStudentId(id));
                 return Ok(new { status = true, message = "Get data successfully", amount = count, data = classes });
             }
             catch (Exception e)
@@ -250,7 +238,7 @@ namespace WebAPI.Controllers
         [HttpPost("addStudent")]
         public async Task<IActionResult> AddStudent([FromBody] Models.Student student)
         {
-            var (isValid, message) = await IsValidStudent(student);
+            var (isValid, message) = await Task.Run(() => IsValidStudent(student));
             if (!isValid)
                 return BadRequest(new { status = false, message });
 
@@ -258,7 +246,7 @@ namespace WebAPI.Controllers
             {
                 var newStudent = _mapper.Map<Domain.Entities.Student>(student);
                 newStudent.id = Guid.NewGuid();
-                await _studentService.AddStudent(newStudent);
+                await Task.Run(() => _studentService.AddStudent(newStudent));
                 return Ok(new { status = true, message = "Add student successfully" });
             }
             catch (Exception e)
@@ -295,14 +283,13 @@ namespace WebAPI.Controllers
 
             try
             {
-                if (!await _studentService.CheckStudentExists(studentId.Value))
+                if (!await Task.Run(() => _studentService.CheckStudentExists(studentId.Value)))
                     return BadRequest(new { status = false, message = "Student id is not exists" });
-                if (!await _studentService.CheckClassExists(classId))
+                if (!await Task.Run(() => _studentService.CheckClassExists(classId)))
                     return BadRequest(new { status = false, message = "Class id is not exists" });
-                if (await _studentService.IsAlreadyInClass(studentId.Value, classId))
+                if (await Task.Run(() => _studentService.IsAlreadyInClass(studentId.Value, classId)))
                     return BadRequest(new { status = false, message = "Student is already in class" });
-                await _studentService.AddClassStudent(new Domain.Entities.ClassStudent
-                { classId = classId, studentId = studentId.Value });
+                await Task.Run(() => _studentService.AddClassStudent(new Domain.Entities.ClassStudent { classId = classId, studentId = studentId.Value }));
                 return Ok(new { status = true, message = "Add student to class successfully" });
             }
             catch (Exception e)
@@ -324,7 +311,10 @@ namespace WebAPI.Controllers
         ///
         ///     PUT /api/v1/student/updateStudent/guid
         ///     {
-        ///         "id": guid,
+        ///         "fullName": "string",
+        ///         "dob": "yyyy-MM-dd",
+        ///         "email": "string",
+        ///         "phone": "string"
         ///     }
         /// </remarks>
         /// <response code="200">Cập nhật thông tin học viên thành công</response>
@@ -336,15 +326,15 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var existStudent = await _studentService.GetStudentById(id);
+                var existStudent = await Task.Run(() => _studentService.GetStudentById(id));
                 if (existStudent == null)
                     return BadRequest(new { status = false, message = "Student not found" });
-                var (isValid, message) = await IsValidStudent(student);
+                var (isValid, message) = await Task.Run(() => IsValidStudent(student));
                 if (!isValid)
                     return BadRequest(new { status = false, message });
                 var newStudent = _mapper.Map<Domain.Entities.Student>(student);
                 newStudent.id = id;
-                await _studentService.UpdateStudent(newStudent, id);
+                await Task.Run(() => _studentService.UpdateStudent(newStudent, id));
                 return Ok(new { status = true, message = "Update student successfully" });
             }
             catch (Exception e)
@@ -363,9 +353,6 @@ namespace WebAPI.Controllers
         /// Sample request
         ///
         ///     DELETE /api/v1/student/deleteStudent/guid
-        ///     {
-        ///         "id": guid
-        ///     }
         /// </remarks>
         /// <response code="200">Xóa học viên thành công</response>
         /// <response code="400">Học viên không tồn tại</response>
@@ -376,10 +363,10 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var existStudent = await _studentService.GetStudentById(id);
+                var existStudent = await Task.Run(() => _studentService.GetStudentById(id));
                 if (existStudent == null)
                     return BadRequest(new { status = false, message = "Student not found" });
-                await _studentService.DeleteStudent(id);
+                await Task.Run(() => _studentService.DeleteStudent(id));
                 return Ok(new { status = true, message = "Delete student successfully" });
             }
             catch (Exception e)

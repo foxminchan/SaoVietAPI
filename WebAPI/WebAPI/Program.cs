@@ -1,14 +1,14 @@
+using Application.Services;
+using AspNetCoreRateLimit;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
-using Application.Services;
-using AspNetCoreRateLimit;
 using Prometheus;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using Serilog.Sinks.SystemConsole.Themes;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +31,7 @@ builder.Services.AddSwaggerGen(options =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-    
+
     options.AddSecurityDefinition(name: "OAuth2", securityScheme: new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.OAuth2,
@@ -199,52 +199,6 @@ var findOutMore = new OpenApiExternalDocs
     Url = new Uri("https://swagger.io/"),
 };
 
-var teacherTag = new OpenApiTag
-{
-    Name = "Teacher",
-    Description = "Quản lý thông tin giáo viên",
-    ExternalDocs = findOutMore
-};
-
-var classTag = new OpenApiTag
-{
-    Name = "Class",
-    Description = "Quản lý thông tin lớp học",
-    ExternalDocs = findOutMore
-};
-
-var branchTag = new OpenApiTag
-{
-    Name = "Branch",
-    Description = "Quản lý thông tin chi nhánh",
-    ExternalDocs = findOutMore
-};
-
-var studentTag = new OpenApiTag
-{
-    Name = "Student",
-    Description = "Quản lý thông tin học viên",
-    ExternalDocs = findOutMore
-};
-var categoryTag = new OpenApiTag
-{
-    Name = "Category",
-    Description = "Quản lý thông tin danh mục",
-    ExternalDocs = findOutMore
-};
-var lessonTag = new OpenApiTag
-{
-    Name = "Lesson",
-    Description = "Quản lý thông tin bài học",
-    ExternalDocs = findOutMore
-};
-var courseTag = new OpenApiTag
-{
-    Name = "Course",
-    Description = "Quản lý thông tin khoá học",
-    ExternalDocs = findOutMore
-};
-
 app.UseStaticFiles();
 app.UseCors("AllowAll");
 
@@ -258,7 +212,56 @@ app.UseSwagger(c =>
             throw new ArgumentNullException(nameof(httpReq));
         swagger.Info = info;
         swagger.ExternalDocs = externalDocs;
-        swagger.Tags = new List<OpenApiTag> { teacherTag, classTag, branchTag, studentTag, categoryTag, courseTag, lessonTag };
+        swagger.Tags = new List<OpenApiTag> { 
+            new()
+            {
+                Name = "Teacher",
+                Description = "Quản lý thông tin giáo viên",
+                ExternalDocs = findOutMore
+            }, 
+            new ()
+            {
+                Name = "Class",
+                Description = "Quản lý thông tin lớp học",
+                ExternalDocs = findOutMore
+            }, 
+            new ()
+            {
+                Name = "Branch",
+                Description = "Quản lý thông tin chi nhánh",
+                ExternalDocs = findOutMore
+            }, 
+            new ()
+            {
+                Name = "Student",
+                Description = "Quản lý thông tin học viên",
+                ExternalDocs = findOutMore
+            }, 
+            new ()
+            {
+                Name = "Category",
+                Description = "Quản lý thông tin danh mục",
+                ExternalDocs = findOutMore
+            }, 
+            new ()
+            {
+                Name = "Course",
+                Description = "Quản lý thông tin khoá học",
+                ExternalDocs = findOutMore
+            }, 
+            new ()
+            {
+                Name = "Lesson",
+                Description = "Quản lý thông tin bài học",
+                ExternalDocs = findOutMore
+            }, 
+            new ()
+            {
+                Name = "Attendance",
+                Description = "Quản lý thông tin điểm danh",
+                ExternalDocs = findOutMore
+            }
+        };
         swagger.Servers = new List<OpenApiServer>
         {
             new()

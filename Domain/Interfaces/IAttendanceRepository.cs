@@ -20,5 +20,6 @@ namespace Domain.Interfaces
         public Task AddAttendance(Attendance attendance);
         public Task UpdateAttendance(Attendance attendance, string classId, string lessonId);
         public Task DeleteAttendance(string classId, string lessonId);
+        public Task<bool> IsAttendanceExist(string classId, string lessonId);
     }
 }

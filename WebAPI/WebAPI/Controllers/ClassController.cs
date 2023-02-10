@@ -53,7 +53,7 @@ namespace WebAPI.Controllers
 
             var teachers = await _classService.GetTeachers();
             if (@class.teacherId != null
-                && ! teachers.Any(x => x != null && x.id == @class.teacherId))
+                && !teachers.Any(x => x != null && x.id == @class.teacherId))
                 return (false, "Teacher id is not exist");
 
             var branches = await _classService.GetBranches();
@@ -80,12 +80,12 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var classes = await _classService.GetClasses();
+                var classes = await Task.Run(_classService.GetClasses);
                 return classes.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = classes })
                     : NoContent();
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 _logger.LogError(e, "Error while getting all class");
                 return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
@@ -101,9 +101,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /findById/string
-        ///     {
-        ///         "id": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Lấy lớp học thành công</response>
         /// <response code="400">Mã lớp không hợp lệ</response>
@@ -117,10 +114,10 @@ namespace WebAPI.Controllers
                 return BadRequest(new { status = false, message = "Class id is required" });
             try
             {
-                var classes = await _classService.GetClasses();
+                var classes = await Task.Run(_classService.GetClasses);
                 if (classes.All(x => x.id != id))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
-                var @class = await _classService.FindClassById(id);
+                var @class = await Task.Run(() => _classService.FindClassById(id));
                 return @class != null
                     ? Ok(new { status = true, message = "Get data successfully", data = @class })
                     : NotFound(new { status = false, message = "Class not found" });
@@ -142,9 +139,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/class/findByName/string
-        ///     {
-        ///         "name": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Tìm lớp theo tên thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
@@ -158,7 +152,7 @@ namespace WebAPI.Controllers
                 return BadRequest(new { status = false, message = "Name is null" });
             try
             {
-                var classEntity = await _classService.FindClassByName(name);
+                var classEntity = await Task.Run(() => _classService.FindClassByName(name));
                 return !classEntity.Any()
                     ? NotFound(new { status = false, message = "Class is not found" })
                     : Ok(new { status = true, message = "Find class successfully", data = classEntity });
@@ -184,9 +178,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/class/findByStatus/string
-        ///     {
-        ///         "status": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Tìm lớp theo trạng thái thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
@@ -201,7 +192,7 @@ namespace WebAPI.Controllers
 
             try
             {
-                var classEntity = await _classService.GetClassesByStatus(status);
+                var classEntity = await Task.Run(() => _classService.GetClassesByStatus(status));
                 return !classEntity.Any()
                     ? NotFound(new { status = false, message = "No classes found with the given status" })
                     : Ok(new { status = true, message = "Find class successfully", data = classEntity });
@@ -222,9 +213,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/class/getClassesByTeacherId/Guid
-        ///     {
-        ///         "teacherId": "Guid"
-        ///     }
         /// </remarks>
         /// <response code="200">Liệt kê lớp theo giáo viên thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
@@ -236,10 +224,10 @@ namespace WebAPI.Controllers
         {
             if (teacherId == null)
                 return BadRequest(new { status = false, message = "TeacherId is null" });
-            
+
             try
             {
-                var classEntity = await _classService.FindClassByTeacher(teacherId);
+                var classEntity = await Task.Run(() => _classService.FindClassByTeacher(teacherId));
                 return !classEntity.Any()
                     ? NotFound(new { status = false, message = "Class is not found" })
                     : Ok(new { status = true, message = "Find class successfully", data = classEntity });
@@ -260,9 +248,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/class/getStudentList/string
-        ///     {
-        ///         "classId": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Lấy danh sách học viên trong lớp thành công</response>
         /// <response code="204">Không có dữ liệu</response>
@@ -277,13 +262,13 @@ namespace WebAPI.Controllers
 
             try
             {
-                var classes = await _classService.GetClasses();
+                var classes = await Task.Run(_classService.GetClasses);
                 if (classes.All(x => x.id != classId))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
-                var studentAmount = await _classService.CountStudentInClass(classId);
+                var studentAmount = await Task.Run(() => _classService.CountStudentInClass(classId));
                 if (studentAmount == 0)
                     return NoContent();
-                var studentList = await _classService.GetStudentsInClass(classId);
+                var studentList = await Task.Run(() => _classService.GetStudentsInClass(classId));
                 return Ok(new { status = true, message = "Get student list successfully", amount = studentAmount, data = studentList });
 
             }
@@ -319,17 +304,17 @@ namespace WebAPI.Controllers
         [HttpPost("addClass")]
         public async Task<IActionResult> AddClass([FromBody] Models.Class request)
         {
-            var (isValid, message) = await IsValidClass(request);
+            var (isValid, message) = await Task.Run(() => IsValidClass(request));
             if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
             {
                 if (string.IsNullOrWhiteSpace(request.id)
-                    || await _classService.CheckClassIdExist(request.id))
+                    || await Task.Run(() => _classService.CheckClassIdExist(request.id)))
                     return BadRequest(new { status = false, message = "Class id is null or existed" });
                 var newClass = _mapper.Map<Domain.Entities.Class>(request);
-                await _classService.AddClass(newClass);
+                await Task.Run(() => _classService.AddClass(newClass));
                 return Ok(new { status = true, message = "Add class successfully" });
             }
             catch (Exception e)
@@ -365,17 +350,17 @@ namespace WebAPI.Controllers
         [HttpPut("updateClass/{id}")]
         public async Task<IActionResult> UpdateClass([FromBody] Models.Class request, [FromRoute] string id)
         {
-            var (isValid, message) = await IsValidClass(request);
+            var (isValid, message) = await Task.Run(() => IsValidClass(request));
             if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
             {
                 if (string.IsNullOrWhiteSpace(request.id)
-                    || !await _classService.CheckClassIdExist(request.id))
+                    || !await Task.Run(() => _classService.CheckClassIdExist(request.id)))
                     return BadRequest(new { status = false, message = "Class id is null or not exist" });
                 var classEntity = _mapper.Map<Domain.Entities.Class>(request);
-                await _classService.UpdateClass(classEntity, id);
+                await Task.Run(() => _classService.UpdateClass(classEntity, id));
                 return Ok(new { status = true, message = "Update class successfully", data = classEntity });
             }
             catch (Exception e)
@@ -394,9 +379,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     DELETE /api/v1/class/deleteClass/string
-        ///     {
-        ///         "id": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Xóa lớp học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
@@ -407,10 +389,10 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var classes = await _classService.GetClasses();
+                var classes = await Task.Run(_classService.GetClasses);
                 if (classes.Any(x => x.id != id))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
-                await _classService.DeleteClass(id);
+                await Task.Run(() => _classService.DeleteClass(id));
                 return Ok(new { status = true, message = "Delete class successfully" });
             }
             catch (Exception e)
@@ -430,10 +412,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     DELETE /api/v1/class/deleteStudentFromClass/string/guid
-        ///     {
-        ///         "classId": "string",
-        ///         "studentId": "guid"
-        ///     }
         /// </remarks>
         /// <response code="200">Xóa học viên khỏi lớp học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
@@ -444,12 +422,12 @@ namespace WebAPI.Controllers
         {
             if (string.IsNullOrEmpty(classId) && studentId == Guid.Empty)
                 return BadRequest(new { status = false, message = "Class id and student id are required" });
-            
+
             try
             {
-                if (!await _classService.CheckStudentInClass(classId, studentId))
+                if (!await Task.Run(() => _classService.CheckStudentInClass(classId, studentId)))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
-                await _classService.DeleteStudentFromClass(new Domain.Entities.ClassStudent { classId = classId, studentId = studentId });
+                await Task.Run(() => _classService.DeleteStudentFromClass(new Domain.Entities.ClassStudent { classId = classId, studentId = studentId }));
                 return Ok(new { status = true, message = "Delete student from class successfully" });
             }
             catch (Exception e)

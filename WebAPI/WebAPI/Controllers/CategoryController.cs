@@ -35,10 +35,10 @@ namespace WebAPI.Controllers
         private static async Task<(bool, string?)> IsValidCategory(Models.Category category)
         {
             await Task.Delay(0);
-            
+
             if (string.IsNullOrEmpty(category.id))
                 return (false, "Category id is required");
-            
+
             return string.IsNullOrEmpty(category.name) ? (false, "Category name is required") : (true, null);
         }
 
@@ -60,7 +60,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var categories = await _studentService.GetCategories();
+                var categories = await Task.Run(_studentService.GetCategories);
                 return categories.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = categories })
                     : NoContent();
@@ -81,20 +81,17 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/Category/findById/string
-        ///     {
-        ///         "id": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Trả về danh mục</response>
         /// <response code="404">Không tìm thấy danh mục</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findById/{id}")]
-        public async Task<IActionResult> GetCategoryById(string? id)
+        public async Task<IActionResult> GetCategoryById([FromRoute] string? id)
         {
             try
             {
-                var category = await _studentService.GetCategoryById(id);
+                var category = await Task.Run(() => _studentService.GetCategoryById(id));
                 return category != null
                     ? Ok(new { status = true, message = "Get data successfully", data = category })
                     : NotFound(new { status = false, message = "Category not found" });
@@ -127,7 +124,7 @@ namespace WebAPI.Controllers
         [HttpPost("addCategory")]
         public async Task<IActionResult> AddCategory([FromBody] Models.Category category)
         {
-            var (isValid, message) = await IsValidCategory(category);
+            var (isValid, message) = await Task.Run(() => IsValidCategory(category));
             if (!isValid)
                 return BadRequest(new { status = false, message });
 
@@ -136,7 +133,7 @@ namespace WebAPI.Controllers
                 if (category.id != null && !await _studentService.CategoryExists(category.id))
                     return BadRequest(new { status = false, message = "Category id already exists" });
                 var categoryEntity = _mapper.Map<Domain.Entities.Category>(category);
-                await _studentService.AddCategory(categoryEntity);
+                await Task.Run(() => _studentService.AddCategory(categoryEntity));
                 return Ok(new { status = true, message = "Add category successfully" });
             }
             catch (Exception e)
@@ -168,16 +165,16 @@ namespace WebAPI.Controllers
         [HttpPut("updateCategory/{id}")]
         public async Task<IActionResult> UpdateCategory([FromBody] Models.Category category, [FromRoute] string? id)
         {
-            var (isValid, message) = await IsValidCategory(category);
+            var (isValid, message) = await Task.Run(() => IsValidCategory(category));
             if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
             {
-                if (category.id != null && await _studentService.CategoryExists(category.id))
+                if (category.id != null && await Task.Run(() => _studentService.CategoryExists(category.id)))
                     return BadRequest(new { status = false, message = "Category id is not exists" });
                 var categoryEntity = _mapper.Map<Domain.Entities.Category>(category);
-                if (id != null) await _studentService.UpdateCategory(categoryEntity, id);
+                if (id != null) await Task.Run(() => _studentService.UpdateCategory(categoryEntity, id));
                 return Ok(new { status = true, message = "Update category successfully" });
             }
             catch (Exception e)
@@ -196,9 +193,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     DELETE /api/v1/Category/deleteCategory/string
-        ///     {
-        ///         "id": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Xóa danh mục thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
@@ -209,9 +203,9 @@ namespace WebAPI.Controllers
         {
             try
             {
-                if (id != null && await _studentService.CategoryExists(id))
+                if (id != null && await Task.Run(() => _studentService.CategoryExists(id)))
                     return BadRequest(new { status = false, message = "Category id is not exists" });
-                if (id != null) await _studentService.DeleteCategory(id);
+                if (id != null) await Task.Run(() => _studentService.DeleteCategory(id));
                 return Ok(new { status = true, message = "Delete category successfully" });
             }
             catch (Exception e)

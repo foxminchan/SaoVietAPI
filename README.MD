@@ -43,7 +43,7 @@ Các thành phần chính của API bao gồm:
 - **Quản lý dữ liệu:** Là một dự án .NET Core 7, sử dụng Entity Framework Core để quản lý dữ liệu. Dữ liệu được lưu trữ trong cơ sở dữ liệu SQL Server.
 - **Loggging:** Sử dụng trình quản lý ghi nhật ký Elastic Stack để quản lý nhật ký.
 - **Giám sát:** Sử dụng trình quản lý giám sát Prometheus và Grafana để giám sát tình trạng của API.
-- **Cache:** Sử dụng Redis để lưu trữ dữ liệu cache.
+- **Cache:** Sử dụng memory cached để lưu trữ dữ liệu cache.
 - **Giao diện người dùng:** Sử dụng Swagger để triển khai giao diện người dùng.
 
 ## Kiến trúc

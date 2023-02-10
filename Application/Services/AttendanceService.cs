@@ -58,5 +58,6 @@ namespace Application.Services
 
         public async Task<bool> CheckClassExists(string classId) => await _classRepository.ClassExists(classId);
 
+        public async Task<bool> IsAttendanceExist(string classId, string lessonId) => await _attendanceRepository.IsAttendanceExist(classId, lessonId);
     }
 }

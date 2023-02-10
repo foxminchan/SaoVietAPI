@@ -41,10 +41,10 @@ namespace WebAPI.Controllers
             if (await _courseService.CourseExists(course.id))
                 return (false, "Course id already exists");
 
-            if (!string.IsNullOrEmpty(course.categoryId) && 
+            if (!string.IsNullOrEmpty(course.categoryId) &&
                 !await _courseService.IsValidCategoryId(course.categoryId))
                 return (false, "Category id not exists");
-            
+
             return (true, null);
         }
 
@@ -66,7 +66,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var courses = await _courseService.GetCourses();
+                var courses = await Task.Run(_courseService.GetCourses);
                 return courses.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = courses })
                     : NoContent();
@@ -88,20 +88,17 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/Course/findByName/string
-        ///     {
-        ///         "name": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Tìm kiếm khoá học theo tên thành công</response>
         /// <response code="404">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByNames/{name}")]
-        public async Task<IActionResult> GetCoursesByNames(string? name)
+        public async Task<IActionResult> GetCoursesByNames([FromRoute] string? name)
         {
             try
             {
-                var courses = await _courseService.GetCoursesByNames(name);
+                var courses = await Task.Run(() => _courseService.GetCoursesByNames(name));
                 return courses.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = courses })
                     : NoContent();
@@ -123,20 +120,17 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     GET /api/v1/Course/findById/string
-        ///     {
-        ///         "id": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Lấy khoá học theo id thành công</response>
         /// <response code="404">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findById/{id}")]
-        public async Task<IActionResult> GetCourseById(string? id)
+        public async Task<IActionResult> GetCourseById([FromRoute] string? id)
         {
             try
             {
-                var course = await _courseService.GetCourseById(id);
+                var course = await Task.Run(() => _courseService.GetCourseById(id));
                 return course != null
                     ? Ok(new { status = true, message = "Get data successfully", data = course })
                     : NotFound(new { status = false, message = "No course was found" });
@@ -172,14 +166,14 @@ namespace WebAPI.Controllers
         [HttpPost("addCourse")]
         public async Task<IActionResult> AddCourse([FromBody] Models.Course course)
         {
-            var (isValid, message) = await IsValidCourse(course);
+            var (isValid, message) = await Task.Run(() => IsValidCourse(course));
             if (!isValid)
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var courseEntity = _mapper.Map<Domain.Entities.Course>(course);
-                await _courseService.AddCourse(courseEntity);
+                await Task.Run(() => _courseService.AddCourse(courseEntity));
                 return Ok(new { status = true, message = "Add course successfully" });
             }
             catch (Exception e)
@@ -214,14 +208,14 @@ namespace WebAPI.Controllers
         [HttpPut("updateCourse/{id}")]
         public async Task<IActionResult> UpdateCourse([FromBody] Models.Course course, [FromRoute] string id)
         {
-            var (isValid, message) = await IsValidCourse(course);
+            var (isValid, message) = await Task.Run(() => IsValidCourse(course));
             if (!isValid)
                 return BadRequest(new { status = false, message });
-            
+
             try
             {
                 var courseEntity = _mapper.Map<Domain.Entities.Course>(course);
-                await _courseService.UpdateCourse(courseEntity, id);
+                await Task.Run(() => _courseService.UpdateCourse(courseEntity, id));
                 return Ok(new { status = true, message = "Update course successfully" });
             }
             catch (Exception e)
@@ -241,9 +235,6 @@ namespace WebAPI.Controllers
         /// Sample request:
         ///
         ///     DELETE /api/v1/Course/deleteCourse/string
-        ///     {
-        ///         "id": "string"
-        ///     }
         /// </remarks>
         /// <response code="200">Xoá khoá học thành công</response>
         /// <response code="404">Không tìm thấy khoá học</response>
@@ -252,12 +243,12 @@ namespace WebAPI.Controllers
         [HttpDelete("deleteCourse/{id}")]
         public async Task<IActionResult> DeleteCourse([FromRoute] string id)
         {
-            if (!await _courseService.CourseExists(id))
+            if (!await Task.Run(() => _courseService.CourseExists(id)))
                 return NotFound(new { status = false, message = "No course id was found" });
 
             try
             {
-                await _courseService.DeleteCourse(id);
+                await Task.Run(() => _courseService.DeleteCourse(id));
                 return Ok(new { status = true, message = "Delete course successfully" });
             }
             catch (Exception e)
