@@ -57,13 +57,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/attendance/getAttendance
+        ///     GET /api/v1/Attendance
         /// </remarks>
         /// <response code="200">Lấy danh sách sổ điểm danh thành công</response>
         /// <response code="204">Không có sổ điểm danh nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("getAttendance")]
+        [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAttendance()
         {
@@ -90,13 +90,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/attendance/getAttendanceById/string/string
+        ///     GET /api/v1/Attendance/string/string
         /// </remarks>
         /// <response code="200">Lấy danh sách sổ điểm danh thành công</response>
         /// <response code="204">Không có sổ điểm danh nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("getAttendanceById/{classId}/{lessonId}")]
+        [HttpGet("{classId}/{lessonId}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetAttendanceById([FromRoute] string classId, [FromRoute] string lessonId)
         {
@@ -119,16 +119,16 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <param name="classId">Mã lớp</param>
         /// <returns></returns>
-        ///       /// <remarks>
+        /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/attendance/getAttendanceByClassId/string
+        ///     GET /api/v1/Attendance/string
         /// </remarks>
         /// <response code="200">Lấy danh sách sổ điểm danh thành công</response>
         /// <response code="204">Không có sổ điểm danh nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("getAttendanceByClassId/{classId}")]
+        [HttpGet("{classId}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetAttendanceByClassId([FromRoute] string classId)
         {
@@ -153,13 +153,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/attendance/sortByAttendance
+        ///     GET /api/v1/Attendance/sort
         /// </remarks>
         /// <response code="200">Lấy danh sách sổ điểm danh thành công</response>
         /// <response code="204">Không có sổ điểm danh nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("sortByAttendance")]
+        [HttpGet("sort")]
         [AllowAnonymous]
         public async Task<IActionResult> SortByAttendance()
         {
@@ -185,7 +185,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /api/v1/attendance/addAttendance
+        ///     POST /api/v1/Attendance
         ///     {
         ///         "classId": "string",
         ///         "lessonId": "string"
@@ -197,9 +197,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Thêm sổ điểm danh thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPost("addAttendance")]
+        [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddAttendance([FromBody] Models.Attendance attendance)
         {
             var (isValid, message) = await Task.Run(() => IsValidAttendance(attendance));
@@ -229,7 +231,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/branch/updateBranch/string
+        ///     PUT /api/v1/Attendance/string/string
         ///     {
         ///         "classId": "string",
         ///         "lessonId": "string"
@@ -241,9 +243,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Cập nhật sổ điểm danh thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("updateAttendance/{classId}/{lessonId}")]
+        [HttpPut("{classId}/{lessonId}")]
+        [Authorize]
         public async Task<IActionResult> UpdateAttendance([FromBody] Models.Attendance attendance, [FromRoute] string classId, [FromRoute] string lessonId)
         {
             var (isValid, message) = await Task.Run(() => IsValidAttendance(attendance));
@@ -272,13 +276,15 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /api/v1/branch/deleteAttendance/string/string
+        ///     DELETE /api/v1/Attendance/string/string
         /// </remarks>
         /// <response code="200">Xóa sổ điểm danh thành công</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="404">Không tìm thấy sổ điểm danh</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpDelete("deleteAttendance/{classId}/{lessonId}")]
+        [HttpDelete("{classId}/{lessonId}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAttendance([FromRoute] string classId, [FromRoute] string lessonId)
         {
             if(!await Task.Run(() => _attendanceService.IsAttendanceExist(classId, lessonId)))

@@ -110,6 +110,15 @@ namespace WebAPI.Controllers
         /// <param name="loginUser">Đối tượng người dùng đăng nhập</param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /api/v1/Token/getToken
+        ///     {
+        ///         "username": "string",
+        ///         "password": "string"
+        ///     }
+        /// </remarks>
         /// <response code="200">Lấy token thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="429">Request quá nhiều</response>

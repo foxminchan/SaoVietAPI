@@ -64,14 +64,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /getTeachers
+        ///     GET /api/v1/Teacher
         /// </remarks>
         /// <response code="200">Lấy danh sách giáo viên thành công</response>
         /// <response code="204">Không có giáo viên nào</response>
-        /// <response code="401">Không có quyền truy cập</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("getTeachers")]
+        [HttpGet()]
         [AllowAnonymous]
         public async Task<IActionResult> GetTeachers()
         {
@@ -97,14 +96,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/teacher/findByName/string
+        ///     GET /api/v1/Teacher/string
         /// </remarks>
         /// <response code="200">Lấy danh sách giáo viên thành công</response>
         /// <response code="204">Không có giáo viên nào</response>
-        /// <response code="401">Không có quyền truy cập</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findByName/{name}")]
+        [HttpGet("{name}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetTeachersByName([FromRoute] string name)
         {
@@ -130,14 +128,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/teacher/uuid
+        ///     GET /api/v1/Teacher/guid
         /// </remarks>
         /// <response code="200">Lấy giáo viên thành công</response>
         /// <response code="204">Không có giáo viên nào</response>
-        /// <response code="401">Không có quyền truy cập</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findById/{id:guid}")]
+        [HttpGet("{id:guid}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetTeacherById([FromRoute] Guid id)
         {
@@ -163,7 +160,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /addTeacher
+        ///     POST /api/v1/Teacher
         ///     {
         ///         "fullName": "string",
         ///         "email": "string",
@@ -173,10 +170,9 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Thêm giáo viên thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
-        /// <response code="401">Không có quyền truy cập</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPost("addTeacher")]
+        [HttpPost()]
         [AllowAnonymous]
         public async Task<IActionResult> AddTeacher([FromBody] Models.Teacher teacher)
         {
@@ -207,7 +203,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /updateTeacher/uuid
+        ///     PUT /api/v1/Teacher/guid
         ///     {
         ///         "id": "uuid",
         ///         "fullName": "string",
@@ -221,7 +217,8 @@ namespace WebAPI.Controllers
         /// <response code="404">Không tìm thấy giáo viên</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("updateTeacher/{id:guid}")]
+        [HttpPut("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> UpdateTeacher([FromBody] Models.Teacher teacher, [FromRoute] Guid id)
         {
             try
@@ -251,14 +248,15 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /deleteTeacher/uuid
+        ///     DELETE /api/v1/Teacher/guid
         /// </remarks>
         /// <response code="200">Xóa giáo viên thành công</response>
         /// <response code="401">Không có quyền truy cập</response>
         /// <response code="404">Không tìm thấy giáo viên</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpDelete("deleteTeacher/{id:guid}")]
+        [HttpDelete("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> DeleteTeacher([FromRoute] Guid id)
         {
             try

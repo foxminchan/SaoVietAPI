@@ -52,13 +52,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/lesson/getLessons
+        ///     GET /api/v1/Lesson
         /// </remarks>
         /// <response code="200">Lấy danh sách bài học thành công</response>
         /// <response code="204">Không có bài học nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("getLessons")]
+        [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetLessons()
         {
@@ -84,13 +84,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/lesson/findByName/string
+        ///     GET /api/v1/Lesson/string
         /// </remarks>
         /// <response code="200">Lấy bài học thành công</response>
         /// <response code="204">Không có bài học nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findByName/{name}")]
+        [HttpGet("{name}")]
         [AllowAnonymous]
         public async Task<IActionResult> FindByName([FromRoute] string name)
         {
@@ -116,13 +116,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/lesson/findById/string
+        ///     GET /api/v1/Lesson/string
         /// </remarks>
         /// <response code="200">Lấy bài học thành công</response>
         /// <response code="404">Không có bài học nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findById/{id}")]
+        [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> FindById([FromRoute] string id)
         {
@@ -148,7 +148,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /api/v1/lesson/addLesson
+        ///     POST /api/v1/Lesson/addLesson
         ///     {
         ///         "id": "string",
         ///         "name": "string",
@@ -158,9 +158,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Thêm bài học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPost("addLesson")]
+        [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddLesson([FromBody] Models.Lesson lesson)
         {
             var (isValid, message) = await Task.Run(() => IsValidLesson(lesson));
@@ -190,7 +192,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/lesson/updateLesson/string
+        ///     PUT /api/v1/Lesson/string
         ///     {
         ///         "id": "string",
         ///         "name": "string",
@@ -200,10 +202,12 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Cập nhật bài học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="404">Không có bài học nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("updateLesson/{id}")]
+        [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateLesson([FromRoute] string id, [FromBody] Models.Lesson lesson)
         {
             var (isValid, message) = await Task.Run(() => IsValidLesson(lesson));
@@ -233,14 +237,16 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /api/v1/lesson/deleteLesson/string
+        ///     DELETE /api/v1/Lesson/string
         /// </remarks>
         /// <response code="200">Xóa bài học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="404">Không có bài học nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpDelete("deleteLesson/{id}")]
+        [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteLesson([FromRoute] string id)
         {
             try

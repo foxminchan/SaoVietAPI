@@ -57,13 +57,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Course/GetCourses
+        ///     GET /api/v1/Course
         /// </remarks>
         /// <response code="200">Lấy danh sách khoá học thành công</response>
         /// <response code="204">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("getCourses")]
+        [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetCourses()
         {
@@ -90,13 +90,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Course/findByName/string
+        ///     GET /api/v1/Course/string
         /// </remarks>
         /// <response code="200">Tìm kiếm khoá học theo tên thành công</response>
         /// <response code="404">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findByNames/{name}")]
+        [HttpGet("{name}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetCoursesByNames([FromRoute] string? name)
         {
@@ -123,13 +123,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Course/findById/string
+        ///     GET /api/v1/Course/string
         /// </remarks>
         /// <response code="200">Lấy khoá học theo id thành công</response>
         /// <response code="404">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findById/{id}")]
+        [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetCourseById([FromRoute] string? id)
         {
@@ -156,7 +156,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /api/v1/Course/addCourse
+        ///     POST /api/v1/Course
         ///     {
         ///         "id": "string",
         ///         "name": "string",
@@ -165,10 +165,12 @@ namespace WebAPI.Controllers
         ///     }
         /// </remarks>
         /// <response code="200">Thêm khoá học thành công</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="404">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPost("addCourse")]
+        [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddCourse([FromBody] Models.Course course)
         {
             var (isValid, message) = await Task.Run(() => IsValidCourse(course));
@@ -198,7 +200,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/Course/updateCourse/string
+        ///     PUT /api/v1/Course/string
         ///     {
         ///         "id": "string",
         ///         "name": "string",
@@ -207,10 +209,12 @@ namespace WebAPI.Controllers
         ///     }
         /// </remarks>
         /// <response code="200">Cập nhật khoá học thành công</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="404">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("updateCourse/{id}")]
+        [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateCourse([FromBody] Models.Course course, [FromRoute] string id)
         {
             var (isValid, message) = await Task.Run(() => IsValidCourse(course));
@@ -239,13 +243,15 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /api/v1/Course/deleteCourse/string
+        ///     DELETE /api/v1/Course/string
         /// </remarks>
         /// <response code="200">Xoá khoá học thành công</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="404">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpDelete("deleteCourse/{id}")]
+        [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCourse([FromRoute] string id)
         {
             if (!await Task.Run(() => _courseService.CourseExists(id)))

@@ -51,13 +51,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Category/GetCategories
+        ///     GET /api/v1/Category
         /// </remarks>
         /// <response code="200">Trả về danh sách danh mục</response>
         /// <response code="204">Không có danh mục nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("getCategories")]
+        [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetCategories()
         {
@@ -83,13 +83,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Category/findById/string
+        ///     GET /api/v1/Category/string
         /// </remarks>
         /// <response code="200">Trả về danh mục</response>
         /// <response code="404">Không tìm thấy danh mục</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findById/{id}")]
+        [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetCategoryById([FromRoute] string? id)
         {
@@ -115,7 +115,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /api/v1/Category/addCategory
+        ///     POST /api/v1/Category
         ///     {
         ///         "id": "string",
         ///         "name": "string"
@@ -123,9 +123,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Thêm danh mục thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPost("addCategory")]
+        [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddCategory([FromBody] Models.Category category)
         {
             var (isValid, message) = await Task.Run(() => IsValidCategory(category));
@@ -156,7 +158,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/Category/updateCategory/string
+        ///     PUT /api/v1/Category/string
         ///     {
         ///         "id": "string",
         ///         "name": "string"
@@ -164,9 +166,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Cập nhật danh mục thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("updateCategory/{id}")]
+        [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateCategory([FromBody] Models.Category category, [FromRoute] string? id)
         {
             var (isValid, message) = await Task.Run(() => IsValidCategory(category));
@@ -196,13 +200,15 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /api/v1/Category/deleteCategory/string
+        ///     DELETE /api/v1/Category/string
         /// </remarks>
         /// <response code="200">Xóa danh mục thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpDelete("deleteCategory/{id}")]
+        [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCategory([FromRoute] string? id)
         {
             try

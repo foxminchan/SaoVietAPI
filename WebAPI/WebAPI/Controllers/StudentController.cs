@@ -65,13 +65,15 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/student/getStudents
+        ///     GET /api/v1/Student
         /// </remarks>
         /// <response code="200">Lấy danh sách học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("getStudents")]
+        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetStudents()
         {
             try
@@ -96,13 +98,15 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/student/findByName/string
+        ///     GET /api/v1/Student/string
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findByName/{name}")]
+        [HttpGet("{name}")]
+        [Authorize]
         public async Task<IActionResult> GetStudentsByName([FromRoute] string? name)
         {
             try
@@ -127,13 +131,15 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/student/findByPhone/number
+        ///     GET /api/v1/Student/number
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findByPhone/{phone:regex(^\\d{{10}}$)}")]
+        [HttpGet("{phone:regex(^\\d{{10}}$)}")]
+        [Authorize]
         public async Task<IActionResult> GetStudentsByPhone([FromRoute] string? phone)
         {
             try
@@ -158,13 +164,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/student/findById/guid
+        ///     GET /api/v1/Student/guid
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("findById/{id:guid}")]
+        [HttpGet("{id:guid}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetStudentById([FromRoute] Guid? id)
         {
@@ -190,14 +196,16 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/student/getClassByStudentId/guid
+        ///     GET /api/v1/Student/class/guid
         /// </remarks>
         /// <response code="200">Lấy danh sách lớp học của học viên thành công</response>
         /// <response code="204">Không có lớp học nào</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("GetClassByStudentId/{id:guid}")]
+        [HttpGet("class/{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> GetClassByStudentId([FromRoute] Guid? id)
         {
             if (id == null)
@@ -225,7 +233,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /api/v1/student/addStudent
+        ///     POST /api/v1/Student
         ///     {
         ///         "id": guid,
         ///         "fullName": string,
@@ -236,9 +244,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Thêm mới học viên thành công</response>
         /// <response code="400">Thông tin học viên không hợp lệ</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPost("addStudent")]
+        [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddStudent([FromBody] Models.Student student)
         {
             var (isValid, message) = await Task.Run(() => IsValidStudent(student));
@@ -268,17 +278,15 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/student/addStudentToClass/guid/string
-        ///     {
-        ///         "studentId": guid,
-        ///         "classId": string
-        ///     }
+        ///     PUT /api/v1/Student/guid/string
         /// </remarks>
         /// <response code="200">Thêm học viên vào lớp học thành công</response>
         /// <response code="400">Thông tin học viên không hợp lệ</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPost("addStudentToClass/{studentId:guid}/{classId}")]
+        [HttpPost("{studentId:guid}/{classId}")]
+        [Authorize]
         public async Task<IActionResult> AddStudentToClass([FromRoute] Guid? studentId, [FromRoute] string classId)
         {
             if (studentId == null || string.IsNullOrEmpty(classId))
@@ -312,7 +320,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/student/updateStudent/guid
+        ///     PUT /api/v1/Student/guid
         ///     {
         ///         "fullName": "string",
         ///         "dob": "yyyy-MM-dd",
@@ -322,9 +330,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Cập nhật thông tin học viên thành công</response>
         /// <response code="400">Thông tin học viên không hợp lệ</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("updateStudent/{id:guid}")]
+        [HttpPut("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> UpdateStudent([FromBody] Models.Student student, [FromRoute] Guid id)
         {
             try
@@ -355,13 +365,15 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request
         ///
-        ///     DELETE /api/v1/student/deleteStudent/guid
+        ///     DELETE /api/v1/Student/guid
         /// </remarks>
         /// <response code="200">Xóa học viên thành công</response>
         /// <response code="400">Học viên không tồn tại</response>
+        /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpDelete("deleteStudent/{id:guid}")]
+        [HttpDelete("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> DeleteStudent([FromRoute] Guid id)
         {
             try
