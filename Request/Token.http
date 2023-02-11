@@ -1,0 +1,23 @@
+@controller=Token
+# Register new user
+POST {{base_url}}/{{controller}}/register
+Content-Type: application/json
+
+{
+	"username": "developer",
+	"password": "Abc@1234",
+	"email": "nxnhan12a3@gmail.com",
+    "phonenumber": "0123456789"
+}
+
+###
+
+# Get bearer token
+
+POST {{base_url}}/{{controller}}/getToken
+Content-Type: application/json
+
+{
+	"username": "developer",
+	"password": "Abc@1234"
+}
