@@ -16,3 +16,15 @@ Tất cả những thay đổi đáng chú ý đối với dự án này sẽ đ
 - API quản lý loại khóa học
 - API quản lý bài học
 - Sử dụng Swagger để tạo tài liệu API
+
+## [1.0.0] - 2021/02/12
+
+### Tính năng mới:
+
+- API quản lý sổ điểm danh
+- Bảo mật API bằng JWT
+- Đăng ký tài khoản
+
+## Sửa đổi:
+
+- Thay đổi đường dẫn API
