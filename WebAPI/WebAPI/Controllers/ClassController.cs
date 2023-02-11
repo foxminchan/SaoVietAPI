@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
@@ -17,6 +18,7 @@ namespace WebAPI.Controllers
     /// <summary>
     /// Quản lý lớp học
     /// </summary>
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class ClassController : ControllerBase
@@ -76,6 +78,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getClasses")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetClasses()
         {
             try
@@ -108,6 +111,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findById/{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> FindClassById([FromRoute] string? id)
         {
             if (id == null)
@@ -146,6 +150,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByName/{name}")]
+        [AllowAnonymous]
         public async Task<IActionResult> FindClassByName([FromRoute] string? name)
         {
             if (name == null)

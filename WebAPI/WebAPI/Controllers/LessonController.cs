@@ -1,5 +1,6 @@
 ﻿using Application.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -16,6 +17,7 @@ namespace WebAPI.Controllers
     /// <summary>
     /// Quản lý bài học
     /// </summary>
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class LessonController : ControllerBase
@@ -57,6 +59,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getLessons")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetLessons()
         {
             try
@@ -88,6 +91,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByName/{name}")]
+        [AllowAnonymous]
         public async Task<IActionResult> FindByName([FromRoute] string name)
         {
             try
@@ -119,6 +123,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findById/{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> FindById([FromRoute] string id)
         {
             try

@@ -1,5 +1,6 @@
 ﻿using Application.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -16,6 +17,7 @@ namespace WebAPI.Controllers
     /// <summary>
     /// Quản lý điểm danh
     /// </summary>
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class AttendanceController : ControllerBase
@@ -62,6 +64,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getAttendance")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAttendance()
         {
             try
@@ -94,6 +97,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getAttendanceById/{classId}/{lessonId}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAttendanceById([FromRoute] string classId, [FromRoute] string lessonId)
         {
             try
@@ -125,6 +129,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getAttendanceByClassId/{classId}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAttendanceByClassId([FromRoute] string classId)
         {
             try
@@ -155,6 +160,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("sortByAttendance")]
+        [AllowAnonymous]
         public async Task<IActionResult> SortByAttendance()
         {
             try

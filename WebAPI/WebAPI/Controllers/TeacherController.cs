@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
@@ -17,6 +18,7 @@ namespace WebAPI.Controllers
     /// <summary>
     /// Quản lý giáo viên
     /// </summary>
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class TeacherController : ControllerBase
@@ -66,9 +68,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy danh sách giáo viên thành công</response>
         /// <response code="204">Không có giáo viên nào</response>
+        /// <response code="401">Không có quyền truy cập</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getTeachers")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetTeachers()
         {
             try
@@ -97,9 +101,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy danh sách giáo viên thành công</response>
         /// <response code="204">Không có giáo viên nào</response>
+        /// <response code="401">Không có quyền truy cập</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByName/{name}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetTeachersByName([FromRoute] string name)
         {
             try
@@ -128,9 +134,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy giáo viên thành công</response>
         /// <response code="204">Không có giáo viên nào</response>
+        /// <response code="401">Không có quyền truy cập</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findById/{id:guid}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetTeacherById([FromRoute] Guid id)
         {
             try
@@ -165,9 +173,11 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Thêm giáo viên thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="401">Không có quyền truy cập</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("addTeacher")]
+        [AllowAnonymous]
         public async Task<IActionResult> AddTeacher([FromBody] Models.Teacher teacher)
         {
             var (isValid, message) = await Task.Run(() => IsValidTeacher(teacher));
@@ -207,6 +217,7 @@ namespace WebAPI.Controllers
         ///     }
         /// </remarks>
         /// <response code="200">Cập nhật giáo viên thành công</response>
+        /// <response code="401">Không có quyền truy cập</response>
         /// <response code="404">Không tìm thấy giáo viên</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
@@ -243,6 +254,7 @@ namespace WebAPI.Controllers
         ///     DELETE /deleteTeacher/uuid
         /// </remarks>
         /// <response code="200">Xóa giáo viên thành công</response>
+        /// <response code="401">Không có quyền truy cập</response>
         /// <response code="404">Không tìm thấy giáo viên</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>

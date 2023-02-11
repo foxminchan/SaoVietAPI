@@ -9,14 +9,44 @@ using Serilog.Sinks.Elasticsearch;
 using Serilog.Sinks.SystemConsole.Themes;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+#region Authorization
 builder.Services.AddAuthorization();
+#endregion
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+#region Authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidAudience = builder.Configuration.GetSection("Jwt:Audience").Value,
+        ValidIssuer = builder.Configuration.GetSection("Jwt:Issuer").Value,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt:Key").Value ?? throw new InvalidOperationException()))
+    };
+});
+#endregion
 
 #region Swagger
 builder.Services.AddSwaggerGen(options =>
@@ -32,28 +62,12 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer"
     });
 
-    options.AddSecurityDefinition(name: "OAuth2", securityScheme: new OpenApiSecurityScheme
-    {
-        Type = SecuritySchemeType.OAuth2,
-        Flows = new OpenApiOAuthFlows
-        {
-            AuthorizationCode = new OpenApiOAuthFlow
-            {
-                AuthorizationUrl = new Uri("https://localhost:5000/connect/authorize"),
-                TokenUrl = new Uri("https://localhost:5000/connect/token"),
-                Scopes = new Dictionary<string, string>
-                {
-                    { "WebAPI", "WebAPI" }
-                }
-            }
-        }
-    });
-
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
             {
+                Scheme = "oauth2",
                 Name = "Bearer",
                 In = ParameterLocation.Header,
                 Reference = new OpenApiReference
@@ -109,9 +123,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", cors =>
     {
-        cors.AllowAnyOrigin()
+        cors.WithOrigins("https://localhost:5000")
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 #endregion
@@ -163,6 +178,7 @@ builder.Services.AddTransient<CategoryService>();
 builder.Services.AddTransient<CourseService>();
 builder.Services.AddTransient<LessonService>();
 builder.Services.AddTransient<AttendanceService>();
+builder.Services.AddTransient<AuthorizationService>();
 #endregion
 
 var app = builder.Build();
@@ -213,6 +229,12 @@ app.UseSwagger(c =>
         swagger.Info = info;
         swagger.ExternalDocs = externalDocs;
         swagger.Tags = new List<OpenApiTag> { 
+            new()
+            {
+                Name = "Token",
+                Description = "Xác thực",
+                ExternalDocs = findOutMore
+            },
             new()
             {
                 Name = "Teacher",
@@ -274,6 +296,7 @@ app.UseSwagger(c =>
 
 app.UseSwaggerUI(c =>
 {
+    c.DefaultModelsExpandDepth(-1);
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sao Việt API v1");
     c.InjectStylesheet("/css/swagger-ui.css");
     c.InjectJavascript("/js/swagger-ui.js");
@@ -299,6 +322,7 @@ else
 }
 #endregion
 
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseRouting();
 app.UseHttpMetrics();

@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
@@ -17,6 +18,7 @@ namespace WebAPI.Controllers
     /// <summary>
     /// Quản lý học viên
     /// </summary>
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class StudentController : ControllerBase
@@ -163,6 +165,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findById/{id:guid}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetStudentById([FromRoute] Guid? id)
         {
             try

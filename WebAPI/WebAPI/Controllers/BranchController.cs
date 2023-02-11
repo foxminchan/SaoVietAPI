@@ -1,5 +1,6 @@
 ﻿using Application.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Models;
 
@@ -17,6 +18,7 @@ namespace WebAPI.Controllers
     /// <summary>
     /// Quản lý chi nhánh
     /// </summary>
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class BranchController : ControllerBase
@@ -55,6 +57,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("getBranches")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetBranches()
         {
             try
@@ -86,6 +89,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByName/{name}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetBranchesByNames([FromRoute] string? name)
         {
             try
@@ -117,6 +121,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findById/{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetBranchById([FromRoute] string? id)
         {
             try
@@ -148,6 +153,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("findByZone/{zone}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetBranchByZone([FromRoute] string? zone)
         {
             try
