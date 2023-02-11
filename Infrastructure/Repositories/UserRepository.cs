@@ -28,19 +28,19 @@ namespace Infrastructure.Repositories
         }
 
         public async Task<bool> CheckTwoFa(ApplicationUser user) =>
-            await Any(x => x.Id == user.Id && x.TwoFactorEnabled == true);
+            await Any(x => x.Id == user.Id && x.TwoFactorEnabled);
 
         public async Task<bool> CheckEmailConfirmed(ApplicationUser user) =>
-            await Any(x => x.Id == user.Id && x.EmailConfirmed == true);
+            await Any(x => x.Id == user.Id && x.EmailConfirmed);
 
         public async Task<bool> CheckPhoneConfirmed(ApplicationUser user) =>
-            await Any(x => x.Id == user.Id && x.PhoneNumberConfirmed == true);
+            await Any(x => x.Id == user.Id && x.PhoneNumberConfirmed);
 
         public async Task<bool> IsUserNameExists (string username) =>
             await Any(x => x.UserName == username);
 
         public async Task<bool> IsLockedAccount(string username) =>
-            await Any(x => x.UserName == username && x.LockoutEnabled == true && x.LockoutEnd > DateTime.Now);
+            await Any(x => x.UserName == username && x.LockoutEnabled && x.LockoutEnd > DateTime.Now);
 
         public async Task<int> GetFailLogin(string username)
         {
