@@ -38,5 +38,58 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> IsUserNameExists (string username) =>
             await Any(x => x.UserName == username);
+
+        public async Task<bool> IsLockedAccount(string username) =>
+            await Any(x => x.UserName == username && x.LockoutEnabled == true && x.LockoutEnd > DateTime.Now);
+
+        public async Task<int> GetFailLogin(string username)
+        {
+            var userList = await GetList(x => x.UserName == username);
+            var user = userList.First();
+            return user.AccessFailedCount;
+        }
+
+        public async Task FailLogin(string username)
+        {
+            var userList = await GetList(x => x.UserName == username);
+            var user = userList.First();
+            user.AccessFailedCount++;
+            await Update(user);
+        }
+
+        public async Task LockAccount(string username)
+        {
+            var userList = await GetList(x => x.UserName == username);
+            var user = userList.First();
+            user.LockoutEnabled = true;
+            user.LockoutEnd = DateTime.Now.AddMinutes(30);
+            await Update(user);
+        }
+
+        public async Task UnlockAccount(string username)
+        {
+            var userList = await GetList(x => x.UserName == username);
+            var user = userList.First();
+            user.LockoutEnabled = false;
+            user.LockoutEnd = null;
+            await Update(user);
+        }
+
+        public async Task ResetFailLogin(string username)
+        {
+            var userList = await GetList(x => x.UserName == username);
+            var user = userList.First();
+            user.AccessFailedCount = 0;
+            await Update(user);
+        }
+
+        public async Task BanAccount(string username)
+        {
+            var userList = await GetList(x => x.UserName == username);
+            var user = userList.First();
+            user.LockoutEnabled = true;
+            user.LockoutEnd = DateTime.Now.AddYears(200);
+            await Update(user);
+        }
     }
 }

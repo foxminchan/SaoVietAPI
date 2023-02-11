@@ -54,9 +54,9 @@ namespace WebAPI.Controllers
                 return (false, "Username or password is invalid");
             if (!Regex.IsMatch(user.password, @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$", RegexOptions.None, TimeSpan.FromSeconds(2)))
                 return (false, "Password is too weak");
-            if(! await Task.Run(() => _authorizationService.CheckUserExist(user.username)))
+            if(await Task.Run(() => _authorizationService.CheckUserExist(user.username)))
                 return (false, "Username is already taken");
-            return !string.IsNullOrWhiteSpace(user.email) ? (false, "Email is already taken") : (true, null);
+            return string.IsNullOrWhiteSpace(user.email) ? (false, "Email is required") : (true, null);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace WebAPI.Controllers
         /// <summary>
         /// Lấy bearer token
         /// </summary>
-        /// <param name="loginUser">Đối tượng đăng nhập</param>
+        /// <param name="loginUser">Đối tượng người dùng đăng nhập</param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
         /// <response code="200">Lấy token thành công</response>
@@ -115,12 +115,18 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         [HttpPost("getToken")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetToken(Models.LoginUser loginUser)
+        public async Task<IActionResult> GetToken([FromBody] Models.LoginUser loginUser)
         {
             if (loginUser.username == null || loginUser.password == null)
                 return BadRequest(new { status = false, message = "Invalid client request" });
+            if (await Task.Run(() => _authorizationService.IsLockedAccount(loginUser.username)))
+                return BadRequest(new { status = false, message = "Account is locked. Please contact admin" });
             if (!await Task.Run(() => _authorizationService.CheckAccountValid(loginUser.username, loginUser.password)))
+            {
+                await Task.Run(() => _authorizationService.FailLogin(loginUser.username));
                 return BadRequest(new { status = false, message = "Invalid credentials" });
+            }
+            await Task.Run(() => _authorizationService.ResetFailLogin(loginUser.username));
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, _config.GetSection("Jwt:Subject").Value ?? throw new InvalidOperationException()),

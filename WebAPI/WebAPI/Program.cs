@@ -296,7 +296,6 @@ app.UseSwagger(c =>
 
 app.UseSwaggerUI(c =>
 {
-    c.DefaultModelsExpandDepth(-1);
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sao Việt API v1");
     c.InjectStylesheet("/css/swagger-ui.css");
     c.InjectJavascript("/js/swagger-ui.js");
