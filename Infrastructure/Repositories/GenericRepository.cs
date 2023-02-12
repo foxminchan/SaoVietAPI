@@ -166,11 +166,12 @@ namespace Infrastructure.Repositories
 
         public virtual async Task<bool> Any(Expression<Func<T, bool>> where) => await _dbSet.AnyAsync(where);
 
-        private async Task RefreshCache()
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task RefreshCache()
         {
             _memoryCache.Remove(_cacheKey);
-            var cachedList = await _context.Set<T>().ToListAsync();
-            _memoryCache.Set(_cacheKey, cachedList);
+            var entities = await _dbSet.AsNoTracking().ToListAsync();
+            _memoryCache.Set(_cacheKey, entities);
         }
     }
 }
