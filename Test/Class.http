@@ -1,0 +1,84 @@
+@controller=Class
+
+# Get all classes
+GET {{base_url}}/{{controller}} HTTP/1.1
+
+###
+
+# Get a class by id
+@id=DOHOA01
+GET {{base_url}}/{{controller}}/{{id}} HTTP/1.1
+
+###
+
+# Get a class by name
+@name=AutoCad%20v%C3%A0%20Adobe%20illustrator%2001
+GET {{base_url}}/{{controller}}/name/{{name}} HTTP/1.1
+
+###
+
+# Get a class by status
+@status=Expired
+GET {{base_url}}/{{controller}}/status/{{status}} HTTP/1.1
+Authorization: Bearer {{bearer_token}}
+
+###
+
+# Get a class by teacher
+@id=417982d3-8338-4d75-bc7c-08db0159e689
+GET {{base_url}}/{{controller}}/teacher/{{id}} HTTP/1.1
+Authorization: Bearer {{bearer_token}}
+
+###
+
+# Get a class by student
+@id=d7d58827-b87f-4a5e-8048-b533f09b3e7a
+GET {{base_url}}/{{controller}}/student/{{id}} HTTP/1.1
+Authorization: Bearer {{bearer_token}}
+
+###
+
+# Add new class
+POST {{base_url}}/{{controller}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+	"id": "DOHOA01",
+  "name": "AutoCad và Adobe illustrator 01",
+  "startDate": "2023-01-01",
+  "endDate": "2023-02-01",
+  "teacherId": null,
+  "branchId": null
+}
+
+###
+
+# Update a class
+@id=DOHOA01
+PUT {{base_url}}/{{controller}}/{{id}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+  "name": "AutoCad và Adobe illustrator 01",
+  "startDate": "2023-01-01",
+  "endDate": "2023-03-01",
+  "teacherId": null,
+  "branchId": null
+}
+
+###
+
+# Delete a class
+@id=DOHOA01
+DELETE {{base_url}}/{{controller}}/{{id}} HTTP/1.1
+Authorization: Bearer {{bearer_token}}
+
+###
+
+# Delete a student from a class
+@class_id=DOHOA01
+@student_id=417982d3-8338-4d75-bc7c-08db0159e689
+DELETE {{base_url}}/{{controller}}/class/{{class_id}}/student/{{student_id}} HTTP/1.1
+Authorization: Bearer {{bearer_token}}

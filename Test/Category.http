@@ -1,0 +1,41 @@
+@controller=Category
+
+# Get all categories
+GET {{base_url}}/{{controller}} HTTP/1.1
+
+###
+
+# Get category by id
+@id=DM001
+GET {{base_url}}/{{controller}}/{{id}} HTTP/1.1
+
+###
+
+# Add new category
+POST {{base_url}}/{{controller}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+	"id": "DM001",
+  "name": "Thiết kế đồ hoạ"
+}
+
+###
+
+# Update category
+PUT {{base_url}}/{{controller}}/{{id}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+  "id": "DM001",
+  "name": "Thiết kế đồ hoạ"
+}
+
+###
+
+# Delete category
+DELETE {{base_url}}/{{controller}}/{{id}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}

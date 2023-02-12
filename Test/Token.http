@@ -1,6 +1,6 @@
 @controller=Token
 # Register new user
-POST {{base_url}}/{{controller}}/register
+POST {{base_url}}/{{controller}}/register HTTP/1.1
 Content-Type: application/json
 
 {
@@ -13,7 +13,7 @@ Content-Type: application/json
 ###
 
 # Get bearer token
-POST {{base_url}}/{{controller}}/getToken
+POST {{base_url}}/{{controller}}/getToken HTTP/1.1
 Content-Type: application/json
 
 {

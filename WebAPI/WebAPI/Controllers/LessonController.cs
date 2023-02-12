@@ -84,13 +84,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Lesson/string
+        ///     GET /api/v1/Lesson/name/string
         /// </remarks>
         /// <response code="200">Lấy bài học thành công</response>
         /// <response code="204">Không có bài học nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("{name}")]
+        [HttpGet("name/{name}")]
         [AllowAnonymous]
         public async Task<IActionResult> FindByName([FromRoute] string name)
         {

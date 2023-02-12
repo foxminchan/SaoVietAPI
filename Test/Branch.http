@@ -1,0 +1,54 @@
+@controller=Branch
+
+# Get all branches
+GET {{base_url}}/{{controller}} HTTP/1.1
+
+###
+
+# Get a branch by name
+@branch_name=T%C3%A2n%20Mai%20Bi%C3%AAn%20Ho%C3%A0
+GET {{base_url}}/{{controller}}/name/{{branch_name}} HTTP/1.1
+
+###
+
+# Get a branch by id
+@branch_id=TMBH0
+GET {{base_url}}/{{controller}}/{{branch_id}} HTTP/1.1
+
+###
+
+# Get a branch by zone
+@zone=Biên%20Hòa
+GET {{base_url}}/{{controller}}/zone/{{zone}} HTTP/1.1
+
+###
+
+# Add a new branch
+POST {{base_url}}/{{controller}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+  "id": "DDHN1",
+  "name": "Hà Nội",
+  "address": "37 Ngõ 56 Hoàng Cầu, Chợ Dừa, Đống Đa, Hà Nội"
+}
+
+###
+
+# Update a branch
+PUT {{base_url}}/{{controller}}/{{branch_id}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+  "id": "TMBH0",
+  "name": "Tân Mai Biên Hòa",
+  "address": "Số 1, Đường 3/2, Phường Tân Mai, Biên Hòa, Đồng Nai"
+}
+
+###
+
+# Delete a branch
+DELETE {{base_url}}/{{controller}}/{{branch_id}} HTTP/1.1
+Authorization: Bearer {{bearer_token}}

@@ -82,13 +82,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Branch/string
+        ///     GET /api/v1/Branch/name/string
         /// </remarks>
         /// <response code="200">Lấy chi nhánh thành công</response>
         /// <response code="204">Không có chi nhánh nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("{name}")]
+        [HttpGet("name/{name}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetBranchesByNames([FromRoute] string? name)
         {
@@ -146,13 +146,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Branch/string
+        ///     GET /api/v1/Branch/zone/string
         /// </remarks>
         /// <response code="200">Lấy chi nhánh thành công</response>
         /// <response code="204">Không có chi nhánh nào</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("{zone}")]
+        [HttpGet("zone/{zone}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetBranchByZone([FromRoute] string? zone)
         {

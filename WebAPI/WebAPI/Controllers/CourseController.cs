@@ -90,13 +90,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Course/string
+        ///     GET /api/v1/Course/name/string
         /// </remarks>
         /// <response code="200">Tìm kiếm khoá học theo tên thành công</response>
         /// <response code="404">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("{name}")]
+        [HttpGet("name/{name}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetCoursesByNames([FromRoute] string? name)
         {

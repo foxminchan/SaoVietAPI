@@ -1,19 +1,19 @@
 @controller=Teacher
 
 # Get all teachers
-GET {{base_url}}/{{controller}}
+GET {{base_url}}/{{controller}} HTTP/1.1
 
 ###
 
 # Get teacher by id
 @id=417982d3-8338-4d75-bc7c-08db0159e689
-GET {{base_url}}/{{controller}}/{{id}}
+GET {{base_url}}/{{controller}}/{{id}} HTTP/1.1
 
 ###
 
 # Get teacher by name
 @name=Nhân
-GET {{base_url}}/{{controller}}/{{name}}
+GET {{base_url}}/{{controller}}/{{name}} HTTP/1.1
 
 ###
 
@@ -33,7 +33,7 @@ Authorization: Bearer {{bearer_token}}
 
 # Update teacher
 @id=417982d3-8338-4d75-bc7c-08db0159e689
-PUT {{base_url}}/{{controller}}/{{id}}
+PUT {{base_url}}/{{controller}}/{{id}} HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{bearer_token}}
 
@@ -48,5 +48,5 @@ Authorization: Bearer {{bearer_token}}
 
 # Delete teacher
 @id=417982d3-8338-4d75-bc7c-08db0159e689
-DELETE {{base_url}}/{{controller}}/{{id}}
+DELETE {{base_url}}/{{controller}}/{{id}} HTTP/1.1
 Authorization: Bearer {{bearer_token}}

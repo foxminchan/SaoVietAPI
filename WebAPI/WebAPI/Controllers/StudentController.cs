@@ -98,14 +98,14 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Student/string
+        ///     GET /api/v1/Student/name/string
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
         /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("{name}")]
+        [HttpGet("name/{name}")]
         [Authorize]
         public async Task<IActionResult> GetStudentsByName([FromRoute] string? name)
         {
@@ -131,14 +131,14 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Student/number
+        ///     GET /api/v1/Student/phone/number
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
         /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("{phone:regex(^\\d{{10}}$)}")]
+        [HttpGet("phone/{phone:regex(^\\d{{10}}$)}")]
         [Authorize]
         public async Task<IActionResult> GetStudentsByPhone([FromRoute] string? phone)
         {

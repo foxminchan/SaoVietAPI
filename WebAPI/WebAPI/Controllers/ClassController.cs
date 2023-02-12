@@ -142,14 +142,14 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/v1/Class/string
+        ///     GET /api/v1/Class/name/string
         /// </remarks>
         /// <response code="200">Tìm lớp theo tên thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="404">Không tìm thấy lớp</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpGet("{name}")]
+        [HttpGet("name/{name}")]
         [AllowAnonymous]
         public async Task<IActionResult> FindClassByName([FromRoute] string? name)
         {

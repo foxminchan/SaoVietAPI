@@ -1,0 +1,49 @@
+@controller=Course
+
+# Get all courses
+GET {{base_url}}/{{controller}} HTTP/1.1
+
+###
+
+# Get a course by name
+@name=Tin%20hc%20vn%20phng
+GET {{base_url}}/{{controller}}/name/{{name}} HTTP/1.1
+
+###
+
+# Get a course by id
+@id=TNVPOF0001
+GET {{base_url}}/{{controller}}/{{id}} HTTP/1.1
+
+###
+
+# Add a new course
+POST {{base_url}}/{{controller}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+    "id": "TNVPOF0001",
+    "name": "Tin học văn phòng",
+    "description": "Tin học văn phòng Office 365",
+    "categoryId": "DM001"
+}
+
+###
+
+# Update a course
+PUT {{base_url}}/{{controller}}/{{id}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+    "name": "Tin học văn phòng",
+    "description": "Tin học văn phòng Office 365",
+    "categoryId": "DM001"
+}
+
+###
+
+# Delete a course
+DELETE {{base_url}}/{{controller}}/{{id}} HTTP/1.1
+Authorization: Bearer {{bearer_token}}

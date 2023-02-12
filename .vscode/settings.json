@@ -1,7 +1,7 @@
 {
   "rest-client.environmentVariables": {
     "$shared": {
-      "bearer_token": "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKV1RTZXJ2aWNlQWNjZXNzVG9rZW4iLCJqdGkiOiIyNjJkNzBlMy1kMjhhLTRiN2UtODlhNC05YzI5OTcxM2YwN2UiLCJpYXQiOiIxNjc2MTc1MzkxIiwiVXNlck5hbWUiOiJkZXZlbG9wZXIiLCJleHAiOjE2NzYyNjE3OTEsImlzcyI6IkpXVEF1dGhlbnRpY2F0aW9uU2VydmVyIiwiYXVkIjoiSldUU2VydmljZUNsaWVudCJ9.f0TnrZs-SvDITaUoUgV3sO5ALYYb41tQJvVPkgD-Xw4"
+      "bearer_token": "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKV1RTZXJ2aWNlQWNjZXNzVG9rZW4iLCJqdGkiOiIyZmQxOGMwMS0wZTU1LTRiN2UtODYxYS01NTM0Y2U4MjA4ZjgiLCJpYXQiOiIxNjc2MTk0OTk0IiwiVXNlck5hbWUiOiJkZXZlbG9wZXIiLCJleHAiOjE2NzYyODEzOTQsImlzcyI6IkpXVEF1dGhlbnRpY2F0aW9uU2VydmVyIiwiYXVkIjoiSldUU2VydmljZUNsaWVudCJ9.2X27FHSkPCwHcPW23flI-Z9jZLirbcfIANO1cJOtr2Y"
     },
     "local": {
       "base_url": "https://localhost:5000/api/v1"
