@@ -14,7 +14,7 @@ namespace Infrastructure.Repositories
 
     public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
     {
-        public CategoryRepository(ApplicationDbContext context) : base(context)
+        public CategoryRepository(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
         }
 

@@ -34,7 +34,7 @@ namespace Infrastructure
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            
+
             builder.Entity<Teacher>(entity =>
             {
                 entity.ToTable("Teachers");

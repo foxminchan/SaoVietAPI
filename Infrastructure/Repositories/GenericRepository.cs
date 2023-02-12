@@ -1,4 +1,6 @@
 ﻿using System.Linq.Expressions;
+using Domain.Interfaces;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
@@ -16,14 +18,23 @@ namespace Infrastructure.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly DbSet<T> _dbSet;
+        private readonly string _cacheKey = $"{typeof(T)}";
+        private readonly ICache _memoryCache;
 
-        protected GenericRepository(ApplicationDbContext context)
+        protected GenericRepository(ApplicationDbContext context, ICache memoryCache)
         {
             _context = context;
+            _memoryCache = memoryCache;
             _dbSet = _context.Set<T>();
         }
 
-        public virtual async Task<IEnumerable<T>> GetAll() => await _dbSet.AsNoTracking().ToListAsync();
+        public virtual async Task<IEnumerable<T>> GetAll()
+        {
+            if (_memoryCache.TryGet(_cacheKey, out IEnumerable<T> entities)) return entities;
+            entities = await _dbSet.AsNoTracking().ToListAsync();
+            _memoryCache.Set(_cacheKey, entities);
+            return entities;
+        }
 
         public virtual async Task Insert(T entity)
         {
@@ -32,6 +43,7 @@ namespace Infrastructure.Repositories
             {
                 await _dbSet.AddAsync(entity);
                 await transaction.CommitAsync();
+                BackgroundJob.Enqueue(() => RefreshCache());
             }
             catch (DbUpdateException e)
             {
@@ -48,6 +60,7 @@ namespace Infrastructure.Repositories
                 _dbSet.Attach(entity);
                 _context.Entry(entity).State = EntityState.Modified;
                 await transaction.CommitAsync();
+                BackgroundJob.Enqueue(() => RefreshCache());
             }
             catch (DbUpdateException e)
             {
@@ -65,6 +78,7 @@ namespace Infrastructure.Repositories
                 if (obj == null) return;
                 _context.Entry(obj).CurrentValues.SetValues(entity);
                 await transaction.CommitAsync();
+                BackgroundJob.Enqueue(() => RefreshCache());
             }
             catch (DbUpdateException e)
             {
@@ -82,6 +96,7 @@ namespace Infrastructure.Repositories
                     _dbSet.Attach(entity);
                 _dbSet.Remove(entity);
                 await transaction.CommitAsync();
+                BackgroundJob.Enqueue(() => RefreshCache());
             }
             catch (DbUpdateException e)
             {
@@ -99,6 +114,7 @@ namespace Infrastructure.Repositories
                 foreach (var obj in objects)
                     _dbSet.Remove(obj);
                 await transaction.CommitAsync();
+                BackgroundJob.Enqueue(() => RefreshCache());
             }
             catch (DbUpdateException e)
             {
@@ -140,5 +156,11 @@ namespace Infrastructure.Repositories
 
         public virtual async Task<bool> Any(Expression<Func<T, bool>> where) => await _dbSet.AnyAsync(where);
 
+        private async Task RefreshCache()
+        {
+            _memoryCache.Remove(_cacheKey);
+            var cachedList = await _context.Set<T>().ToListAsync();
+            _memoryCache.Set(_cacheKey, cachedList);
+        }
     }
 }

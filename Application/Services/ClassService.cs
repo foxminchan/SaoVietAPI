@@ -23,13 +23,13 @@ namespace Application.Services
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IStudentRepository _studentRepository;
 
-        public ClassService(ApplicationDbContext context) : base(context)
+        public ClassService(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
-            _classRepository = new ClassRepository(context);
-            _teacherRepository = new TeacherRepository(context);
-            _branchRepository = new BranchRepository(context);
-            _classStudentRepository = new ClassStudentRepository(context);
-            _studentRepository = new StudentRepository(context);
+            _classRepository = new ClassRepository(context, cache);
+            _teacherRepository = new TeacherRepository(context, cache);
+            _branchRepository = new BranchRepository(context, cache);
+            _classStudentRepository = new ClassStudentRepository(context, cache);
+            _studentRepository = new StudentRepository(context, cache);
         }
 
         public async Task<List<Class>> GetClasses() => await _classRepository.GetClasses();

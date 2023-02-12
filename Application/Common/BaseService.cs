@@ -1,4 +1,6 @@
-﻿using Infrastructure;
+﻿using Application.Cache;
+using Domain.Interfaces;
+using Infrastructure;
 
 namespace Application.Common
 {
@@ -14,9 +16,14 @@ namespace Application.Common
     public class BaseService
     {
         private readonly ApplicationDbContext _context;
+        private readonly ICache _cache;
 
-        protected BaseService(ApplicationDbContext context) => _context = context;
+        protected BaseService(ApplicationDbContext context, ICache cache)
+        {
+            _context = context;
+            _cache = cache;
+        } 
 
-        protected virtual async Task SaveAsync() => await _context.SaveChangesAsync();
+        protected async Task SaveAsync() => await _context.SaveChangesAsync();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Application.Common;
+﻿using Application.Cache;
+using Application.Common;
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure;
@@ -17,8 +18,8 @@ namespace Application.Services
 
     public class AuthorizationService : BaseService
     {
-        private readonly IUserRepository _userRepository;
-        public AuthorizationService(ApplicationDbContext context) : base(context) => _userRepository = new UserRepository(context);
+        private readonly IApplicationUserRepository _userRepository;
+        public AuthorizationService(ApplicationDbContext context, ICache cache) : base(context, cache) => _userRepository = new ApplicationUserRepository(context, cache);
 
         public async Task<bool> CheckAccountValid(string username, string password) =>
             await _userRepository.CheckAccountValid(username, password);

@@ -11,7 +11,7 @@ namespace Domain.Interfaces
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
 
-    public interface IUserRepository
+    public interface IApplicationUserRepository
     {
         public Task Register(ApplicationUser user);
         public Task<bool> CheckAccountValid(string username, string password);

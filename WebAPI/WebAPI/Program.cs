@@ -13,6 +13,9 @@ using Serilog.Sinks.SystemConsole.Themes;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
 using System.Text;
+using Application.Cache;
+using Domain.Interfaces;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,8 +93,18 @@ builder.Services.AddSwaggerGen(options =>
 });
 #endregion
 
-#region Request Throttling
+#region Cache
 builder.Services.AddMemoryCache();
+builder.Services.AddTransient<ICache, CacheService>();
+#endregion
+
+#region Hangfire
+builder.Services.AddHangfire(x => 
+    x.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHangfireServer();
+#endregion
+
+#region Request Throttling
 builder.Services.Configure<IpRateLimitOptions>(options =>
 {
     options.EnableEndpointRateLimiting = true;
@@ -139,7 +152,9 @@ builder.Services.AddCors(options =>
 });
 #endregion
 
+#region Mapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+#endregion
 
 #region ELK Stack
 ConfigureLogging();
@@ -329,6 +344,7 @@ else
 }
 #endregion
 
+app.UseHangfireDashboard("/jobs");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseRouting();

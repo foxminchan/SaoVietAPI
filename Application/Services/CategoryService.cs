@@ -19,7 +19,7 @@ namespace Application.Services
     {
         private readonly ICategoryRepository _categoryRepository;
 
-        public CategoryService(ApplicationDbContext context) : base(context) => _categoryRepository = new CategoryRepository(context);
+        public CategoryService(ApplicationDbContext context, ICache cache) : base(context, cache) => _categoryRepository = new CategoryRepository(context, cache);
 
         public async Task<List<Category>> GetCategories() => await _categoryRepository.GetCategories();
 

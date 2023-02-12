@@ -12,9 +12,9 @@ namespace Infrastructure.Repositories
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
 
-    public class UserRepository : GenericRepository<ApplicationUser>, IUserRepository
+    public class ApplicationUserRepository : GenericRepository<ApplicationUser>, IApplicationUserRepository
     {
-        public UserRepository(ApplicationDbContext context) : base(context)
+        public ApplicationUserRepository(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
         }
 

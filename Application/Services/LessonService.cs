@@ -20,10 +20,10 @@ namespace Application.Services
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseRepository _courseRepository;
 
-        public LessonService(ApplicationDbContext context) : base(context)
+        public LessonService(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
-            _lessonRepository = new LessonRepository(context);
-            _courseRepository = new CourseRepository(context);
+            _lessonRepository = new LessonRepository(context, cache);
+            _courseRepository = new CourseRepository(context, cache);
         }
 
         public async Task<List<Lesson>> GetAllLesson() => await _lessonRepository.GetAllLesson();

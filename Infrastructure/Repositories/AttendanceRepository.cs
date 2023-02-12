@@ -14,7 +14,7 @@ namespace Infrastructure.Repositories
 
     public class AttendanceRepository : GenericRepository<Attendance>, IAttendanceRepository
     {
-        public AttendanceRepository(ApplicationDbContext context) : base(context)
+        public AttendanceRepository(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
         }
 

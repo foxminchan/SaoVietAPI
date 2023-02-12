@@ -21,11 +21,11 @@ namespace Application.Services
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IClassRepository _classRepository;
 
-        public StudentService(ApplicationDbContext context) : base(context)
+        public StudentService(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
-            _studentRepository = new StudentRepository(context);
-            _classRepository = new ClassRepository(context);
-            _classStudentRepository = new ClassStudentRepository(context);
+            _studentRepository = new StudentRepository(context, cache);
+            _classRepository = new ClassRepository(context, cache);
+            _classStudentRepository = new ClassStudentRepository(context, cache);
             
         }
 

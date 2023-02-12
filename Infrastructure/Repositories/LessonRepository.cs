@@ -14,7 +14,7 @@ namespace Infrastructure.Repositories
 
     public class LessonRepository : GenericRepository<Lesson>, ILessonRepository
     {
-        public LessonRepository(ApplicationDbContext context) : base(context)
+        public LessonRepository(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
         }
 

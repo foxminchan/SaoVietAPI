@@ -14,7 +14,7 @@ namespace Infrastructure.Repositories
 
     public class BranchRepository : GenericRepository<Branch>, IBranchRepository
     {
-        public BranchRepository(ApplicationDbContext context) : base(context)
+        public BranchRepository(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
         }
 

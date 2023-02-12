@@ -14,7 +14,7 @@ namespace Infrastructure.Repositories
 
     public class CourseRepository : GenericRepository<Course>, ICourseRepository
     {
-        public CourseRepository(ApplicationDbContext context) : base(context)
+        public CourseRepository(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
         }
 

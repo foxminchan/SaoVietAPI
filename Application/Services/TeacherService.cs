@@ -20,10 +20,10 @@ namespace Application.Services
         private readonly ApplicationDbContext _context;
         private readonly ITeacherRepository _teacherRepository;
 
-        public TeacherService(ApplicationDbContext context) : base(context)
+        public TeacherService(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
             _context = context;
-            _teacherRepository = new TeacherRepository(_context);
+            _teacherRepository = new TeacherRepository(_context, cache);
         }
 
         public async Task<IEnumerable<string>> GetAllId() => await  _context.GetAllId();

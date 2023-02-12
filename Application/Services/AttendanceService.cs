@@ -1,6 +1,7 @@
 ﻿using Application.Common;
 using Domain.Entities;
 using Domain.Interfaces;
+using Hangfire;
 using Infrastructure;
 using Infrastructure.Repositories;
 
@@ -21,11 +22,11 @@ namespace Application.Services
         private readonly ILessonRepository _lessonRepository;
         private readonly IClassRepository _classRepository;
 
-        public AttendanceService(ApplicationDbContext context) : base(context)
+        public AttendanceService(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
-            _attendanceRepository = new AttendanceRepository(context);
-            _lessonRepository = new LessonRepository(context);
-            _classRepository = new ClassRepository(context);
+            _attendanceRepository = new AttendanceRepository(context, cache);
+            _lessonRepository = new LessonRepository(context, cache);
+            _classRepository = new ClassRepository(context, cache);
         }
 
         public async Task<List<Attendance>> GetAllAttendance() => await _attendanceRepository.GetAllAttendance();
