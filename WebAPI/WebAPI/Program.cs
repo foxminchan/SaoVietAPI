@@ -1,7 +1,10 @@
 using Application.Services;
 using AspNetCoreRateLimit;
 using Infrastructure;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Prometheus;
 using Serilog;
@@ -10,8 +13,6 @@ using Serilog.Sinks.SystemConsole.Themes;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
 using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,28 +25,34 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
 
 #region Authentication
+
 builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters()
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidAudience = builder.Configuration.GetSection("Jwt:Audience").Value,
-        ValidIssuer = builder.Configuration.GetSection("Jwt:Issuer").Value,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt:Key").Value ?? throw new InvalidOperationException()))
-    };
-});
+        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddCookie()
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidAudience = builder.Configuration.GetSection("Jwt:Audience").Value,
+            ValidIssuer = builder.Configuration.GetSection("Jwt:Issuer").Value,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration.GetSection("Jwt:Key").Value ?? throw new InvalidOperationException()))
+        };
+    });
 #endregion
 
 #region Swagger
@@ -53,12 +60,13 @@ builder.Services.AddSwaggerGen(options =>
 {
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-    options.AddSecurityDefinition(name: "Bearer", securityScheme: new OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
+        In = ParameterLocation.Header,
         Name = "Authorization",
         Description = "Enter the Bearer Authorization string as following: `Bearer Generated-JWT-Token`",
-        In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
+        BearerFormat = "JWT",
         Scheme = "Bearer"
     });
 
@@ -67,14 +75,14 @@ builder.Services.AddSwaggerGen(options =>
         {
             new OpenApiSecurityScheme
             {
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = ParameterLocation.Header,
                 Reference = new OpenApiReference
                 {
                     Id = "Bearer",
                     Type = ReferenceType.SecurityScheme
-                }
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
             },
             new List<string>()
         }
@@ -228,7 +236,7 @@ app.UseSwagger(c =>
             throw new ArgumentNullException(nameof(httpReq));
         swagger.Info = info;
         swagger.ExternalDocs = externalDocs;
-        swagger.Tags = new List<OpenApiTag> { 
+        swagger.Tags = new List<OpenApiTag> {
             new()
             {
                 Name = "Token",
@@ -240,43 +248,43 @@ app.UseSwagger(c =>
                 Name = "Teacher",
                 Description = "Quản lý thông tin giáo viên",
                 ExternalDocs = findOutMore
-            }, 
+            },
             new ()
             {
                 Name = "Class",
                 Description = "Quản lý thông tin lớp học",
                 ExternalDocs = findOutMore
-            }, 
+            },
             new ()
             {
                 Name = "Branch",
                 Description = "Quản lý thông tin chi nhánh",
                 ExternalDocs = findOutMore
-            }, 
+            },
             new ()
             {
                 Name = "Student",
                 Description = "Quản lý thông tin học viên",
                 ExternalDocs = findOutMore
-            }, 
+            },
             new ()
             {
                 Name = "Category",
                 Description = "Quản lý thông tin danh mục",
                 ExternalDocs = findOutMore
-            }, 
+            },
             new ()
             {
                 Name = "Course",
                 Description = "Quản lý thông tin khoá học",
                 ExternalDocs = findOutMore
-            }, 
+            },
             new ()
             {
                 Name = "Lesson",
                 Description = "Quản lý thông tin bài học",
                 ExternalDocs = findOutMore
-            }, 
+            },
             new ()
             {
                 Name = "Attendance",

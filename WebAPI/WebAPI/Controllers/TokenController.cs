@@ -112,7 +112,7 @@ namespace WebAPI.Controllers
         /// <exception cref="InvalidOperationException"></exception>
         /// <remarks>
         /// Sample request:
-        ///
+        /// 
         ///     POST /api/v1/Token/getToken
         ///     {
         ///         "username": "string",
@@ -126,37 +126,45 @@ namespace WebAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetToken([FromBody] Models.LoginUser loginUser)
         {
-            if (loginUser.username == null || loginUser.password == null)
-                return BadRequest(new { status = false, message = "Invalid client request" });
-            if (await Task.Run(() => _authorizationService.IsLockedAccount(loginUser.username)))
-                return BadRequest(new { status = false, message = "Account is locked. Please contact admin" });
-            if (!await Task.Run(() => _authorizationService.CheckAccountValid(loginUser.username, loginUser.password)))
+            try
             {
-                await Task.Run(() => _authorizationService.FailLogin(loginUser.username));
-                return BadRequest(new { status = false, message = "Invalid credentials" });
+                if (loginUser.username == null || loginUser.password == null)
+                    return BadRequest(new { status = false, message = "Invalid client request" });
+                if (await Task.Run(() => _authorizationService.IsLockedAccount(loginUser.username)))
+                    return BadRequest(new { status = false, message = "Account is locked. Please contact admin" });
+                if (!await Task.Run(() => _authorizationService.CheckAccountValid(loginUser.username, loginUser.password)))
+                {
+                    await Task.Run(() => _authorizationService.FailLogin(loginUser.username));
+                    return BadRequest(new { status = false, message = "Invalid credentials" });
+                }
+                await Task.Run(() => _authorizationService.ResetFailLogin(loginUser.username));
+                var claims = new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, _config.GetSection("Jwt:Subject").Value ?? throw new InvalidOperationException()),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(JwtRegisteredClaimNames.Iat, ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds().ToString()),
+                    new Claim("UserName", loginUser.username)
+                };
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("Jwt:Key").Value ?? throw new InvalidOperationException()));
+
+                var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+
+                var token = new JwtSecurityToken(
+                    _config.GetSection("Jwt:Issuer").Value,
+                    _config.GetSection("Jwt:Audience").Value,
+                    claims,
+                    expires: DateTime.UtcNow.AddDays(1),
+                    signingCredentials: signIn
+                );
+
+                return Ok(new { status = true, expire = DateTime.UtcNow.AddDays(1), token = new JwtSecurityTokenHandler().WriteToken(token) });
             }
-            await Task.Run(() => _authorizationService.ResetFailLogin(loginUser.username));
-            var claims = new[]
+            catch (Exception e)
             {
-                new Claim(JwtRegisteredClaimNames.Sub, _config.GetSection("Jwt:Subject").Value ?? throw new InvalidOperationException()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds().ToString()),
-                new Claim("UserName", loginUser.username)
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("Jwt:Key").Value ?? throw new InvalidOperationException()));
-
-            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
-
-            var token = new JwtSecurityToken(
-                _config.GetSection("Jwt:Issuer").Value,
-                _config.GetSection("Jwt:Audience").Value,
-                claims,
-                expires: DateTime.UtcNow.AddDays(1),
-                signingCredentials: signIn
-            );
-
-            return Ok(new { status = true, expire = DateTime.UtcNow.AddDays(1), token = new  JwtSecurityTokenHandler().WriteToken(token) });
+                _logger.LogError(e, "Error while getting token");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "An error occurred while processing your request" });
+            }
         }
     }
 }

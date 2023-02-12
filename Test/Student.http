@@ -1,0 +1,68 @@
+@controller=Student
+
+# Get all students
+GET {{base_url}}/{{controller}}
+Authorization: Bearer {{bearer_token}}
+
+###
+
+# Get student by id
+@id=d7d58827-b87f-4a5e-8048-b533f09b3e7a
+GET {{base_url}}/{{controller}}/{{id}}
+
+###
+
+# Get student by name
+@name=Nhân
+GET {{base_url}}/{{controller}}/{{name}}
+Authorization: Bearer {{bearer_token}}
+
+###
+
+# Get student by phone
+@phone=0123456789
+GET {{base_url}}/{{controller}}/{{phone}}
+Authorization: Bearer {{bearer_token}}
+
+###
+
+# Get class of student
+@id=d7d58827-b87f-4a5e-8048-b533f09b3e7a
+GET {{base_url}}/{{controller}}/class/{{id}}
+Authorization: Bearer {{bearer_token}}
+
+###
+
+# Add new student
+POST {{base_url}}/{{controller}}
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+  "fullName": "Nguyễn Văn A",
+  "dob": "2002-08-02",
+  "email": "example@email.com",
+  "phone": "0123456789"
+}
+
+###
+
+# Update student
+@id=d7d58827-b87f-4a5e-8048-b533f09b3e7a
+PUT {{base_url}}/{{controller}}/{{id}}
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+  "fullName": "Nguyễn Văn B",
+  "dob": "2002-08-02",
+  "email": "example@email.com",
+  "phone": "0123456789"
+}
+
+###
+
+# Delete student
+@id=d7d58827-b87f-4a5e-8048-b533f09b3e7a
+DELETE {{base_url}}/{{controller}}/{{id}}
+Authorization: Bearer {{bearer_token}}

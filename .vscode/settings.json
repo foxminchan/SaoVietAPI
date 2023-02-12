@@ -1,8 +1,10 @@
 {
   "rest-client.environmentVariables": {
-    "$shared": {},
+    "$shared": {
+      "bearer_token": "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKV1RTZXJ2aWNlQWNjZXNzVG9rZW4iLCJqdGkiOiIyNjJkNzBlMy1kMjhhLTRiN2UtODlhNC05YzI5OTcxM2YwN2UiLCJpYXQiOiIxNjc2MTc1MzkxIiwiVXNlck5hbWUiOiJkZXZlbG9wZXIiLCJleHAiOjE2NzYyNjE3OTEsImlzcyI6IkpXVEF1dGhlbnRpY2F0aW9uU2VydmVyIiwiYXVkIjoiSldUU2VydmljZUNsaWVudCJ9.f0TnrZs-SvDITaUoUgV3sO5ALYYb41tQJvVPkgD-Xw4"
+    },
     "local": {
       "base_url": "https://localhost:5000/api/v1"
-    },
+    }
   }
 }
