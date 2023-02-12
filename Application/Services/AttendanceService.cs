@@ -22,7 +22,7 @@ namespace Application.Services
         private readonly ILessonRepository _lessonRepository;
         private readonly IClassRepository _classRepository;
 
-        public AttendanceService(ApplicationDbContext context, ICache cache) : base(context, cache)
+        public AttendanceService(ApplicationDbContext context, ICache cache) : base(context)
         {
             _attendanceRepository = new AttendanceRepository(context, cache);
             _lessonRepository = new LessonRepository(context, cache);

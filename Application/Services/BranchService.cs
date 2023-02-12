@@ -19,7 +19,7 @@ namespace Application.Services
     {
         private readonly IBranchRepository _branchRepository;
 
-        public BranchService(ApplicationDbContext context, ICache cache) : base(context, cache) => _branchRepository = new BranchRepository(context, cache);
+        public BranchService(ApplicationDbContext context, ICache cache) : base(context) => _branchRepository = new BranchRepository(context, cache);
 
         public async Task<List<Branch>> GetBranches() => await _branchRepository.GetBranches();
 

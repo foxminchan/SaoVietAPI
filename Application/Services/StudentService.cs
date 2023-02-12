@@ -21,7 +21,7 @@ namespace Application.Services
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IClassRepository _classRepository;
 
-        public StudentService(ApplicationDbContext context, ICache cache) : base(context, cache)
+        public StudentService(ApplicationDbContext context, ICache cache) : base(context)
         {
             _studentRepository = new StudentRepository(context, cache);
             _classRepository = new ClassRepository(context, cache);

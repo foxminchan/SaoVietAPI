@@ -19,7 +19,7 @@ namespace Application.Services
     public class AuthorizationService : BaseService
     {
         private readonly IApplicationUserRepository _userRepository;
-        public AuthorizationService(ApplicationDbContext context, ICache cache) : base(context, cache) => _userRepository = new ApplicationUserRepository(context, cache);
+        public AuthorizationService(ApplicationDbContext context, ICache cache) : base(context) => _userRepository = new ApplicationUserRepository(context, cache);
 
         public async Task<bool> CheckAccountValid(string username, string password) =>
             await _userRepository.CheckAccountValid(username, password);

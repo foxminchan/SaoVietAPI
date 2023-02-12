@@ -20,7 +20,7 @@ namespace Application.Services
         private readonly ICourseRepository _courseRepository;
         private readonly ICategoryRepository _categoryRepository;
 
-        public CourseService(ApplicationDbContext context, ICache cache) : base(context, cache)
+        public CourseService(ApplicationDbContext context, ICache cache) : base(context)
         {
             _courseRepository = new CourseRepository(context, cache);
             _categoryRepository = new CategoryRepository(context, cache);

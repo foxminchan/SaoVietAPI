@@ -20,7 +20,7 @@ namespace Application.Services
         private readonly ApplicationDbContext _context;
         private readonly ITeacherRepository _teacherRepository;
 
-        public TeacherService(ApplicationDbContext context, ICache cache) : base(context, cache)
+        public TeacherService(ApplicationDbContext context, ICache cache) : base(context)
         {
             _context = context;
             _teacherRepository = new TeacherRepository(_context, cache);

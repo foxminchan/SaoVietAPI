@@ -16,13 +16,8 @@ namespace Application.Common
     public class BaseService
     {
         private readonly ApplicationDbContext _context;
-        private readonly ICache _cache;
 
-        protected BaseService(ApplicationDbContext context, ICache cache)
-        {
-            _context = context;
-            _cache = cache;
-        } 
+        protected BaseService(ApplicationDbContext context) => _context = context;
 
         protected async Task SaveAsync() => await _context.SaveChangesAsync();
     }

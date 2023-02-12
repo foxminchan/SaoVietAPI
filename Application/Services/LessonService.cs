@@ -20,7 +20,7 @@ namespace Application.Services
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseRepository _courseRepository;
 
-        public LessonService(ApplicationDbContext context, ICache cache) : base(context, cache)
+        public LessonService(ApplicationDbContext context, ICache cache) : base(context)
         {
             _lessonRepository = new LessonRepository(context, cache);
             _courseRepository = new CourseRepository(context, cache);
