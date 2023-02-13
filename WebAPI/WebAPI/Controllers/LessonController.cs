@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using Application.Message;
+using Application.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,11 +26,13 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly LessonService _lessonService;
+        private readonly IRabbitMqService _rabbitMqService;
 
         /// <inheritdoc />
         public LessonController(LessonService lessonService, ILogger<TeacherController> logger)
         {
             _logger = logger;
+            _rabbitMqService = new RabbitMqService("lessonQueue");
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Lesson, Domain.Entities.Lesson>()).CreateMapper();
             _lessonService = lessonService;
         }
@@ -174,6 +177,7 @@ namespace WebAPI.Controllers
                     return BadRequest(new { status = false, message = "Lesson id is null or exists" });
                 var lessonEntity = _mapper.Map<Domain.Entities.Lesson>(lesson);
                 await Task.Run(() => _lessonService.AddLesson(lessonEntity));
+                _rabbitMqService.SendMessage(lesson);
                 return Ok(new { status = true, message = "Add lesson successfully" });
             }
             catch (Exception e)

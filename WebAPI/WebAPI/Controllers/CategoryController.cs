@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using Application.Message;
+using Application.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,11 +26,13 @@ namespace WebAPI.Controllers
         private readonly ILogger<CategoryController> _logger;
         private readonly IMapper _mapper;
         private readonly CategoryService _studentService;
+        private readonly IRabbitMqService _rabbitMqService;
 
         /// <inheritdoc />
         public CategoryController(ILogger<CategoryController> logger, CategoryService studentService)
         {
             _logger = logger;
+            _rabbitMqService = new RabbitMqService("categoryQueue");
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Category, Domain.Entities.Category>()).CreateMapper();
             _studentService = studentService;
         }
@@ -140,6 +143,7 @@ namespace WebAPI.Controllers
                     return BadRequest(new { status = false, message = "Category id already exists" });
                 var categoryEntity = _mapper.Map<Domain.Entities.Category>(category);
                 await Task.Run(() => _studentService.AddCategory(categoryEntity));
+                _rabbitMqService.SendMessage(category);
                 return Ok(new { status = true, message = "Add category successfully" });
             }
             catch (Exception e)

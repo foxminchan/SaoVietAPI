@@ -14,6 +14,7 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
 using System.Text;
 using Application.Cache;
+using Application.Message;
 using Domain.Interfaces;
 using Hangfire;
 using HealthChecks.UI.Client;
@@ -34,8 +35,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 // Add health checks
+
+#region RabbitMQ
+builder.Services.AddScoped<IRabbitMqService, RabbitMqService>();
+builder.Services.AddSingleton(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException());
+#endregion
+
+#region Health Check
 builder.Services.AddHealthChecks()
     .AddCheck<HealthCheckService>("SaoVietApiChecks", tags: new[] { "Sao Viet Api" });
+#endregion
+
 #region Authentication
 
 builder.Services.AddAuthentication(options =>
