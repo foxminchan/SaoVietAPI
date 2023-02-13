@@ -32,3 +32,16 @@ spec:
       - name: cache
         persistentVolumeClaim:
           claimName: cache
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  selector:
+    app: redis
+  ports:
+    - name: redis-port
+      port: 6379
+      targetPort: 6379
+  type: LoadBalancer

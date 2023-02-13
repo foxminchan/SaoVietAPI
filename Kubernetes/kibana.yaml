@@ -39,4 +39,4 @@ spec:
     - name: http
       port: 5601
       targetPort: 5601
-  type: ClusterIP
+  type: LoadBalancer
