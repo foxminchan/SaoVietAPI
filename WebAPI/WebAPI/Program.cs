@@ -16,6 +16,10 @@ using System.Text;
 using Application.Cache;
 using Domain.Interfaces;
 using Hangfire;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using HealthCheckService = Application.Health.HealthCheckService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +33,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
-
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddCheck<HealthCheckService>("SaoVietApiChecks", tags: new[] { "Sao Viet Api" });
 #region Authentication
 
 builder.Services.AddAuthentication(options =>
@@ -100,7 +106,7 @@ builder.Services.AddTransient<ICache, CacheService>();
 
 #region Hangfire
 builder.Services.AddHangfire(x => 
-    x.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+    x.UseSqlServerStorage(builder.Configuration.GetConnectionString("BackgroundJobConnection")));
 builder.Services.AddHangfireServer();
 #endregion
 
@@ -353,4 +359,22 @@ app.UseAuthorization();
 app.UseIpRateLimiting();
 app.MapControllers();
 app.MapMetrics();
+app.MapHealthChecks("/health", new HealthCheckOptions()
+{
+    Predicate = _ => true,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+    AllowCachingResponses = false,
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status200OK,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+    }
+});
+app.UseHealthChecks("/health/live", new HealthCheckOptions()
+{
+    Predicate = r => r.Tags.Contains("live"),
+    AllowCachingResponses = false,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 app.Run();
