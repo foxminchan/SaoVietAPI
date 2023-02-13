@@ -2,7 +2,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
-using Application.Message;
 using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
@@ -27,13 +26,11 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly ClassService _classService;
-        private readonly IRabbitMqService _rabbitMqService;
 
         /// <inheritdoc />
         public ClassController(ClassService classService, ILogger<TeacherController> logger)
         {
             _logger = logger;
-            _rabbitMqService = new RabbitMqService("classQueue");
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Class, Domain.Entities.Class>()).CreateMapper();
             _classService = classService;
         }
@@ -331,7 +328,6 @@ namespace WebAPI.Controllers
                     return BadRequest(new { status = false, message = "Class id is null or existed" });
                 var newClass = _mapper.Map<Domain.Entities.Class>(request);
                 await Task.Run(() => _classService.AddClass(newClass));
-                _rabbitMqService.SendMessage(request);
                 return Ok(new { status = true, message = "Add class successfully" });
             }
             catch (Exception e)

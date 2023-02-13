@@ -3,7 +3,6 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
-using Application.Message;
 
 namespace WebAPI.Controllers
 {
@@ -27,13 +26,11 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly StudentService _studentService;
-        private readonly IRabbitMqService _rabbitMqService;
 
         /// <inheritdoc />
         public StudentController(StudentService studentService, ILogger<TeacherController> logger)
         {
             _logger = logger;
-            _rabbitMqService = new RabbitMqService("studentQueue");
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Student, Domain.Entities.Student>()).CreateMapper();
             _studentService = studentService;
         }
@@ -263,7 +260,6 @@ namespace WebAPI.Controllers
                 var newStudent = _mapper.Map<Domain.Entities.Student>(student);
                 newStudent.id = Guid.NewGuid();
                 await Task.Run(() => _studentService.AddStudent(newStudent));
-                _rabbitMqService.SendMessage(student);
                 return Ok(new { status = true, message = "Add student successfully" });
             }
             catch (Exception e)
@@ -305,7 +301,6 @@ namespace WebAPI.Controllers
                 if (await Task.Run(() => _studentService.IsAlreadyInClass(studentId.Value, classId)))
                     return BadRequest(new { status = false, message = "Student is already in class" });
                 await Task.Run(() => _studentService.AddClassStudent(new Domain.Entities.ClassStudent { classId = classId, studentId = studentId.Value }));
-                _rabbitMqService.SendMessage(new { studentId = studentId.Value, classId });
                 return Ok(new { status = true, message = "Add student to class successfully" });
             }
             catch (Exception e)

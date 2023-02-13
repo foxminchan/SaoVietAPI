@@ -14,7 +14,6 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
 using System.Text;
 using Application.Cache;
-using Application.Message;
 using Domain.Interfaces;
 using Hangfire;
 using HealthChecks.UI.Client;
@@ -69,11 +68,6 @@ ElasticsearchSinkOptions ConfigureElasticSink(IConfiguration configuration, stri
         IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name?.ToLower(System.Globalization.CultureInfo.CurrentCulture).Replace(".", "-")}-{environment?.ToLower(System.Globalization.CultureInfo.CurrentCulture).Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
     };
 }
-#endregion
-
-#region RabbitMQ
-builder.Services.AddScoped<IRabbitMqService, RabbitMqService>();
-builder.Services.AddSingleton(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException());
 #endregion
 
 #region Health Check
@@ -145,7 +139,11 @@ builder.Services.AddSwaggerGen(options =>
 #endregion
 
 #region Cache
-builder.Services.AddMemoryCache();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
+    options.InstanceName = "SaoVietApi";
+});
 builder.Services.AddTransient<ICache, CacheService>();
 #endregion
 
@@ -156,6 +154,7 @@ builder.Services.AddHangfireServer();
 #endregion
 
 #region Request Throttling
+builder.Services.AddMemoryCache();
 builder.Services.Configure<IpRateLimitOptions>(options =>
 {
     options.EnableEndpointRateLimiting = true;

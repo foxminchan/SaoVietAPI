@@ -1,5 +1,4 @@
-﻿using Application.Message;
-using Application.Services;
+﻿using Application.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,13 +26,11 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly BranchService _branchService;
-        private readonly IRabbitMqService _rabbitMqService;
 
         /// <inheritdoc />
         public BranchController(BranchService branchService, ILogger<TeacherController> logger)
         {
             _logger = logger;
-            _rabbitMqService = new RabbitMqService("branchQueue");
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Branch, Domain.Entities.Branch>()).CreateMapper();
             _branchService = branchService;
         }
@@ -205,7 +202,6 @@ namespace WebAPI.Controllers
             {
                 var branchEntity = _mapper.Map<Domain.Entities.Branch>(branch);
                 await Task.Run(() => _branchService.AddBranch(branchEntity));
-                _rabbitMqService.SendMessage(branch);
                 return Ok(new { status = true, message = "Add branch successfully" });
             }
             catch (Exception e)

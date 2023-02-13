@@ -19,25 +19,25 @@ namespace Infrastructure.Repositories
         private readonly ApplicationDbContext _context;
         private readonly DbSet<T> _dbSet;
         private readonly string _cacheKey = $"{typeof(T)}";
-        private readonly ICache _memoryCache;
+        private readonly ICache _redisCache;
         private readonly SemaphoreSlim _lock = new(1, 1);
 
-        protected GenericRepository(ApplicationDbContext context, ICache memoryCache)
+        protected GenericRepository(ApplicationDbContext context, ICache redisCache)
         {
             _context = context;
-            _memoryCache = memoryCache;
+            _redisCache = redisCache;
             _dbSet = _context.Set<T>();
         }
 
         public virtual async Task<IEnumerable<T>> GetAll()
         {
-            if (_memoryCache.TryGet(_cacheKey, out IEnumerable<T> entities)) return entities;
+            if (_redisCache.TryGet(_cacheKey, out IEnumerable<T> entities)) return entities;
             await _lock.WaitAsync();
             try
             {
-                if (_memoryCache.TryGet(_cacheKey, out entities)) return entities;
+                if (_redisCache.TryGet(_cacheKey, out entities)) return entities;
                 entities = await _dbSet.AsNoTracking().ToListAsync();
-                _memoryCache.Set(_cacheKey, entities);
+                _redisCache.Set(_cacheKey, entities);
                 return entities;
             }
             finally
@@ -169,9 +169,9 @@ namespace Infrastructure.Repositories
         // ReSharper disable once MemberCanBePrivate.Global
         public async Task RefreshCache()
         {
-            _memoryCache.Remove(_cacheKey);
+            _redisCache.Remove(_cacheKey);
             var entities = await _dbSet.AsNoTracking().ToListAsync();
-            _memoryCache.Set(_cacheKey, entities);
+            _redisCache.Set(_cacheKey, entities);
         }
     }
 }

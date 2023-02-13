@@ -1,5 +1,4 @@
-﻿using Application.Message;
-using Application.Services;
+﻿using Application.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,13 +25,11 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly AttendanceService _attendanceService;
-        private readonly IRabbitMqService _rabbitMqService;
 
         /// <inheritdoc />
         public AttendanceController(AttendanceService attendanceService, ILogger<TeacherController> logger)
         {
             _logger = logger;
-            _rabbitMqService = new RabbitMqService("attendanceQueue");
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Attendance, Domain.Entities.Attendance>()).CreateMapper();
             _attendanceService = attendanceService;
         }
@@ -215,7 +212,6 @@ namespace WebAPI.Controllers
             {
                 var attendanceEntity = _mapper.Map<Domain.Entities.Attendance>(attendance);
                 await Task.Run(() => _attendanceService.AddAttendance(attendanceEntity));
-                _rabbitMqService.SendMessage(attendance);
                 return Ok(new { status = true, message = "Add attendance successfully" });
             }
             catch (Exception e)

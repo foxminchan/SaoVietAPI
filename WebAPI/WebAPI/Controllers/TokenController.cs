@@ -2,7 +2,6 @@
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
-using Application.Message;
 using Application.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -32,14 +31,12 @@ namespace WebAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
         private readonly AuthorizationService _authorizationService;
-        private readonly IRabbitMqService _rabbitMqService;
 
         /// <inheritdoc />
         public TokenController(AuthorizationService authorizationService, ILogger<TokenController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
-            _rabbitMqService = new RabbitMqService("tokenQueue");
             _mapper = new MapperConfiguration(cfg =>
                 cfg.CreateMap<Models.RegisterUser, Domain.Entities.ApplicationUser>()).CreateMapper();
             _authorizationService = authorizationService;
@@ -97,7 +94,6 @@ namespace WebAPI.Controllers
                 if (user.email != null) newUser.NormalizedEmail = user.email.ToUpper();
                 newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.password);
                 await Task.Run(() => _authorizationService.Register(newUser));
-                _rabbitMqService.SendMessage(user);
                 return Ok(new { status = true, message = "Register successfully" });
             }
             catch (Exception e)
@@ -162,7 +158,6 @@ namespace WebAPI.Controllers
                     signingCredentials: signIn
                 );
 
-                _rabbitMqService.SendMessage(loginUser);
                 return Ok(new { status = true, expire = DateTime.UtcNow.AddDays(1), token = new JwtSecurityTokenHandler().WriteToken(token) });
             }
             catch (Exception e)
