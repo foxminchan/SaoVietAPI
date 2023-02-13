@@ -61,9 +61,20 @@ services:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: Abc@1234
 
+  redis:
+    image: redis
+    container_name: redis
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    ports:
+      - "6379:6379"
+    volumes:
+      - cache:/data
+
 networks:
   elk:
   monitoring:
 
 volumes:
   elasticsearch-data:
+  cache:
+    driver: local
