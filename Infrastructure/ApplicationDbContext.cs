@@ -23,6 +23,9 @@ namespace Infrastructure
         public DbSet<ClassStudent>? classStudents { get; set; }
         public DbSet<Category>? categories { get; set; }
         public DbSet<Course>? courses { get; set; }
+        public DbSet<Lesson>? lessons { get; set; }
+        public DbSet<Attendance>? attendances { get; set; }
+        public DbSet<RefreshToken>? refreshTokens { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -34,6 +37,29 @@ namespace Infrastructure
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<RefreshToken>(entity =>
+            {
+                entity.ToTable("RefreshTokens");
+                entity.HasKey(e => e.id);
+                entity.Property(e => e.id)
+                    .HasColumnType("bigint")
+                    .ValueGeneratedOnAdd();
+                entity.Property(e => e.userId)
+                    .HasColumnType("nvarchar(450)");
+                entity.Property(e => e.token)
+                    .HasColumnType("varchar(max)");
+                entity.Property(e => e.jwtId)
+                    .HasColumnType("nvarchar(450)");
+                entity.Property(e => e.isUsed)
+                    .HasColumnType("bit");
+                entity.Property(e => e.isRevoked)
+                    .HasColumnType("bit");
+                entity.Property(e => e.addedDate)
+                    .HasColumnType("datetime2");
+                entity.Property(e => e.expiryDate)
+                    .HasColumnType("datetime2");
+            });
 
             builder.Entity<Teacher>(entity =>
             {

@@ -49,6 +49,18 @@ namespace Infrastructure.Repositories
             return user.AccessFailedCount;
         }
 
+        public async Task<ApplicationUser> GetById(string id)
+        {
+            var result = await GetList(x => x.Id == id);
+            return result.First();
+        }
+
+        public async Task<ApplicationUser> GetByUserName(string username)
+        {
+            var userList = await GetList(x => x.UserName == username);
+            return userList.First();
+        }
+
         public async Task FailLogin(string username)
         {
             var userList = await GetList(x => x.UserName == username);
@@ -90,6 +102,13 @@ namespace Infrastructure.Repositories
             user.LockoutEnabled = true;
             user.LockoutEnd = DateTime.Now.AddYears(200);
             await Update(user);
+        }
+
+        public async Task<string> GetUserId(string username)
+        {
+            var userList = await GetList(x => x.UserName == username);
+            var user = userList.First();
+            return user.Id;
         }
     }
 }

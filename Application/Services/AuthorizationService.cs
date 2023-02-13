@@ -1,5 +1,4 @@
-﻿using Application.Cache;
-using Application.Common;
+﻿using Application.Common;
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure;
@@ -19,7 +18,13 @@ namespace Application.Services
     public class AuthorizationService : BaseService
     {
         private readonly IApplicationUserRepository _userRepository;
-        public AuthorizationService(ApplicationDbContext context, ICache cache) : base(context) => _userRepository = new ApplicationUserRepository(context, cache);
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
+
+        public AuthorizationService(ApplicationDbContext context, ICache cache) : base(context)
+        {
+            _refreshTokenRepository = new RefreshTokenRepository(context, cache);
+            _userRepository = new ApplicationUserRepository(context, cache);
+        } 
 
         public async Task<bool> CheckAccountValid(string username, string password) =>
             await _userRepository.CheckAccountValid(username, password);
@@ -32,6 +37,8 @@ namespace Application.Services
         public async Task<bool> CheckPhoneConfirmed(ApplicationUser user) => await _userRepository.CheckPhoneConfirmed(user);
 
         public async Task<bool> CheckUserExist(string username) => await _userRepository.IsUserNameExists(username);
+
+        public async Task<string> GetUserId(string username) => await _userRepository.GetUserId(username);
 
         public async Task Register(ApplicationUser user)
         {
@@ -69,5 +76,23 @@ namespace Application.Services
             await _userRepository.ResetFailLogin(username);
             await SaveAsync();
         }
+
+        public async Task AddToken(RefreshToken token)
+        {
+            await _refreshTokenRepository.AddToken(token);
+            await SaveAsync();
+        }
+
+        public async Task UpdateRefreshToken(RefreshToken token)
+        {
+            await _refreshTokenRepository.UpdateToken(token);
+            await SaveAsync();
+        }
+
+        public async Task<RefreshToken> GetToken(string token) => await _refreshTokenRepository.GetToken(token);
+
+        public async Task<ApplicationUser> GetUserById(string userId) => await _userRepository.GetById(userId);
+
+        public async Task<ApplicationUser> GetUserByUserName(string username) => await _userRepository.GetByUserName(username);
     }
 }

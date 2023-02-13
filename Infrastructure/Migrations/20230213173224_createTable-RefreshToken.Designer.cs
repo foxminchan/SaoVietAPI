@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230213173224_createTable-RefreshToken")]
+    partial class createTableRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,40 +24,6 @@ namespace Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
-            {
-                b.Property<long>("id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
-
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("id"));
-
-                b.Property<DateTime?>("addedDate")
-                    .HasColumnType("datetime2");
-
-                b.Property<DateTime?>("expiryDate")
-                    .HasColumnType("datetime2");
-
-                b.Property<bool>("isRevoked")
-                    .HasColumnType("bit");
-
-                b.Property<bool>("isUsed")
-                    .HasColumnType("bit");
-
-                b.Property<string>("jwtId")
-                    .HasColumnType("nvarchar(450)");
-
-                b.Property<string>("token")
-                    .HasColumnType("varchar(max)");
-
-                b.Property<string>("userId")
-                    .HasColumnType("nvarchar(450)");
-
-                b.HasKey("id");
-
-                b.ToTable("RefreshTokens", (string)null);
-            });
 
             modelBuilder.Entity("Domain.Entities.ApplicationUser", b =>
                 {
@@ -266,6 +235,40 @@ namespace Infrastructure.Migrations
                     b.HasIndex("courseId");
 
                     b.ToTable("Lessons", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<long>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("id"));
+
+                    b.Property<DateTime?>("addedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("expiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("isRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("jwtId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("token")
+                        .HasColumnType("varchar(max)");
+
+                    b.Property<string>("userId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Student", b =>

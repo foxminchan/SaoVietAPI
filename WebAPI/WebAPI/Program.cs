@@ -19,8 +19,8 @@ using Hangfire;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using WebAPI.Middlewares;
 using HealthCheckService = Application.Health.HealthCheckService;
-using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,6 +77,18 @@ builder.Services.AddHealthChecks()
 #endregion
 
 #region Authentication
+var tokenValidationParameters = new TokenValidationParameters()
+{
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidateLifetime = true,
+    ValidateIssuerSigningKey = true,
+    ValidAudience = builder.Configuration.GetSection("Jwt:Audience").Value,
+    ValidIssuer = builder.Configuration.GetSection("Jwt:Issuer").Value,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+        builder.Configuration.GetSection("Jwt:Key").Value ?? throw new InvalidOperationException())),
+    ClockSkew = TimeSpan.Zero
+};
 
 builder.Services.AddAuthentication(options =>
     {
@@ -90,18 +102,9 @@ builder.Services.AddAuthentication(options =>
     {
         options.RequireHttpsMetadata = false;
         options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidAudience = builder.Configuration.GetSection("Jwt:Audience").Value,
-            ValidIssuer = builder.Configuration.GetSection("Jwt:Issuer").Value,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                builder.Configuration.GetSection("Jwt:Key").Value ?? throw new InvalidOperationException()))
-        };
+        options.TokenValidationParameters = tokenValidationParameters;
     });
+builder.Services.AddSingleton(tokenValidationParameters);
 #endregion
 
 #region Swagger
@@ -270,7 +273,7 @@ app.UseSwagger(c =>
         swagger.Tags = new List<OpenApiTag> {
             new()
             {
-                Name = "Token",
+                Name = "Authentication",
                 Description = "Xác thực",
                 ExternalDocs = findOutMore
             },
