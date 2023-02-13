@@ -137,19 +137,19 @@ namespace WebAPI.Controllers
                 var storedRefreshToken = await _authorizationService.GetToken(tokenRefresh.refreshToken);
 
                 if (storedRefreshToken.isUsed)
-                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Invalid tokens" } };
+                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Token is used" } };
 
                 if (storedRefreshToken.isRevoked)
-                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Invalid tokens" } };
+                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Token is revoked" } };
 
                 var jti = principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
 
                 if (storedRefreshToken.jwtId != jti)
-                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Invalid tokens" } };
+                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Unknown tokens" } };
 
                 if (storedRefreshToken.expiryDate < DateTime.UtcNow)
                     return new Models.Auth
-                    { isAuthSuccessful = false, errors = new List<string> { "Invalid tokens" } };
+                    { isAuthSuccessful = false, errors = new List<string> { "Tokens is invalid" } };
 
                 storedRefreshToken.isUsed = true;
                 await _authorizationService.UpdateRefreshToken(storedRefreshToken);
@@ -157,7 +157,6 @@ namespace WebAPI.Controllers
                 var dbUser = await _authorizationService.GetUserById(storedRefreshToken.userId!);
 
                 return await GenerateJwtToken(dbUser);
-
             }
             catch (Exception e)
             {
