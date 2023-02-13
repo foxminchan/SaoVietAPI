@@ -34,7 +34,42 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
-// Add health checks
+
+#region ELK Stack
+ConfigureLogging();
+builder.Host.UseSerilog();
+
+void ConfigureLogging()
+{
+    var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    var configuration = new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile(
+            $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
+            optional: true)
+        .Build();
+
+    Log.Logger = new LoggerConfiguration()
+        .Enrich.FromLogContext()
+        .Enrich.WithEnvironmentName()
+        .WriteTo.Debug()
+        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+            theme: AnsiConsoleTheme.Literate)
+        .WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment!))
+        .Enrich.WithProperty("Environment", environment!)
+        .ReadFrom.Configuration(configuration)
+        .CreateLogger();
+}
+
+ElasticsearchSinkOptions ConfigureElasticSink(IConfiguration configuration, string? environment)
+{
+    return new ElasticsearchSinkOptions(new Uri(configuration["ElasticConfiguration:Uri"] ?? string.Empty))
+    {
+        AutoRegisterTemplate = true,
+        IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name?.ToLower(System.Globalization.CultureInfo.CurrentCulture).Replace(".", "-")}-{environment?.ToLower(System.Globalization.CultureInfo.CurrentCulture).Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
+    };
+}
+#endregion
 
 #region RabbitMQ
 builder.Services.AddScoped<IRabbitMqService, RabbitMqService>();
@@ -149,7 +184,12 @@ builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-    options.UseLoggerFactory(LoggerFactory.Create(log => log.AddConsole()));
+    options.UseLoggerFactory(LoggerFactory.Create(log =>
+    {
+        log.AddConsole();
+        ConfigureLogging();
+        log.AddSerilog(dispose: true);
+    }));
     options.EnableSensitiveDataLogging();
     options.EnableDetailedErrors();
 });
@@ -170,42 +210,6 @@ builder.Services.AddCors(options =>
 
 #region Mapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-#endregion
-
-#region ELK Stack
-ConfigureLogging();
-builder.Host.UseSerilog();
-
-void ConfigureLogging()
-{
-    var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-    var configuration = new ConfigurationBuilder()
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        .AddJsonFile(
-            $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
-            optional: true)
-        .Build();
-
-    Log.Logger = new LoggerConfiguration()
-        .Enrich.FromLogContext()
-        .Enrich.WithEnvironmentName()
-        .WriteTo.Debug()
-        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}",
-            theme: AnsiConsoleTheme.Literate)
-        .WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment!))
-        .Enrich.WithProperty("Environment", environment!)
-        .ReadFrom.Configuration(configuration)
-        .CreateLogger();
-}
-
-ElasticsearchSinkOptions ConfigureElasticSink(IConfiguration configuration, string? environment)
-{
-    return new ElasticsearchSinkOptions(new Uri(configuration["ElasticConfiguration:Uri"] ?? string.Empty))
-    {
-        AutoRegisterTemplate = true,
-        IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name?.ToLower(System.Globalization.CultureInfo.CurrentCulture).Replace(".", "-")}-{environment?.ToLower(System.Globalization.CultureInfo.CurrentCulture).Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
-    };
-}
 #endregion
 
 #region Services
