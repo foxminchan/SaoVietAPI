@@ -17,11 +17,14 @@ namespace Application.Cache
     public class CacheService : ICache
     {
         private readonly IDistributedCache _distributedCache;
-        private const int EXPIRATION_TIME_IN_SECONDS = 3600;
+        private readonly DistributedCacheEntryOptions _cacheEntryOptions;
 
         public CacheService(IDistributedCache distributedCache)
         {
             _distributedCache = distributedCache;
+            _cacheEntryOptions = new DistributedCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(3600))
+                .SetSlidingExpiration(TimeSpan.FromSeconds(60));
         }
 
         public void Remove(string cacheKey) => _distributedCache.Remove(cacheKey);
@@ -29,11 +32,7 @@ namespace Application.Cache
         public T Set<T>(string cacheKey, T value)
         {
             var serializedValue = JsonConvert.SerializeObject(value);
-            var byteArray = Encoding.UTF8.GetBytes(serializedValue);
-            _distributedCache.Set(cacheKey, byteArray, new DistributedCacheEntryOptions
-            {
-                AbsoluteExpiration = DateTime.Now.AddSeconds(EXPIRATION_TIME_IN_SECONDS)
-            });
+            _distributedCache.Set(cacheKey, Encoding.UTF8.GetBytes(serializedValue), _cacheEntryOptions);
             return value;
         }
 
@@ -45,7 +44,9 @@ namespace Application.Cache
                 value = default!;
                 return false;
             }
-            value = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(cacheValue));
+
+            var deserializedValue = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(cacheValue));
+            value = deserializedValue;
             return true;
         }
 

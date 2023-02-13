@@ -20,6 +20,7 @@ using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using HealthCheckService = Application.Health.HealthCheckService;
+using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -139,11 +140,8 @@ builder.Services.AddSwaggerGen(options =>
 #endregion
 
 #region Cache
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
-    options.InstanceName = "SaoVietApi";
-});
+builder.Services.AddMemoryCache();
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddTransient<ICache, CacheService>();
 #endregion
 
@@ -154,7 +152,6 @@ builder.Services.AddHangfireServer();
 #endregion
 
 #region Request Throttling
-builder.Services.AddMemoryCache();
 builder.Services.Configure<IpRateLimitOptions>(options =>
 {
     options.EnableEndpointRateLimiting = true;
@@ -361,6 +358,10 @@ else
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+#endregion
+
+#region Security Headers
+app.UseSecurityHeadersMiddleware();
 #endregion
 
 app.UseHangfireDashboard("/jobs");
