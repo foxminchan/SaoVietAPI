@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
@@ -21,17 +22,21 @@ namespace Application.Message
         public RabbitMqService(string queueName)
         {
             _queueName = queueName;
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+            var section = configuration.GetSection("RabbitMq");
+
             var factory = new ConnectionFactory()
             {
-                HostName = "localhost",
-                UserName = "admin",
-                Password = "Abc@1234",
-                VirtualHost = "/"
+                HostName = section["HostName"],
+                UserName = section["UserName"],
+                Password = section["Password"],
+                VirtualHost = section["VirtualHost"]
             };
             var conn = factory.CreateConnection();
             _channel = conn.CreateModel();
             _channel.QueueDeclare(_queueName, true);
-
         }
 
         public void SendMessage<T>(T message)
