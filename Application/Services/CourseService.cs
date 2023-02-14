@@ -26,32 +26,32 @@ namespace Application.Services
             _categoryRepository = new CategoryRepository(context, cache);
         }
 
-        public async Task<List<Course>> GetCourses() => await _courseRepository.GetCourses();
+        public IEnumerable<Course> GetCourses() => _courseRepository.GetCourses();
 
-        public async Task<List<Course>> GetCoursesByNames(string? name) => await _courseRepository.GetCoursesByNames(name);
+        public IEnumerable<Course> GetCoursesByNames(string? name) => _courseRepository.GetCoursesByNames(name);
 
-        public async Task<Course?> GetCourseById(string? id) => await _courseRepository.GetCourseById(id);
+        public Course? GetCourseById(string? id) => _courseRepository.GetCourseById(id);
 
-        public async Task AddCourse(Course course)
+        public void AddCourse(Course course)
         {
-            await _courseRepository.AddCourse(course);
-            await SaveAsync();
+            _courseRepository.AddCourse(course);
+            Save();
         }
 
-        public async Task UpdateCourse(Course course, string id)
+        public void UpdateCourse(Course course)
         {
-            await _courseRepository.UpdateCourse(course, id);
-            await SaveAsync();
+            _courseRepository.UpdateCourse(course);
+            Save();
         }
 
-        public async Task DeleteCourse(string id)
+        public void DeleteCourse(string id)
         {
-            await _courseRepository.DeleteCourse(id);
-            await SaveAsync();
+            _courseRepository.DeleteCourse(id);
+            Save();
         }
 
-        public async Task<bool> CourseExists(string id) => await _courseRepository.CourseExists(id);
+        public bool CourseExists(string id) => _courseRepository.CourseExists(id);
 
-        public async Task<bool> IsValidCategoryId(string id) => await _categoryRepository.CategoryExists(id);
+        public bool IsValidCategoryId(string id) => _categoryRepository.CategoryExists(id);
     }
 }

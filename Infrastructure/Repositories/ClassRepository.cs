@@ -18,43 +18,30 @@ namespace Infrastructure.Repositories
         {
         }
 
-        public async Task<List<Class>> GetClasses()
-        {
-            var classes = await GetAll();
-            return classes.ToList();
-        }
+        public IEnumerable<Class> GetClasses() => GetAll();
 
-        public async Task<List<Class>> FindClassByName(string? name)
-        {
-            var classes = await GetList(filter: x => x.name != null && name != null && x.name.Contains(name));
-            return classes.ToList();
-        }
+        public IEnumerable<Class> FindClassByName(string? name) => GetMany( x => x.name != null && name != null && x.name.Contains(name));
 
-        public async Task<List<Class>> GetClassesByStatus(string? status)
+        public IEnumerable<Class> GetClassesByStatus(string? status)
         {
-            var classes = await GetClasses();
-            if (status == null) return classes;
+            if(status == null) return GetAll();
             if (status.Contains("Expired"))
-                return classes.Where(x => Convert.ToDateTime(x.endDate) < DateTime.Now).ToList();
+                return GetMany(x => Convert.ToDateTime(x.endDate) < DateTime.Now);
             if (status.Contains("Active"))
-                return classes.Where(x => Convert.ToDateTime(x.startDate) <= DateTime.Now && Convert.ToDateTime(x.endDate) >= DateTime.Now).ToList();
-            return status.Contains("Upcoming") ? classes.Where(x => Convert.ToDateTime(x.startDate) > DateTime.Now).ToList() : classes;
+                return GetMany(x => Convert.ToDateTime(x.startDate) <= DateTime.Now && Convert.ToDateTime(x.endDate) >= DateTime.Now);
+            return status.Contains("Upcoming") ? GetMany(x => Convert.ToDateTime(x.startDate) > DateTime.Now) : GetAll();
         }
 
-        public async Task<List<Class>> FindClassByTeacher(Guid? teacherId)
-        {
-            var classes = await GetList(filter: x => teacherId != null && x.teacherId == teacherId);
-            return classes.ToList();
-        }
+        public IEnumerable<Class> FindClassByTeacher(Guid? teacherId) => GetMany(x => teacherId != null && x.teacherId == teacherId);
 
-        public async Task<Class?> FindClassById(string? id) => await GetById(id);
+        public Class? FindClassById(string? id) => GetById(id);
 
-        public async Task AddClass(Class entity) => await Insert(entity);
+        public void AddClass(Class entity) => Insert(entity);
 
-        public async Task UpdateClass(Class entity, string id) => await Update(entity, x => x.id == id);
+        public void UpdateClass(Class entity) => Update(entity);
 
-        public async Task DeleteClass(string id) => await Delete(x => x.id == id);
+        public void DeleteClass(string id) => Delete(x => x.id == id);
 
-        public async Task<bool> ClassExists(string? id) => await Any(x => x.id == id);
+        public bool ClassExists(string? id) => Any(x => x.id == id);
     }
 }

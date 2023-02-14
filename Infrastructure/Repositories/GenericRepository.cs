@@ -29,14 +29,14 @@ namespace Infrastructure.Repositories
             _dbSet = _context.Set<T>();
         }
 
-        public virtual async Task<IEnumerable<T>> GetAll()
+        public virtual IEnumerable<T> GetAll()
         {
             if (_memoryCache.TryGet(_cacheKey, out IEnumerable<T> entities)) return entities;
-            await _lock.WaitAsync();
+            _lock.Wait();
             try
             {
                 if (_memoryCache.TryGet(_cacheKey, out entities)) return entities;
-                entities = await _dbSet.AsNoTracking().ToListAsync();
+                entities = _dbSet.AsNoTracking().ToList();
                 _memoryCache.Set(_cacheKey, entities);
                 return entities;
             }
@@ -46,98 +46,68 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public virtual async Task Insert(T entity)
+        public virtual void Insert(T entity)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                await _dbSet.AddAsync(entity);
-                await transaction.CommitAsync();
+                _dbSet.Add(entity);
                 BackgroundJob.Enqueue(() => RefreshCache());
             }
             catch (DbUpdateException e)
             {
-                await transaction.RollbackAsync();
                 throw new DbUpdateException("Error while inserting entity into the database.", e);
             }
         }
 
-        public virtual async Task Update(T entity)
+        public virtual void Update(T entity)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 _dbSet.Attach(entity);
                 _context.Entry(entity).State = EntityState.Modified;
-                await transaction.CommitAsync();
                 BackgroundJob.Enqueue(() => RefreshCache());
             }
             catch (DbUpdateException e)
             {
-                await transaction.RollbackAsync();
                 throw new DbUpdateException("Error while updating entity in the database.", e);
             }
         }
 
-        public virtual async Task Update(T entity, Expression<Func<T, bool>> where)
+        public virtual void Delete(T entity)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-            try
-            {
-                var obj = await _dbSet.FirstOrDefaultAsync(where);
-                if (obj == null) return;
-                _context.Entry(obj).CurrentValues.SetValues(entity);
-                await transaction.CommitAsync();
-                BackgroundJob.Enqueue(() => RefreshCache());
-            }
-            catch (DbUpdateException e)
-            {
-                await transaction.RollbackAsync();
-                throw new DbUpdateException("Error while updating entity in the database.", e);
-            }
-        }
-
-        public virtual async Task Delete(T entity)
-        {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 if (_context.Entry(entity).State == EntityState.Detached)
                     _dbSet.Attach(entity);
                 _dbSet.Remove(entity);
-                await transaction.CommitAsync();
                 BackgroundJob.Enqueue(() => RefreshCache());
             }
             catch (DbUpdateException e)
             {
-                await transaction.RollbackAsync();
                 throw new DbUpdateException("Error while deleting entity from the database.", e);
             }
         }
 
-        public virtual async Task Delete(Expression<Func<T, bool>> where)
+        public virtual void Delete(Expression<Func<T, bool>> where)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var objects = _dbSet.Where(where).AsEnumerable();
                 foreach (var obj in objects)
                     _dbSet.Remove(obj);
-                await transaction.CommitAsync();
                 BackgroundJob.Enqueue(() => RefreshCache());
             }
             catch (DbUpdateException e)
             {
-                await transaction.RollbackAsync();
                 throw new DbUpdateException("Error while deleting entity from the database.", e);
             }
         }
 
-        public virtual async Task<int> Count(Expression<Func<T, bool>> where) => await _dbSet.CountAsync(where);
+        public virtual int Count(Expression<Func<T, bool>> where) => _dbSet.Count(where);
 
-        public virtual async Task<T?> GetById(object? id) => await _dbSet.FindAsync(id);
+        public virtual T? GetById(object? id) => _dbSet.Find(id);
 
-        public virtual async Task<IEnumerable<T>> GetList(
+        public virtual IEnumerable<T> GetList(
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             string includeProperties = "",
@@ -159,12 +129,12 @@ namespace Infrastructure.Repositories
             if (take != 0)
                 _ = query.Take(take);
 
-            return await query.ToListAsync();
+            return query.ToList();
         }
 
-        public virtual async Task<IEnumerable<T>> GetMany(Expression<Func<T, bool>> where) => await _dbSet.Where(where).ToListAsync();
+        public virtual IEnumerable<T> GetMany(Expression<Func<T, bool>> where) => _dbSet.Where(where).ToList();
 
-        public virtual async Task<bool> Any(Expression<Func<T, bool>> where) => await _dbSet.AnyAsync(where);
+        public virtual bool Any(Expression<Func<T, bool>> where) => _dbSet.Any(where);
 
         // ReSharper disable once MemberCanBePrivate.Global
         public async Task RefreshCache()

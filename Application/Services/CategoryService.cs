@@ -21,28 +21,28 @@ namespace Application.Services
 
         public CategoryService(ApplicationDbContext context, ICache cache) : base(context) => _categoryRepository = new CategoryRepository(context, cache);
 
-        public async Task<List<Category>> GetCategories() => await _categoryRepository.GetCategories();
+        public IEnumerable<Category> GetCategories() => _categoryRepository.GetCategories();
 
-        public async Task<Category?> GetCategoryById(string? id) => await _categoryRepository.GetCategoryById(id);
+        public Category? GetCategoryById(string? id) => _categoryRepository.GetCategoryById(id);
 
-        public async Task<bool> CategoryExists(string id) => await _categoryRepository.CategoryExists(id);
+        public bool CategoryExists(string id) => _categoryRepository.CategoryExists(id);
 
-        public async Task AddCategory(Category newCategory)
+        public void AddCategory(Category newCategory)
         {
-            await _categoryRepository.AddCategory(newCategory);
-            await SaveAsync();
+            _categoryRepository.AddCategory(newCategory);
+            Save();
         }
 
-        public async Task UpdateCategory(Category newCategory, string id)
+        public void UpdateCategory(Category newCategory)
         {
-            await _categoryRepository.UpdateCategory(newCategory, id);
-            await SaveAsync();
+            _categoryRepository.UpdateCategory(newCategory);
+            Save();
         }
 
-        public async Task DeleteCategory(string id)
+        public void DeleteCategory(string id)
         {
-            await _categoryRepository.DeleteCategory(id);
-            await SaveAsync();
+            _categoryRepository.DeleteCategory(id);
+            Save();
         }
     }
 }

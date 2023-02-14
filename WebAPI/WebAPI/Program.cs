@@ -10,7 +10,6 @@ using Prometheus;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using Serilog.Sinks.SystemConsole.Themes;
-using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
 using System.Text;
 using Application.Cache;
@@ -24,7 +23,7 @@ using HealthCheckService = Application.Health.HealthCheckService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 
 #region Authorization
 builder.Services.AddAuthorization();
@@ -144,7 +143,6 @@ builder.Services.AddSwaggerGen(options =>
 
 #region Cache
 builder.Services.AddMemoryCache();
-builder.Services.AddDistributedMemoryCache();
 builder.Services.AddTransient<ICache, CacheService>();
 #endregion
 
@@ -342,13 +340,7 @@ app.UseSwaggerUI(c =>
     c.InjectStylesheet("/css/swagger-ui.css");
     c.InjectJavascript("/js/swagger-ui.js");
     c.DocumentTitle = "Sao Việt API";
-    c.OAuthConfigObject = new OAuthConfigObject
-    {
-        ClientId = "swagger",
-        AppName = "Swagger",
-        UsePkceWithAuthorizationCodeGrant = true,
-        UseBasicAuthenticationWithAccessCodeGrant = true
-    };
+
 });
 
 // Configure the HTTP request pipeline.

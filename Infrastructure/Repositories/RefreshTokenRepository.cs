@@ -18,14 +18,10 @@ namespace Infrastructure.Repositories
         {
         }
 
-        public async Task AddToken(RefreshToken token) => await Insert(token);
+        public void AddToken(RefreshToken token) => Insert(token);
 
-        public async Task<RefreshToken> GetToken(string token)
-        {
-            var result = await GetList(filter: x => x.token == token);
-            return result.First();
-        }
+        public RefreshToken GetToken(string token) => GetList(filter: x => x.token == token).First();
 
-        public async Task UpdateToken(RefreshToken token) => await Update(token);
+        public void UpdateToken(RefreshToken token) => Update(token);
     }
 }

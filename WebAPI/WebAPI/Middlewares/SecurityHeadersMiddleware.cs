@@ -20,10 +20,7 @@
         /// Bảo mật HTTP Headers
         /// </summary>
         /// <param name="next">Đối tượng RequestDelegate</param>
-        public SecurityHeadersMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
+        public SecurityHeadersMiddleware(RequestDelegate next) => _next = next;
 
         /// <summary>
         /// Thêm HTTP Headers

@@ -13,21 +13,17 @@ namespace Domain.Interfaces
 
     public interface IApplicationUserRepository
     {
-        public Task Register(ApplicationUser user);
-        public Task<bool> CheckAccountValid(string username, string password);
-        public Task<bool> CheckTwoFa(ApplicationUser user);
-        public Task<bool> CheckEmailConfirmed(ApplicationUser user);
-        public Task<bool> CheckPhoneConfirmed(ApplicationUser user);
-        public Task<bool> IsLockedAccount(string username);
-        public Task<bool> IsUserNameExists(string username);
-        public Task<int> GetFailLogin(string username);
-        public Task<string> GetUserId(string username);
-        public Task<ApplicationUser> GetById(string userId);
-        public Task<ApplicationUser> GetByUserName(string username);
-        public Task FailLogin(string username);
-        public Task LockAccount(string username);
-        public Task UnlockAccount(string username);
-        public Task ResetFailLogin(string username);
-        public Task BanAccount(string username);
+        public void Register(ApplicationUser user);
+        public bool CheckAccountValid(string username, string password);
+        public bool IsLockedAccount(string username);
+        public bool IsUserNameExists(string username);
+        public int GetFailLogin(string username);
+        public string GetUserId(string username);
+        public ApplicationUser GetById(string userId);
+        public ApplicationUser GetByUserName(string username);
+        public void FailLogin(string username);
+        public void LockAccount(string username);
+        public void ResetFailLogin(string username);
+        public void BanAccount(string username);
     }
 }

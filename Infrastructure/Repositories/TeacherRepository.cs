@@ -18,27 +18,17 @@ namespace Infrastructure.Repositories
         {
         }
 
-        public async Task<List<Teacher>> GetTeachers()
-        {
-            var teachers = await GetAll();
-            return teachers.ToList();
-        }
+        public IEnumerable<Teacher> GetTeachers() => GetAll();
 
-        public async Task<List<Teacher>> FindTeacherByName(string name)
-        {
-            var teachers = await GetList(filter: x => x.fullName != null && x.fullName.Contains(name));
-            return teachers.ToList();
-        }
-        public async Task<Teacher?> GetTeacherById(Guid? id)
-        {
-            var teacher = await GetById(id);
-            return teacher;
-        }
+        public IEnumerable<Teacher> FindTeacherByName(string name) =>
+            GetMany(x => x.fullName != null && x.fullName.Contains(name));
 
-        public async Task AddTeacher(Teacher teacher) => await Insert(teacher);
+        public Teacher? GetTeacherById(Guid? id) => GetById(id);
 
-        public async Task UpdateTeacher(Teacher teacher, Guid id) => await Update(teacher, x => x.id == id);
+        public void AddTeacher(Teacher teacher) => Insert(teacher);
 
-        public async Task DeleteTeacher(Guid id) => await Delete(x => x.id == id);
+        public void UpdateTeacher(Teacher teacher) => Update(teacher);
+
+        public void DeleteTeacher(Guid id) => Delete(x => x.id == id);
     }
 }

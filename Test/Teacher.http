@@ -47,6 +47,6 @@ Authorization: Bearer {{bearer_token}}
 ###
 
 # Delete teacher
-@id=417982d3-8338-4d75-bc7c-08db0159e689
+@id=dedd80ff-f505-4036-a3e3-30b477b5b017
 DELETE {{base_url}}/{{controller}}/{{id}} HTTP/1.1
 Authorization: Bearer {{bearer_token}}

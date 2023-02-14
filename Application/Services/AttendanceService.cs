@@ -29,36 +29,36 @@ namespace Application.Services
             _classRepository = new ClassRepository(context, cache);
         }
 
-        public async Task<List<Attendance>> GetAllAttendance() => await _attendanceRepository.GetAllAttendance();
+        public IEnumerable<Attendance> GetAllAttendance() => _attendanceRepository.GetAllAttendance();
 
-        public async Task<List<Attendance>> GetAttendanceById(string? classId, string? lessonId) => await _attendanceRepository.GetAttendanceById(classId, lessonId);
+        public IEnumerable<Attendance> GetAttendanceById(string? classId, string? lessonId) => _attendanceRepository.GetAttendanceById(classId, lessonId);
 
-        public async Task<List<Attendance>> GetAttendanceByClassId(string? classId) => await _attendanceRepository.GetAttendanceByClassId(classId);
+        public IEnumerable<Attendance> GetAttendanceByClassId(string? classId) => _attendanceRepository.GetAttendanceByClassId(classId);
 
-        public async Task<List<Attendance>> SortByAttendance() => await _attendanceRepository.SortByAttendance();
+        public IEnumerable<Attendance> SortByAttendance() => _attendanceRepository.SortByAttendance();
 
-        public async Task AddAttendance(Attendance attendance)
+        public void AddAttendance(Attendance attendance)
         {
-            await _attendanceRepository.AddAttendance(attendance);
-            await SaveAsync();
+            _attendanceRepository.AddAttendance(attendance);
+            Save();
         }
 
-        public async Task UpdateAttendance(Attendance attendance, string classId, string lessonId)
+        public void UpdateAttendance(Attendance attendance)
         {
-            await _attendanceRepository.UpdateAttendance(attendance, classId, lessonId);
-            await SaveAsync();
+            _attendanceRepository.UpdateAttendance(attendance);
+            Save();
         }
 
-        public async Task DeleteAttendance(string classId, string lessonId)
+        public void DeleteAttendance(string classId, string lessonId)
         {
-            await _attendanceRepository.DeleteAttendance(classId, lessonId);
-            await SaveAsync();
+            _attendanceRepository.DeleteAttendance(classId, lessonId);
+            Save();
         }
 
-        public async Task<bool> CheckLessonExists(string lessonId) => await _lessonRepository.LessonExists(lessonId);
+        public bool CheckLessonExists(string lessonId) => _lessonRepository.LessonExists(lessonId);
 
-        public async Task<bool> CheckClassExists(string classId) => await _classRepository.ClassExists(classId);
+        public bool CheckClassExists(string classId) => _classRepository.ClassExists(classId);
 
-        public async Task<bool> IsAttendanceExist(string classId, string lessonId) => await _attendanceRepository.IsAttendanceExist(classId, lessonId);
+        public bool IsAttendanceExist(string classId, string lessonId) => _attendanceRepository.IsAttendanceExist(classId, lessonId);
     }
 }

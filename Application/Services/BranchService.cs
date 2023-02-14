@@ -21,30 +21,30 @@ namespace Application.Services
 
         public BranchService(ApplicationDbContext context, ICache cache) : base(context) => _branchRepository = new BranchRepository(context, cache);
 
-        public async Task<List<Branch>> GetBranches() => await _branchRepository.GetBranches();
+        public IEnumerable<Branch> GetBranches() => _branchRepository.GetBranches();
 
-        public async Task<List<Branch>> GetBranchesByNames(string? name) => await _branchRepository.GetBranchesByNames(name);
+        public IEnumerable<Branch> GetBranchesByNames(string? name) => _branchRepository.GetBranchesByNames(name);
 
-        public async Task<List<Branch>> GetBranchesByZone(string? zone) => await _branchRepository.GetBranchesByZone(zone);
+        public IEnumerable<Branch> GetBranchesByZone(string? zone) => _branchRepository.GetBranchesByZone(zone);
 
-        public async Task<Branch?> GetBranchById(string? id) => await _branchRepository.GetBranchById(id);
+        public Branch? GetBranchById(string? id) => _branchRepository.GetBranchById(id);
 
-        public async Task AddBranch(Branch branch)
+        public void AddBranch(Branch branch)
         {
-            await _branchRepository.AddBranch(branch);
-            await SaveAsync();
+            _branchRepository.AddBranch(branch);
+            Save();
         }
 
-        public async Task UpdateBranch(Branch branch, string id)
+        public void UpdateBranch(Branch branch)
         {
-            await _branchRepository.UpdateBranch(branch, id);
-            await SaveAsync();
+            _branchRepository.UpdateBranch(branch);
+            Save();
         }
 
-        public async Task DeleteBranch(string id)
+        public void DeleteBranch(string id)
         {
-            await _branchRepository.DeleteBranch(id);
-            await SaveAsync();
+            _branchRepository.DeleteBranch(id);
+            Save();
         }
     }   
 }

@@ -18,27 +18,21 @@ namespace Infrastructure.Repositories
         {
         }
 
-        public async Task<int> CountStudentInClass(string? classId) => await Count(x => x.classId == classId);
+        public int CountStudentInClass(string? classId) => Count(x => x.classId == classId);
 
-        public async Task<int> CountClassByStudent(Guid? studentId) => await Count(x => x.studentId == studentId);
+        public int CountClassByStudent(Guid? studentId) => Count(x => x.studentId == studentId);
 
-        public async Task<IEnumerable<Guid?>> GetAllStudentIdByClassId(string? classId)
-        {
-            var students = await GetList(x => x.classId == classId);
-            return students.Select(x => x.studentId).ToList();
-        }
+        public IEnumerable<Guid?> GetAllStudentIdByClassId(string? classId) =>
+            GetMany(x => x.classId == classId).Select(x => x.studentId);
 
-        public async Task<IEnumerable<string?>> GetAllClassIdByStudentId(Guid? studentId)
-        {
-            var classes = await GetList(x => x.studentId == studentId);
-            return classes.Select(x => x.classId).ToList();
-        }
+        public IEnumerable<string?> GetAllClassIdByStudentId(Guid? studentId) =>
+            GetMany(x => x.studentId == studentId).Select(x => x.classId);
 
-        public async Task AddClassStudent(ClassStudent classStudent) => await Insert(classStudent);
+        public void AddClassStudent(ClassStudent classStudent) => Insert(classStudent);
 
-        public async Task DeleteClassStudent(ClassStudent classStudent) => await Delete(classStudent);
+        public void DeleteClassStudent(ClassStudent classStudent) => Delete(classStudent);
 
-        public async Task<bool> IsExistClassStudent(string? classId, Guid? studentId) => await Any(x => x.classId == classId && x.studentId == studentId);
+        public bool IsExistClassStudent(string? classId, Guid? studentId) => Any(x => x.classId == classId && x.studentId == studentId);
 
     }
 }

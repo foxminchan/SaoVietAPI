@@ -34,20 +34,41 @@ namespace WebAPI.Controllers
             _attendanceService = attendanceService;
         }
 
-        private async Task<(bool, string?)> IsValidAttendance(Models.Attendance attendance)
+        private bool IsValidAttendance(Models.Attendance attendance, out string? message)
         {
-            if(string.IsNullOrEmpty(attendance.classId) &&
-               string.IsNullOrEmpty(attendance.lessonId))
-                return (false, "ClassId and LessonId cannot be null or empty");
+            if (string.IsNullOrEmpty(attendance.classId) &&
+                string.IsNullOrEmpty(attendance.lessonId))
+            {
+                message = "ClassId and LessonId cannot be null or empty";
+                return false;
+            }
+
             if (attendance.evaluation is < 0 or > 10)
-                return (false, "Evaluation must be between 0 and 10");
+            {
+                message = "Evaluation must be between 0 and 10";
+                return false;
+            }
+
             if (attendance.attendance < 0)
-                return (false, "Attendance must be greater than 0");
-            if (attendance.lessonId != null && !await _attendanceService.CheckLessonExists(attendance.lessonId))
-                return (false, "LessonId does not exist");
-            if (attendance.classId != null && !await _attendanceService.CheckClassExists(attendance.classId))
-                return (false, "ClassId does not exist");
-            return (true, null);
+            {
+                message = "Attendance must be greater than 0";
+                return false;
+            }
+
+            if (attendance.lessonId != null && !_attendanceService.CheckLessonExists(attendance.lessonId))
+            {
+                message = "LessonId does not exist";
+                return false;
+            }
+
+            if (attendance.classId != null && !_attendanceService.CheckClassExists(attendance.classId))
+            {
+                message = "ClassId does not exist";
+                return false;
+            }
+            
+            message = null;
+            return true;
         }
 
         /// <summary>
@@ -65,13 +86,13 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAttendance()
+        public ActionResult GetAttendance()
         {
             try
             {
-                var branches = await Task.Run(_attendanceService.GetAllAttendance);
-                return branches.Any()
-                    ? Ok(new { status = true, message = "Get data successfully", data = branches })
+                var attendance = _attendanceService.GetAllAttendance().ToArray();
+                return attendance.Any()
+                    ? Ok(new { status = true, message = "Get data successfully", data = attendance })
                     : NoContent();
             }
             catch (Exception e)
@@ -98,11 +119,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{classId}/{lessonId}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAttendanceById([FromRoute] string classId, [FromRoute] string lessonId)
+        public ActionResult GetAttendanceById([FromRoute] string classId, [FromRoute] string lessonId)
         {
             try
             {
-                var attendance = await Task.Run(() => _attendanceService.GetAttendanceById(classId, lessonId));
+                var attendance = _attendanceService.GetAttendanceById(classId, lessonId).ToArray();
                 return attendance.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = attendance })
                     : NoContent();
@@ -130,11 +151,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{classId}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAttendanceByClassId([FromRoute] string classId)
+        public ActionResult GetAttendanceByClassId([FromRoute] string classId)
         {
             try
             {
-                var attendance = await Task.Run(() => _attendanceService.GetAttendanceByClassId(classId));
+                var attendance = _attendanceService.GetAttendanceByClassId(classId).ToArray();
                 return attendance.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = attendance })
                     : NoContent();
@@ -161,11 +182,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("sort")]
         [AllowAnonymous]
-        public async Task<IActionResult> SortByAttendance()
+        public IActionResult SortByAttendance()
         {
             try
             {
-                var attendance = await Task.Run(_attendanceService.SortByAttendance);
+                var attendance = _attendanceService.SortByAttendance().ToArray();
                 return attendance.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = attendance })
                     : NoContent();
@@ -202,16 +223,15 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddAttendance([FromBody] Models.Attendance attendance)
+        public ActionResult AddAttendance([FromBody] Models.Attendance attendance)
         {
-            var (isValid, message) = await Task.Run(() => IsValidAttendance(attendance));
-            if (!isValid)
+            if(!IsValidAttendance(attendance, out var message))
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var attendanceEntity = _mapper.Map<Domain.Entities.Attendance>(attendance);
-                await Task.Run(() => _attendanceService.AddAttendance(attendanceEntity));
+                _attendanceService.AddAttendance(attendanceEntity);
                 return Ok(new { status = true, message = "Add attendance successfully" });
             }
             catch (Exception e)
@@ -225,13 +245,11 @@ namespace WebAPI.Controllers
         /// Cập nhật sổ điểm danh
         /// </summary>
         /// <param name="attendance">Đối tượng sổ điểm danh</param>
-        /// <param name="classId">Mã lớp</param>
-        /// <param name="lessonId">Mã bài học</param>
         /// <returns></returns>
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/Attendance/string/string
+        ///     PUT /api/v1/Attendance
         ///     {
         ///         "classId": "string",
         ///         "lessonId": "string"
@@ -246,18 +264,17 @@ namespace WebAPI.Controllers
         /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("{classId}/{lessonId}")]
+        [HttpPut]
         [Authorize]
-        public async Task<IActionResult> UpdateAttendance([FromBody] Models.Attendance attendance, [FromRoute] string classId, [FromRoute] string lessonId)
+        public ActionResult UpdateAttendance([FromBody] Models.Attendance attendance)
         {
-            var (isValid, message) = await Task.Run(() => IsValidAttendance(attendance));
-            if (!isValid)
+            if (!IsValidAttendance(attendance, out var message))
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var attendanceEntity = _mapper.Map<Domain.Entities.Attendance>(attendance);
-                await Task.Run(() => _attendanceService.UpdateAttendance(attendanceEntity, classId, lessonId));
+                _attendanceService.UpdateAttendance(attendanceEntity);
                 return Ok(new { status = true, message = "Update attendance successfully" });
             }
             catch (Exception e)
@@ -285,14 +302,13 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{classId}/{lessonId}")]
         [Authorize]
-        public async Task<IActionResult> DeleteAttendance([FromRoute] string classId, [FromRoute] string lessonId)
+        public ActionResult DeleteAttendance([FromRoute] string classId, [FromRoute] string lessonId)
         {
-            if(!await Task.Run(() => _attendanceService.IsAttendanceExist(classId, lessonId)))
-                return NotFound(new { status = false, message = "Attendance not found" });
-
             try
             {
-                await Task.Run(() => _attendanceService.DeleteAttendance(classId, lessonId));
+                if (!_attendanceService.IsAttendanceExist(classId, lessonId))
+                    return NotFound(new { status = false, message = "Attendance not found" });
+                _attendanceService.DeleteAttendance(classId, lessonId);
                 return Ok(new { status = true, message = "Delete attendance successfully" });
             }
             catch (Exception e)

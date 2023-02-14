@@ -29,50 +29,46 @@ namespace Application.Services
             
         }
 
-        public async Task<List<Student>> GetStudents() => await _studentRepository.GetStudents();
+        public IEnumerable<Student> GetStudents() => _studentRepository.GetStudents();
 
-        public async Task<List<Student>> GetStudentsByNames(string? name) => await _studentRepository.GetStudentsByNames(name);
+        public IEnumerable<Student> GetStudentsByNames(string? name) => _studentRepository.GetStudentsByNames(name);
 
-        public async Task<List<Student>> GetStudentsByPhone(string? phone) => await _studentRepository.GetStudentsByPhone(phone);
+        public IEnumerable<Student> GetStudentsByPhone(string? phone) => _studentRepository.GetStudentsByPhone(phone);
 
-        public async Task<Student?> GetStudentById(Guid? id) => await _studentRepository.GetStudentById(id);
+        public Student? GetStudentById(Guid? id) => _studentRepository.GetStudentById(id);
 
-        public async Task AddStudent(Student student)
+        public void AddStudent(Student student)
         {
-            await _studentRepository.AddStudent(student);
-            await SaveAsync();
+            _studentRepository.AddStudent(student);
+            Save();
         }
 
-        public async Task UpdateStudent(Student student, Guid id)
+        public void UpdateStudent(Student student)
         {
-            await _studentRepository.UpdateStudent(student, id);
-            await SaveAsync();
+            _studentRepository.UpdateStudent(student);
+            Save();
         }
 
-        public async Task DeleteStudent(Guid id)
+        public void DeleteStudent(Guid id)
         {
-            await _studentRepository.DeleteStudent(id);
-            await SaveAsync();
+            _studentRepository.DeleteStudent(id);
+            Save();
         }
 
-        public async Task<int> CountClassByStudent(Guid? studentId) => await _classStudentRepository.CountClassByStudent(studentId);
+        public int CountClassByStudent(Guid? studentId) => _classStudentRepository.CountClassByStudent(studentId);
 
-        public async Task<IEnumerable<Class?>> GetClassesByStudentId(Guid? studentId)
+        public IEnumerable<Class?> GetClassesByStudentId(Guid? studentId) => _classStudentRepository.GetAllClassIdByStudentId(studentId).Select(_classRepository.FindClassById);
+
+        public bool CheckStudentExists(Guid? id) => _studentRepository.StudentExists(id);
+
+        public bool CheckClassExists(string? id) => _classRepository.ClassExists(id);
+
+        public bool IsAlreadyInClass(Guid? studentId, string? classId) => _classStudentRepository.IsExistClassStudent(classId, studentId);
+
+        public void AddClassStudent(ClassStudent classStudent)
         {
-            var classIds = await _classStudentRepository.GetAllClassIdByStudentId(studentId);
-            return await Task.WhenAll(classIds.Select(_classRepository.FindClassById));
-        }
-
-        public async Task<bool> CheckStudentExists(Guid? id) => await _studentRepository.StudentExists(id);
-
-        public async Task<bool> CheckClassExists(string? id) => await _classRepository.ClassExists(id);
-
-        public async Task<bool> IsAlreadyInClass(Guid? studentId, string? classId) => await _classStudentRepository.IsExistClassStudent(classId, studentId);
-
-        public async Task AddClassStudent(ClassStudent classStudent)
-        {
-            await _classStudentRepository.AddClassStudent(classStudent);
-            await SaveAsync();
+            _classStudentRepository.AddClassStudent(classStudent);
+            Save();
         }
     }
 }

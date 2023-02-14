@@ -13,11 +13,11 @@ namespace Domain.Interfaces
 
     public interface ITeacherRepository : IGenericRepository<Teacher>
     {
-        public Task<List<Teacher>> GetTeachers();
-        public Task<List<Teacher>> FindTeacherByName(string name);
-        public Task<Teacher?> GetTeacherById(Guid? id);
-        public Task AddTeacher(Teacher teacher);
-        public Task UpdateTeacher(Teacher teacher, Guid id);
-        public Task DeleteTeacher(Guid id);
+        public IEnumerable<Teacher> GetTeachers();
+        public IEnumerable<Teacher> FindTeacherByName(string name);
+        public Teacher? GetTeacherById(Guid? id);
+        public void AddTeacher(Teacher teacher);
+        public void UpdateTeacher(Teacher teacher);
+        public void DeleteTeacher(Guid id);
     }
 }

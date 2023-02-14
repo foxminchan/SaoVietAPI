@@ -1,7 +1,5 @@
 ﻿using Domain.Interfaces;
-using Microsoft.Extensions.Caching.Distributed;
-using Newtonsoft.Json;
-using System.Text;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Application.Cache
 {
@@ -16,39 +14,24 @@ namespace Application.Cache
 
     public class CacheService : ICache
     {
-        private readonly IDistributedCache _distributedCache;
-        private readonly DistributedCacheEntryOptions _cacheEntryOptions;
+        private readonly IMemoryCache _memoryCache;
+        private readonly MemoryCacheEntryOptions _cacheEntryOptions;
 
-        public CacheService(IDistributedCache distributedCache)
+        public CacheService(IMemoryCache memoryCache)
         {
-            _distributedCache = distributedCache;
-            _cacheEntryOptions = new DistributedCacheEntryOptions()
+            _memoryCache = memoryCache;
+            _cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromSeconds(60))
                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(3600))
-                .SetSlidingExpiration(TimeSpan.FromSeconds(60));
+                .SetPriority(CacheItemPriority.High)
+                .SetSize(1024);
         }
 
-        public void Remove(string cacheKey) => _distributedCache.Remove(cacheKey);
+        public void Remove(string cacheKey) => _memoryCache.Remove(cacheKey);
 
-        public T Set<T>(string cacheKey, T value)
-        {
-            var serializedValue = JsonConvert.SerializeObject(value);
-            _distributedCache.Set(cacheKey, Encoding.UTF8.GetBytes(serializedValue), _cacheEntryOptions);
-            return value;
-        }
+        public T Set<T>(string cacheKey, T value) => _memoryCache.Set(cacheKey, value, _cacheEntryOptions);
 
-        public bool TryGet<T>(string cacheKey, out T value)
-        {
-            var cacheValue = _distributedCache.Get(cacheKey);
-            if (cacheValue == null)
-            {
-                value = default!;
-                return false;
-            }
-
-            var deserializedValue = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(cacheValue));
-            value = deserializedValue;
-            return true;
-        }
+        public bool TryGet<T>(string cacheKey, out T value) => _memoryCache.TryGetValue(cacheKey, out value!);
 
     }
 }

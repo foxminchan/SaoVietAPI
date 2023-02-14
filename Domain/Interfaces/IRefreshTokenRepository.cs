@@ -13,8 +13,8 @@ namespace Domain.Interfaces
 
     public interface IRefreshTokenRepository
     {
-        public Task AddToken(RefreshToken token);
-        public Task UpdateToken(RefreshToken token);
-        public Task<RefreshToken> GetToken(string token);
+        public void AddToken(RefreshToken token);
+        public void UpdateToken(RefreshToken token);
+        public RefreshToken GetToken(string token);
     }
 }

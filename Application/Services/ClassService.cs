@@ -32,54 +32,51 @@ namespace Application.Services
             _studentRepository = new StudentRepository(context, cache);
         }
 
-        public async Task<List<Class>> GetClasses() => await _classRepository.GetClasses();
+        public IEnumerable<Class> GetClasses() => _classRepository.GetClasses();
 
-        public async Task<List<Class>> FindClassByName(string? name) => await _classRepository.FindClassByName(name);
+        public IEnumerable<Class> FindClassByName(string? name) => _classRepository.FindClassByName(name);
 
-        public async Task<List<Class>> GetClassesByStatus(string? status) => await _classRepository.GetClassesByStatus(status);
+        public IEnumerable<Class> GetClassesByStatus(string? status) => _classRepository.GetClassesByStatus(status);
 
-        public async Task<List<Class>> FindClassByTeacher(Guid? teacherId) => await _classRepository.FindClassByTeacher(teacherId);
+        public IEnumerable<Class> FindClassByTeacher(Guid? teacherId) => _classRepository.FindClassByTeacher(teacherId);
 
-        public async Task<Class?> FindClassById(string? id) => await _classRepository.FindClassById(id);
+        public Class? FindClassById(string? id) => _classRepository.FindClassById(id);
 
-        public async Task AddClass(Class newClass)
+        public void AddClass(Class newClass)
         {
-            await _classRepository.AddClass(newClass);
-            await SaveAsync();
+            _classRepository.AddClass(newClass);
+            Save();
         }
 
-        public async Task UpdateClass(Class newClass, string id)
+        public void UpdateClass(Class newClass)
         {
-            await _classRepository.UpdateClass(newClass, id);
-            await SaveAsync();
+            _classRepository.UpdateClass(newClass);
+            Save();
         }
 
-        public async Task DeleteClass(string id)
+        public void DeleteClass(string id)
         {
-            await _classRepository.DeleteClass(id);
-            await SaveAsync();
+            _classRepository.DeleteClass(id);
+            Save();
         }
 
-        public async Task<IEnumerable<Teacher?>> GetTeachers() => await _teacherRepository.GetTeachers();
+        public IEnumerable<Teacher?> GetTeachers() => _teacherRepository.GetTeachers();
 
-        public async Task<IEnumerable<Branch?>> GetBranches() => await _branchRepository.GetBranches();
+        public IEnumerable<Branch?> GetBranches() => _branchRepository.GetBranches();
 
-        public async Task<int> CountStudentInClass(string? classId) => await _classStudentRepository.CountStudentInClass(classId);
+        public int CountStudentInClass(string? classId) => _classStudentRepository.CountStudentInClass(classId);
 
-        public async Task<List<Student?>> GetStudentsInClass(string? classId)
+        public IEnumerable<Student?> GetStudentsInClass(string? classId) => _classStudentRepository
+            .GetAllStudentIdByClassId(classId).Select(studentId => _studentRepository.GetById(studentId));
+
+        public bool CheckStudentInClass(string? classId, Guid? studentId) => _classStudentRepository.IsExistClassStudent(classId, studentId);
+
+        public void DeleteStudentFromClass(ClassStudent classStudent)
         {
-            var studentIds = await _classStudentRepository.GetAllStudentIdByClassId(classId);
-            return Task.WhenAll(studentIds.Select(_studentRepository.GetStudentById)).Result.ToList();
+            _classStudentRepository.DeleteClassStudent(classStudent);
+            Save();
         }
 
-        public async Task<bool> CheckStudentInClass(string? classId, Guid? studentId) => await _classStudentRepository.IsExistClassStudent(classId, studentId);
-
-        public async Task DeleteStudentFromClass(ClassStudent classStudent)
-        {
-            await _classStudentRepository.DeleteClassStudent(classStudent);
-            await SaveAsync();
-        }
-
-        public async Task<bool> CheckClassIdExist(string? classId) => await _classRepository.ClassExists(classId);
+        public bool CheckClassIdExist(string? classId) => _classRepository.ClassExists(classId);
     }
 }

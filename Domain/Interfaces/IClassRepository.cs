@@ -13,14 +13,14 @@ namespace Domain.Interfaces
 
     public interface IClassRepository : IGenericRepository<Class>
     {
-        public Task<List<Class>> GetClasses();
-        public Task<List<Class>> FindClassByName(string? name);
-        public Task<List<Class>> GetClassesByStatus(string? status);
-        public Task<List<Class>> FindClassByTeacher(Guid? teacherId);
-        public Task<Class?> FindClassById(string? id);
-        public Task AddClass(Class entity);
-        public Task UpdateClass(Class entity, string id);
-        public Task DeleteClass(string id);
-        public Task<bool> ClassExists(string? id);
+        public IEnumerable<Class> GetClasses();
+        public IEnumerable<Class> FindClassByName(string? name);
+        public IEnumerable<Class> GetClassesByStatus(string? status);
+        public IEnumerable<Class> FindClassByTeacher(Guid? teacherId);
+        public Class? FindClassById(string? id);
+        public void AddClass(Class entity);
+        public void UpdateClass(Class entity);
+        public void DeleteClass(string id);
+        public bool ClassExists(string? id);
     }
 }

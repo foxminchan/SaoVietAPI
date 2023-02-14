@@ -35,27 +35,41 @@ namespace WebAPI.Controllers
             _studentService = studentService;
         }
 
-        private static async Task<(bool, string?)> IsValidStudent(Models.Student student)
+        private static bool IsValidStudent(Models.Student student, out string? message)
         {
-            await Task.Delay(0);
 
             if (string.IsNullOrEmpty(student.fullName) &&
                 string.IsNullOrEmpty(student.dob) &&
                 string.IsNullOrEmpty(student.phone))
-                return (false, "Full name, date of birth and phone number are required");
+            {
+                message = "Full name, date of birth and phone number are required";
+                return false;
+            }
 
             if (!string.IsNullOrWhiteSpace(student.email) &&
-                !Regex.IsMatch(student.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None, TimeSpan.FromSeconds(2)))
-                return (false, "Email is invalid");
+                !Regex.IsMatch(student.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None,
+                    TimeSpan.FromSeconds(2)))
+            {
+                message = "Email is invalid";
+                return false;
+            }
 
             if (!string.IsNullOrWhiteSpace(student.phone) &&
                 !Regex.IsMatch(student.phone, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
-                return (false, "Phone is invalid");
+            {
+                message = "Phone is invalid";
+                return false;
+            }
 
             if (string.IsNullOrWhiteSpace(student.dob) ||
-                Regex.IsMatch(student.dob, "^\\d{4}-\\d{2}-\\d{2}$", RegexOptions.None, TimeSpan.FromSeconds(2))) return (true, null);
-            return (false, "Start date must be match YYYY-MM-DD format");
+                !Regex.IsMatch(student.dob, "^\\d{4}-\\d{2}-\\d{2}$", RegexOptions.None, TimeSpan.FromSeconds(2)))
+            {
+                message = "Start date must be match YYYY-MM-DD format";
+                return false;
+            }
 
+            message = null;
+            return true;
         }
 
         /// <summary>
@@ -74,11 +88,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetStudents()
+        public ActionResult GetStudents()
         {
             try
             {
-                var students = await Task.Run(_studentService.GetStudents);
+                var students = _studentService.GetStudents().ToArray();
                 return students.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = students })
                     : NoContent();
@@ -107,11 +121,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("name/{name}")]
         [Authorize]
-        public async Task<IActionResult> GetStudentsByName([FromRoute] string? name)
+        public ActionResult GetStudentsByName([FromRoute] string? name)
         {
             try
             {
-                var students = await Task.Run(() => _studentService.GetStudentsByNames(name));
+                var students = _studentService.GetStudentsByNames(name).ToArray();
                 return students.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = students })
                     : NoContent();
@@ -140,11 +154,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("phone/{phone:regex(^\\d{{10}}$)}")]
         [Authorize]
-        public async Task<IActionResult> GetStudentsByPhone([FromRoute] string? phone)
+        public ActionResult GetStudentsByPhone([FromRoute] string? phone)
         {
             try
             {
-                var students = await Task.Run(() => _studentService.GetStudentsByPhone(phone));
+                var students = _studentService.GetStudentsByPhone(phone).ToArray();
                 return students.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = students })
                     : NoContent();
@@ -172,11 +186,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id:guid}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetStudentById([FromRoute] Guid? id)
+        public ActionResult GetStudentById([FromRoute] Guid? id)
         {
             try
             {
-                var student = await Task.Run(() => _studentService.GetStudentById(id));
+                var student =  _studentService.GetStudentById(id);
                 return student != null
                     ? Ok(new { status = true, message = "Get data successfully", data = student })
                     : NoContent();
@@ -206,16 +220,16 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("class/{id:guid}")]
         [Authorize]
-        public async Task<IActionResult> GetClassByStudentId([FromRoute] Guid? id)
+        public ActionResult GetClassByStudentId([FromRoute] Guid? id)
         {
             if (id == null)
                 return BadRequest(new { status = false, message = "Id is required" });
             try
             {
-                var count = await Task.Run(() => _studentService.CountClassByStudent(id));
+                var count =  _studentService.CountClassByStudent(id);
                 if (count == 0)
                     return NoContent();
-                var classes = await Task.Run(() => _studentService.GetClassesByStudentId(id));
+                var classes = _studentService.GetClassesByStudentId(id).ToArray();
                 return Ok(new { status = true, message = "Get data successfully", amount = count, data = classes });
             }
             catch (Exception e)
@@ -249,17 +263,16 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddStudent([FromBody] Models.Student student)
+        public ActionResult AddStudent([FromBody] Models.Student student)
         {
-            var (isValid, message) = await Task.Run(() => IsValidStudent(student));
-            if (!isValid)
+            if (!IsValidStudent(student, out var message))
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var newStudent = _mapper.Map<Domain.Entities.Student>(student);
                 newStudent.id = Guid.NewGuid();
-                await Task.Run(() => _studentService.AddStudent(newStudent));
+                _studentService.AddStudent(newStudent);
                 return Ok(new { status = true, message = "Add student successfully" });
             }
             catch (Exception e)
@@ -287,20 +300,21 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost("{studentId:guid}/{classId}")]
         [Authorize]
-        public async Task<IActionResult> AddStudentToClass([FromRoute] Guid? studentId, [FromRoute] string classId)
+        public ActionResult AddStudentToClass([FromRoute] Guid? studentId, [FromRoute] string classId)
         {
             if (studentId == null || string.IsNullOrEmpty(classId))
                 return BadRequest(new { status = false, message = "Student id and class id are required" });
 
             try
             {
-                if (!await Task.Run(() => _studentService.CheckStudentExists(studentId.Value)))
+                if (!_studentService.CheckStudentExists(studentId.Value))
                     return BadRequest(new { status = false, message = "Student id is not exists" });
-                if (!await Task.Run(() => _studentService.CheckClassExists(classId)))
+                if (!_studentService.CheckClassExists(classId))
                     return BadRequest(new { status = false, message = "Class id is not exists" });
-                if (await Task.Run(() => _studentService.IsAlreadyInClass(studentId.Value, classId)))
+                if (_studentService.IsAlreadyInClass(studentId.Value, classId))
                     return BadRequest(new { status = false, message = "Student is already in class" });
-                await Task.Run(() => _studentService.AddClassStudent(new Domain.Entities.ClassStudent { classId = classId, studentId = studentId.Value }));
+                _studentService.AddClassStudent(
+                    new Domain.Entities.ClassStudent { classId = classId, studentId = studentId.Value });
                 return Ok(new { status = true, message = "Add student to class successfully" });
             }
             catch (Exception e)
@@ -333,21 +347,19 @@ namespace WebAPI.Controllers
         /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("{id:guid}")]
+        [HttpPut]
         [Authorize]
-        public async Task<IActionResult> UpdateStudent([FromBody] Models.Student student, [FromRoute] Guid id)
+        public ActionResult UpdateStudent([FromBody] Models.Student student, [FromRoute] Guid id)
         {
             try
             {
-                var existStudent = await Task.Run(() => _studentService.GetStudentById(id));
-                if (existStudent == null)
+                if (_studentService.GetStudentById(id) == null)
                     return BadRequest(new { status = false, message = "Student not found" });
-                var (isValid, message) = await Task.Run(() => IsValidStudent(student));
-                if (!isValid)
+                if (!IsValidStudent(student, out var message))
                     return BadRequest(new { status = false, message });
                 var newStudent = _mapper.Map<Domain.Entities.Student>(student);
                 newStudent.id = id;
-                await Task.Run(() => _studentService.UpdateStudent(newStudent, id));
+                _studentService.UpdateStudent(newStudent);
                 return Ok(new { status = true, message = "Update student successfully" });
             }
             catch (Exception e)
@@ -374,14 +386,13 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id:guid}")]
         [Authorize]
-        public async Task<IActionResult> DeleteStudent([FromRoute] Guid id)
+        public ActionResult DeleteStudent([FromRoute] Guid id)
         {
             try
             {
-                var existStudent = await Task.Run(() => _studentService.GetStudentById(id));
-                if (existStudent == null)
+                if (_studentService.GetStudentById(id) == null)
                     return BadRequest(new { status = false, message = "Student not found" });
-                await Task.Run(() => _studentService.DeleteStudent(id));
+                _studentService.DeleteStudent(id);
                 return Ok(new { status = true, message = "Delete student successfully" });
             }
             catch (Exception e)

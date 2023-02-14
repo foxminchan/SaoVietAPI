@@ -35,19 +35,29 @@ namespace WebAPI.Controllers
             _courseService = courseService;
         }
 
-        private async Task<(bool, string?)> IsValidCourse(Models.Course course)
+        private bool IsValidCourse(Models.Course course, out string? message)
         {
             if (string.IsNullOrEmpty(course.id))
-                return (false, "Course id is required");
+            {
+                message = "Course id is required";
+                return false;
+            }
 
-            if (await _courseService.CourseExists(course.id))
-                return (false, "Course id already exists");
+            if (_courseService.CourseExists(course.id))
+            {
+                message = "Course id already exists";
+                return false;
+            }
 
             if (!string.IsNullOrEmpty(course.categoryId) &&
-                !await _courseService.IsValidCategoryId(course.categoryId))
-                return (false, "Category id not exists");
+                !_courseService.IsValidCategoryId(course.categoryId))
+            {
+                message = "Category id not exists";
+                return false;
+            }
 
-            return (true, null);
+            message = null;
+            return true;
         }
 
         /// <summary>
@@ -65,11 +75,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetCourses()
+        public ActionResult GetCourses()
         {
             try
             {
-                var courses = await Task.Run(_courseService.GetCourses);
+                var courses = _courseService.GetCourses().ToArray();
                 return courses.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = courses })
                     : NoContent();
@@ -98,11 +108,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("name/{name}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetCoursesByNames([FromRoute] string? name)
+        public ActionResult GetCoursesByNames([FromRoute] string? name)
         {
             try
             {
-                var courses = await Task.Run(() => _courseService.GetCoursesByNames(name));
+                var courses = _courseService.GetCoursesByNames(name).ToArray();
                 return courses.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = courses })
                     : NoContent();
@@ -131,11 +141,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetCourseById([FromRoute] string? id)
+        public ActionResult GetCourseById([FromRoute] string? id)
         {
             try
             {
-                var course = await Task.Run(() => _courseService.GetCourseById(id));
+                var course =  _courseService.GetCourseById(id);
                 return course != null
                     ? Ok(new { status = true, message = "Get data successfully", data = course })
                     : NotFound(new { status = false, message = "No course was found" });
@@ -171,16 +181,15 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddCourse([FromBody] Models.Course course)
+        public ActionResult AddCourse([FromBody] Models.Course course)
         {
-            var (isValid, message) = await Task.Run(() => IsValidCourse(course));
-            if (!isValid)
+            if(!IsValidCourse(course, out var message))
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var courseEntity = _mapper.Map<Domain.Entities.Course>(course);
-                await Task.Run(() => _courseService.AddCourse(courseEntity));
+                _courseService.AddCourse(courseEntity);
                 return Ok(new { status = true, message = "Add course successfully" });
             }
             catch (Exception e)
@@ -195,7 +204,6 @@ namespace WebAPI.Controllers
         /// Cập nhật khoá học
         /// </summary>
         /// <param name="course">Đối tượng khoá học</param>
-        /// <param name="id">Mã khoá học</param>
         /// <returns></returns>
         /// <remarks>
         /// Sample request:
@@ -213,18 +221,17 @@ namespace WebAPI.Controllers
         /// <response code="404">Không tìm thấy khoá học</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("{id}")]
+        [HttpPut]
         [Authorize]
-        public async Task<IActionResult> UpdateCourse([FromBody] Models.Course course, [FromRoute] string id)
+        public ActionResult UpdateCourse([FromBody] Models.Course course)
         {
-            var (isValid, message) = await Task.Run(() => IsValidCourse(course));
-            if (!isValid)
+            if (!IsValidCourse(course, out var message))
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var courseEntity = _mapper.Map<Domain.Entities.Course>(course);
-                await Task.Run(() => _courseService.UpdateCourse(courseEntity, id));
+                _courseService.UpdateCourse(courseEntity);
                 return Ok(new { status = true, message = "Update course successfully" });
             }
             catch (Exception e)
@@ -252,14 +259,13 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> DeleteCourse([FromRoute] string id)
+        public ActionResult DeleteCourse([FromRoute] string id)
         {
-            if (!await Task.Run(() => _courseService.CourseExists(id)))
-                return NotFound(new { status = false, message = "No course id was found" });
-
             try
             {
-                await Task.Run(() => _courseService.DeleteCourse(id));
+                if (!_courseService.CourseExists(id))
+                    return NotFound(new { status = false, message = "No course id was found" });
+                _courseService.DeleteCourse(id);
                 return Ok(new { status = true, message = "Delete course successfully" });
             }
             catch (Exception e)

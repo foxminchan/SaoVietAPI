@@ -18,37 +18,22 @@ namespace Infrastructure.Repositories
         {
         }
 
-        public async Task<List<Attendance>> GetAllAttendance()
-        {
-            var result = await GetAll();
-            return result.ToList();
-        }
+        public IEnumerable<Attendance> GetAllAttendance() => GetAll();
 
-        public async Task<List<Attendance>> GetAttendanceById(string? classId, string? lessonId)
-        {
-            var result = await GetList(filter: x => x.classId == classId && x.lessonId == lessonId);
-            return result.ToList();
-        }
+        public IEnumerable<Attendance> GetAttendanceById(string? classId, string? lessonId) =>
+            GetList(filter: x => x.classId == classId && x.lessonId == lessonId);
 
-        public async Task<List<Attendance>> GetAttendanceByClassId(string? classId)
-        {
-            var result = await GetList(filter: x => x.classId == classId);
-            return result.ToList();
-        }
+        public IEnumerable<Attendance> GetAttendanceByClassId(string? classId) =>
+            GetList(filter: x => x.classId == classId);
 
-        public async Task<List<Attendance>> SortByAttendance()
-        {
-            var result = await GetList(orderBy: x => x.OrderBy(y => y.attendance));
-            return result.ToList();
-        }
+        public IEnumerable<Attendance> SortByAttendance() => GetList(orderBy: x => x.OrderBy(y => y.attendance));
 
-        public async Task AddAttendance(Attendance attendance) => await Insert(attendance);
+        public void AddAttendance(Attendance attendance) => Insert(attendance);
 
-        public async Task UpdateAttendance(Attendance attendance, string classId, string lessonId) => await Update(attendance, x => x.classId == classId && x.lessonId == lessonId);
+        public void UpdateAttendance(Attendance attendance) => Update(attendance);
 
-        public async Task DeleteAttendance(string classId, string lessonId) => await Delete(x => x.classId == classId && x.lessonId == lessonId);
+        public void DeleteAttendance(string classId, string lessonId) => Delete(x => x.classId == classId && x.lessonId == lessonId);
 
-        public async Task<bool> IsAttendanceExist(string classId, string lessonId) =>
-            await Any(x => x.classId == classId && x.lessonId == lessonId);
+        public bool IsAttendanceExist(string classId, string lessonId) => Any(x => x.classId == classId && x.lessonId == lessonId);
     }
 }

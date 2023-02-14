@@ -13,12 +13,12 @@ namespace Domain.Interfaces
 
     public interface ILessonRepository : IGenericRepository<Lesson>
     {
-        public Task<List<Lesson>> GetAllLesson();
-        public Task<List<Lesson>> GetByNames(string? name);
-        public Task<Lesson?> GetLessonById(string id);
-        public Task AddLesson(Lesson lesson);
-        public Task UpdateLesson(Lesson lesson, string? id);
-        public Task DeleteLesson(Lesson lesson);
-        public Task<bool> LessonExists(string id);
+        public IEnumerable<Lesson> GetAllLesson();
+        public IEnumerable<Lesson> GetByNames(string? name);
+        public Lesson? GetLessonById(string id);
+        public void AddLesson(Lesson lesson);
+        public void UpdateLesson(Lesson lesson);
+        public void DeleteLesson(string lesson);
+        public bool LessonExists(string id);
     }
 }

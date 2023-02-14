@@ -18,97 +18,50 @@ namespace Infrastructure.Repositories
         {
         }
 
-        public async Task Register(ApplicationUser user) => await Insert(user);
+        public void Register(ApplicationUser user) => Insert(user);
 
-        public async Task<bool> CheckAccountValid(string username, string password)
+        public bool CheckAccountValid(string username, string password) => Any(x => x.UserName == username) && BCrypt.Net.BCrypt.Verify(password, GetList(x => x.UserName == username && x.PasswordHash != null).Select(x => x.PasswordHash).SingleOrDefault());
+
+        public bool IsUserNameExists(string username) => Any(x => x.UserName == username);
+
+        public bool IsLockedAccount(string username) => Any(x => x.UserName == username && x.LockoutEnabled && x.LockoutEnd > DateTime.Now);
+
+        public int GetFailLogin(string username) => GetMany(x => x.UserName == username).First().AccessFailedCount;
+
+        public ApplicationUser GetById(string userId) => GetMany(x => x.Id == userId).First();
+
+        public ApplicationUser GetByUserName(string username) => GetMany(x => x.UserName == username).First();
+
+        public void FailLogin(string username)
         {
-            if (!await Any(x => x.UserName == username)) return false;
-            var user = await GetList(x => x.UserName == username && x.PasswordHash != null);
-            return BCrypt.Net.BCrypt.Verify(password,  user.Select(x => x.PasswordHash).SingleOrDefault());
-        }
-
-        public async Task<bool> CheckTwoFa(ApplicationUser user) =>
-            await Any(x => x.Id == user.Id && x.TwoFactorEnabled);
-
-        public async Task<bool> CheckEmailConfirmed(ApplicationUser user) =>
-            await Any(x => x.Id == user.Id && x.EmailConfirmed);
-
-        public async Task<bool> CheckPhoneConfirmed(ApplicationUser user) =>
-            await Any(x => x.Id == user.Id && x.PhoneNumberConfirmed);
-
-        public async Task<bool> IsUserNameExists (string username) =>
-            await Any(x => x.UserName == username);
-
-        public async Task<bool> IsLockedAccount(string username) =>
-            await Any(x => x.UserName == username && x.LockoutEnabled && x.LockoutEnd > DateTime.Now);
-
-        public async Task<int> GetFailLogin(string username)
-        {
-            var userList = await GetList(x => x.UserName == username);
-            var user = userList.First();
-            return user.AccessFailedCount;
-        }
-
-        public async Task<ApplicationUser> GetById(string id)
-        {
-            var result = await GetList(x => x.Id == id);
-            return result.First();
-        }
-
-        public async Task<ApplicationUser> GetByUserName(string username)
-        {
-            var userList = await GetList(x => x.UserName == username);
-            return userList.First();
-        }
-
-        public async Task FailLogin(string username)
-        {
-            var userList = await GetList(x => x.UserName == username);
-            var user = userList.First();
+            var user = GetList(x => x.UserName == username).First();
             user.AccessFailedCount++;
-            await Update(user);
+            Update(user);
         }
 
-        public async Task LockAccount(string username)
+        public void LockAccount(string username)
         {
-            var userList = await GetList(x => x.UserName == username);
-            var user = userList.First();
+            var user = GetList(x => x.UserName == username).First();
             user.LockoutEnabled = true;
             user.LockoutEnd = DateTime.Now.AddMinutes(30);
-            await Update(user);
+            Update(user);
         }
 
-        public async Task UnlockAccount(string username)
+        public void ResetFailLogin(string username)
         {
-            var userList = await GetList(x => x.UserName == username);
-            var user = userList.First();
-            user.LockoutEnabled = false;
-            user.LockoutEnd = null;
-            await Update(user);
-        }
-
-        public async Task ResetFailLogin(string username)
-        {
-            var userList = await GetList(x => x.UserName == username);
-            var user = userList.First();
+            var user = GetList(x => x.UserName == username).First();
             user.AccessFailedCount = 0;
-            await Update(user);
+            Update(user);
         }
 
-        public async Task BanAccount(string username)
+        public void BanAccount(string username)
         {
-            var userList = await GetList(x => x.UserName == username);
-            var user = userList.First();
+            var user = GetList(x => x.UserName == username).First();
             user.LockoutEnabled = true;
             user.LockoutEnd = DateTime.Now.AddYears(200);
-            await Update(user);
+            Update(user);
         }
 
-        public async Task<string> GetUserId(string username)
-        {
-            var userList = await GetList(x => x.UserName == username);
-            var user = userList.First();
-            return user.Id;
-        }
+        public string GetUserId(string username) => GetList(x => x.UserName == username).First().Id;
     }
 }

@@ -32,7 +32,7 @@ namespace Infrastructure
         {
         }
 
-        public async Task<IEnumerable<string>> GetAllId() => await Users.Select(u => u.Id).ToListAsync();
+        public IEnumerable<string> GetAllId() => Users.Select(u => u.Id);
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

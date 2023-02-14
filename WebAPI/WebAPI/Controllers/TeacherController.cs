@@ -1,8 +1,8 @@
 ﻿using Application.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
@@ -29,7 +29,7 @@ namespace WebAPI.Controllers
 
         /// <inheritdoc />
         public TeacherController(
-            TeacherService teacherService, 
+            TeacherService teacherService,
             ILogger<TeacherController> logger)
         {
             _logger = logger;
@@ -37,26 +37,40 @@ namespace WebAPI.Controllers
             _teacherService = teacherService;
         }
 
-        private async Task<(bool, string?)> IsValidTeacher(Models.Teacher teacher)
+        private bool IsValidTeacher(Models.Teacher teacher, out string? message)
         {
             if (string.IsNullOrWhiteSpace(teacher.fullName) &&
                 string.IsNullOrWhiteSpace(teacher.email) &&
                 string.IsNullOrWhiteSpace(teacher.phone))
-                return (false, "Full name, email and phone are required");
+            {
+                message = "Full name, email and phone are required";
+                return false;
+            }
 
             if (!string.IsNullOrWhiteSpace(teacher.email) &&
-                !Regex.IsMatch(teacher.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None, TimeSpan.FromSeconds(2)))
-                return (false, "Email is invalid");
+                !Regex.IsMatch(teacher.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None,
+                    TimeSpan.FromSeconds(2)))
+            {
+                message = "Email is invalid";
+                return false;
+            }
 
             if (!string.IsNullOrWhiteSpace(teacher.phone) &&
-                    !Regex.IsMatch(teacher.phone, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
-                return (false, "Phone is invalid");
+                !Regex.IsMatch(teacher.phone, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
+            {
+                message = "Phone is invalid";
+                return false;
+            }
 
-            var allId = await _teacherService.GetAllId();
-            if (string.IsNullOrWhiteSpace(teacher.customerId)
-                || allId.Contains(teacher.customerId)) return (true, null);
-            return (false, "Customer id is not exists");
+            if (string.IsNullOrWhiteSpace(teacher.customerId) && 
+                !_teacherService.GetAllId().Contains(teacher.customerId))
+            {
+                message = "Customer id is not exists";
+                return false;
+            }
 
+            message = null;
+            return true;
         }
 
         /// <summary>
@@ -74,11 +88,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet()]
         [AllowAnonymous]
-        public async Task<IActionResult> GetTeachers()
+        public ActionResult GetTeachers()
         {
             try
             {
-                var teachers = await Task.Run(_teacherService.GetTeachers);
+                var teachers = _teacherService.GetTeachers().ToArray();
                 return teachers.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = teachers })
                     : NoContent();
@@ -106,11 +120,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{name}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetTeachersByName([FromRoute] string name)
+        public ActionResult GetTeachersByName([FromRoute] string name)
         {
             try
             {
-                var teachers = await Task.Run(() => _teacherService.FindTeacherByName(name));
+                var teachers =  _teacherService.FindTeacherByName(name).ToArray();
                 return teachers.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = teachers })
                     : NoContent();
@@ -138,11 +152,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id:guid}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetTeacherById([FromRoute] Guid id)
+        public ActionResult GetTeacherById([FromRoute] Guid id)
         {
             try
             {
-                var teacher = await Task.Run(() => _teacherService.GetTeacherById(id));
+                var teacher = _teacherService.GetTeacherById(id);
                 return teacher != null
                     ? Ok(new { status = true, message = "Get data successfully", data = teacher })
                     : NoContent();
@@ -176,17 +190,16 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost()]
         [AllowAnonymous]
-        public async Task<IActionResult> AddTeacher([FromBody] Models.Teacher teacher)
+        public ActionResult AddTeacher([FromBody] Models.Teacher teacher)
         {
-            var (isValid, message) = await Task.Run(() => IsValidTeacher(teacher));
-            if (!isValid)
+            if (!IsValidTeacher(teacher, out var message))
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var newTeacher = _mapper.Map<Domain.Entities.Teacher>(teacher);
                 newTeacher.id = Guid.NewGuid();
-                await Task.Run(() => _teacherService.AddTeacher(newTeacher));
+                _teacherService.AddTeacher(newTeacher);
                 return Ok(new { status = true, message = "Add teacher successfully" });
             }
             catch (Exception e)
@@ -221,18 +234,17 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPut("{id:guid}")]
         [Authorize]
-        public async Task<IActionResult> UpdateTeacher([FromBody] Models.Teacher teacher, [FromRoute] Guid id)
+        public ActionResult UpdateTeacher([FromBody] Models.Teacher teacher, [FromRoute] Guid id)
         {
             try
             {
-                var existTeacher = await Task.Run(() => _teacherService.GetTeacherById(id));
-                if (existTeacher == null)
-                    return NotFound(new { status = false, message = "Teacher not found" });
-                var (isValid, message) = await Task.Run(() => IsValidTeacher(teacher));
-                if (!isValid)
+                if (!IsValidTeacher(teacher, out var message))
                     return BadRequest(new { status = false, message });
-                var updatedTeacher = _mapper.Map(teacher, existTeacher);
-                await Task.Run(() => _teacherService.UpdateTeacher(updatedTeacher, id));
+                var teacherToUpdate = _teacherService.GetTeacherById(id);
+                if (teacherToUpdate == null)
+                    return NotFound(new { status = false, message = "Teacher not found" });
+                _mapper.Map(teacher, teacherToUpdate);
+                _teacherService.UpdateTeacher(teacherToUpdate);
                 return Ok(new { status = true, message = "Update teacher successfully" });
             }
             catch (Exception e)
@@ -259,14 +271,13 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id:guid}")]
         [Authorize]
-        public async Task<IActionResult> DeleteTeacher([FromRoute] Guid id)
+        public ActionResult DeleteTeacher([FromRoute] Guid id)
         {
             try
             {
-                var teacher = await Task.Run(() => _teacherService.GetTeacherById(id));
-                if (teacher == null)
+                if (_teacherService.GetTeacherById(id) == null)
                     return NotFound(new { status = false, message = "Teacher not found" });
-                await Task.Run(() => _teacherService.DeleteTeacher(id));
+                _teacherService.DeleteTeacher(id);
                 return Ok(new { status = true, message = "Delete teacher successfully" });
             }
             catch (Exception e)

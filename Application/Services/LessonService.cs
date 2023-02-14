@@ -26,30 +26,30 @@ namespace Application.Services
             _courseRepository = new CourseRepository(context, cache);
         }
 
-        public async Task<List<Lesson>> GetAllLesson() => await _lessonRepository.GetAllLesson();
+        public IEnumerable<Lesson> GetAllLesson() => _lessonRepository.GetAllLesson();
 
-        public async Task<List<Lesson>> GetByNames(string? name) => await _lessonRepository.GetByNames(name);
+        public IEnumerable<Lesson> GetByNames(string? name) => _lessonRepository.GetByNames(name);
 
-        public async Task<Lesson?> GetLessonById(string id) => await _lessonRepository.GetLessonById(id);
+        public Lesson? GetLessonById(string id) => _lessonRepository.GetLessonById(id);
 
-        public async Task AddLesson(Lesson lesson)
+        public void AddLesson(Lesson lesson)
         {
-            await _lessonRepository.AddLesson(lesson);
-            await SaveAsync();
+            _lessonRepository.AddLesson(lesson);
+            Save();
         }
 
-        public async Task UpdateLesson(Lesson lesson, string? id)
+        public void UpdateLesson(Lesson lesson)
         {
-            await _lessonRepository.UpdateLesson(lesson, id);
-            await SaveAsync();
+            _lessonRepository.UpdateLesson(lesson);
+            Save();
         }
 
-        public async Task DeleteLesson(Lesson lesson)
+        public void DeleteLesson(string id)
         {
-            await _lessonRepository.DeleteLesson(lesson);
-            await SaveAsync();
+            _lessonRepository.DeleteLesson(id);
+            Save();
         }
 
-        public async Task<bool> IsCourseExists(string id) => await _courseRepository.CourseExists(id);
+        public bool IsCourseExists(string id) => _courseRepository.CourseExists(id);
     }
 }

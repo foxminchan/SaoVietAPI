@@ -13,12 +13,12 @@ namespace Domain.Interfaces
 
     public interface ICourseRepository : IGenericRepository<Course>
     {
-        public Task<List<Course>> GetCourses();
-        public Task<List<Course>> GetCoursesByNames(string? name);
-        public Task<Course?> GetCourseById(string? id);
-        public Task AddCourse(Course course);
-        public Task UpdateCourse(Course course, string id);
-        public Task DeleteCourse(string id);
-        public Task<bool> CourseExists(string id);
+        public IEnumerable<Course> GetCourses();
+        public IEnumerable<Course> GetCoursesByNames(string? name);
+        public Course? GetCourseById(string? id);
+        public void AddCourse(Course course);
+        public void UpdateCourse(Course course);
+        public void DeleteCourse(string id);
+        public bool CourseExists(string id);
     }
 }

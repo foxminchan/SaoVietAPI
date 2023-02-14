@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -48,31 +49,62 @@ namespace WebAPI.Controllers
             _tokenValidationParameters = tokenValidationParameters;
         }
 
-        private async Task<(bool, string?)> IsValidUser(Models.RegisterUser user)
+        private bool IsValidUser(Models.RegisterUser user, out string? message)
         {
             if (!string.IsNullOrWhiteSpace(user.email) &&
-                !Regex.IsMatch(user.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None, TimeSpan.FromSeconds(2)))
-                return (false, "Email is invalid");
+                !Regex.IsMatch(user.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None,
+                    TimeSpan.FromSeconds(2)))
+            {
+                message = "Email is invalid";
+                return false;
+            }
+
             if (!string.IsNullOrWhiteSpace(user.phoneNumber) &&
                 !Regex.IsMatch(user.phoneNumber, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
-                return (false, "Phone is invalid");
+            {
+                message = "Phone number is invalid";
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(user.username) || string.IsNullOrWhiteSpace(user.password))
-                return (false, "Username or password is invalid");
-            if (!Regex.IsMatch(user.password, @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$", RegexOptions.None, TimeSpan.FromSeconds(2)))
-                return (false, "Password is too weak");
-            if (await Task.Run(() => _authorizationService.CheckUserExist(user.username)))
-                return (false, "Username is already taken");
-            return string.IsNullOrWhiteSpace(user.email) ? (false, "Email is required") : (true, null);
+            {
+                message = "Username or password is required";
+                return false;
+            }
+
+            if (!Regex.IsMatch(user.password, @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$",
+                    RegexOptions.None, TimeSpan.FromSeconds(2)))
+            {
+                message = "Password is too weak";
+                return false;
+            }
+
+            if (_authorizationService.CheckUserExist(user.username))
+            {
+                message = "Username is already exists";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(user.email))
+            {
+                message = "Email is required";
+                return false;
+            }
+
+            message = null;
+            return true;
         }
 
-        private async Task<Models.Auth> GenerateJwtToken(Domain.Entities.ApplicationUser user)
+        private Models.Auth GenerateJwtToken(Domain.Entities.ApplicationUser user)
         {
             var claims = new[]
             {
+                new Claim("Id", user.Id),
                 new Claim(JwtRegisteredClaimNames.Sub, _config.GetSection("Jwt:Subject").Value ?? throw new InvalidOperationException()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds().ToString()),
-                new Claim("UserName", user.UserName!)
+                new Claim("UserName", user.UserName!),
+                new Claim("Email", user.Email!)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("Jwt:Key").Value ?? throw new InvalidOperationException()));
@@ -93,13 +125,13 @@ namespace WebAPI.Controllers
                 jwtId = token.Id,
                 token = RandomStringGeneration(64),
                 addedDate = DateTime.UtcNow,
-                expiryDate = DateTime.UtcNow.AddMonths(6),
+                expiryDate = DateTime.UtcNow.AddDays(10),
                 isRevoked = false,
                 isUsed = false,
-                userId = await _authorizationService.GetUserId(user.UserName!)
+                userId = _authorizationService.GetUserId(user.UserName!)
             };
 
-            await _authorizationService.AddToken(refreshToken);
+            _authorizationService.AddToken(refreshToken);
 
             return new Models.Auth()
             {
@@ -110,7 +142,7 @@ namespace WebAPI.Controllers
 
         }
 
-        private async Task<Models.Auth> VerifyAndGenerateToken(Models.TokenRefresh tokenRefresh)
+        private Models.Auth VerifyAndGenerateToken(Models.TokenRefresh tokenRefresh)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
@@ -118,12 +150,12 @@ namespace WebAPI.Controllers
             {
                 _tokenValidationParameters.ValidateLifetime = false;
                 var principal = jwtTokenHandler.ValidateToken(tokenRefresh.token, _tokenValidationParameters, out var validatedToken);
-                if (validatedToken is JwtSecurityToken jwtSecurityToken)
+                if (validatedToken is JwtSecurityToken jwtSecurityToken
+                    && !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature, StringComparison.InvariantCultureIgnoreCase);
-                    if (result == false)
-                        throw new SecurityTokenException("Invalid token");
+                    throw new SecurityTokenException("Invalid token");
                 }
+
                 var utcExpiryDate = long.Parse(principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)!.Value);
 
                 var expiryDateUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(utcExpiryDate)
@@ -134,7 +166,7 @@ namespace WebAPI.Controllers
 
                 if (tokenRefresh.refreshToken == null)
                     return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Invalid tokens" } };
-                var storedRefreshToken = await _authorizationService.GetToken(tokenRefresh.refreshToken);
+                var storedRefreshToken = _authorizationService.GetToken(tokenRefresh.refreshToken);
 
                 if (storedRefreshToken.isUsed)
                     return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Token is used" } };
@@ -152,11 +184,8 @@ namespace WebAPI.Controllers
                     { isAuthSuccessful = false, errors = new List<string> { "Tokens is invalid" } };
 
                 storedRefreshToken.isUsed = true;
-                await _authorizationService.UpdateRefreshToken(storedRefreshToken);
-
-                var dbUser = await _authorizationService.GetUserById(storedRefreshToken.userId!);
-
-                return await GenerateJwtToken(dbUser);
+                _authorizationService.UpdateRefreshToken(storedRefreshToken);
+                return GenerateJwtToken(_authorizationService.GetUserById(storedRefreshToken.userId!));
             }
             catch (Exception e)
             {
@@ -168,8 +197,13 @@ namespace WebAPI.Controllers
         private static string RandomStringGeneration(int length)
         {
             const string CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(CHARS, length)
-                .Select(s => s[new Random().Next(s.Length)]).ToArray());
+            var randomBytes = new byte[length];
+            using (var rng = RandomNumberGenerator.Create())
+                rng.GetBytes(randomBytes);
+            var chars = new char[length];
+            for (var i = 0; i < length; i++)
+                chars[i] = CHARS[randomBytes[i] % CHARS.Length];
+            return new string(chars);
         }
 
         /// <summary>
@@ -194,11 +228,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost("Register")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] Models.RegisterUser user)
+        public ActionResult Register([FromBody] Models.RegisterUser user)
         {
-            var (isValid, message) = await Task.Run(() => IsValidUser(user));
-            if (!isValid)
+            if (!IsValidUser(user, out var message))
                 return BadRequest(new { status = false, message });
+
             try
             {
                 var newUser = _mapper.Map<Domain.Entities.ApplicationUser>(user);
@@ -206,7 +240,7 @@ namespace WebAPI.Controllers
                 if (user.username != null) newUser.NormalizedUserName = user.username.ToUpper();
                 if (user.email != null) newUser.NormalizedEmail = user.email.ToUpper();
                 newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.password);
-                await Task.Run(() => _authorizationService.Register(newUser));
+                _authorizationService.Register(newUser);
                 return Ok(new { status = true, message = "Register successfully" });
             }
             catch (Exception e)
@@ -237,24 +271,21 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         [HttpPost("Login")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetToken([FromBody] Models.LoginUser loginUser)
+        public ActionResult GetToken([FromBody] Models.LoginUser loginUser)
         {
             try
             {
                 if (loginUser.username == null || loginUser.password == null)
                     return BadRequest(new { status = false, message = "Invalid client request" });
-                if (await Task.Run(() => _authorizationService.IsLockedAccount(loginUser.username)))
+                if (_authorizationService.IsLockedAccount(loginUser.username))
                     return BadRequest(new { status = false, message = "Account is locked. Please contact admin" });
-                if (!await Task.Run(() => _authorizationService.CheckAccountValid(loginUser.username, loginUser.password)))
+                if (!_authorizationService.CheckAccountValid(loginUser.username, loginUser.password))
                 {
-                    await Task.Run(() => _authorizationService.FailLogin(loginUser.username));
+                    _authorizationService.FailLogin(loginUser.username);
                     return BadRequest(new { status = false, message = "Invalid credentials" });
                 }
-                await Task.Run(() => _authorizationService.ResetFailLogin(loginUser.username));
-
-                var user = await Task.Run(() => _authorizationService.GetUserByUserName(loginUser.username));
-
-                var jwtToken = await Task.Run(() => GenerateJwtToken(user));
+                _authorizationService.ResetFailLogin(loginUser.username);
+                var jwtToken = GenerateJwtToken(_authorizationService.GetUserByUserName(loginUser.username));
 
                 return Ok(new
                 {
@@ -287,12 +318,21 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         [HttpPost("RefreshToken")]
         [AllowAnonymous]
-        public async Task<IActionResult> RefreshToken([FromBody] Models.TokenRefresh tokenRefresh)
+        public ActionResult RefreshToken([FromBody] Models.TokenRefresh tokenRefresh)
         {
-            if (tokenRefresh.refreshToken == null && tokenRefresh.token == null)
-                return BadRequest(new { status = false, message = "Invalid client request" });
-            var result = await Task.Run(() => VerifyAndGenerateToken(tokenRefresh));
-            return Ok(new { status = true, result });
+            try
+            {
+                if (tokenRefresh.refreshToken == null && tokenRefresh.token == null)
+                    return BadRequest(new { status = false, message = "Invalid client request" });
+                var result = VerifyAndGenerateToken(tokenRefresh);
+                return Ok(new { status = true, result });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while refreshing token");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { status = false, message = "An error occurred while processing your request" });
+            }
         }
     }
 }

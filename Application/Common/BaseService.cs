@@ -19,6 +19,6 @@ namespace Application.Common
 
         protected BaseService(ApplicationDbContext context) => _context = context;
 
-        protected async Task SaveAsync() => await _context.SaveChangesAsync();
+        protected void Save() => _context.SaveChanges();
     }
 }

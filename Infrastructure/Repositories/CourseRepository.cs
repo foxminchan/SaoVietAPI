@@ -18,26 +18,18 @@ namespace Infrastructure.Repositories
         {
         }
 
-        public async Task<List<Course>> GetCourses()
-        {
-            var courses = await GetAll();
-            return courses.ToList();
-        }
+        public IEnumerable<Course> GetCourses() => GetAll();
 
-        public async Task<List<Course>> GetCoursesByNames(string? name)
-        {
-            var courses = await GetList(x => name != null && x.name != null && x.name.Contains(name));
-            return courses.ToList();
-        }
+        public IEnumerable<Course> GetCoursesByNames(string? name) => GetMany(x => name != null && x.name != null && x.name.Contains(name));
 
-        public async Task<Course?> GetCourseById(string? id) => id == null ? null : await GetById(id);
+        public Course? GetCourseById(string? id) => id == null ? null : GetById(id);
 
-        public async Task AddCourse(Course course) => await Insert(course);
+        public void AddCourse(Course course) => Insert(course);
 
-        public async Task UpdateCourse(Course course, string id) => await Update(course, x => x.id == id);
+        public void UpdateCourse(Course course) => Update(course);
 
-        public async Task DeleteCourse(string id) => await Delete(x => x.id == id);
+        public void DeleteCourse(string id) => Delete(x => x.id == id);
 
-        public async Task<bool> CourseExists(string id) => await Any(x => x.id == id);
+        public bool CourseExists(string id) => Any(x => x.id == id);
     }
 }

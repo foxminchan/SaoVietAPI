@@ -35,12 +35,22 @@ namespace WebAPI.Controllers
             _branchService = branchService;
         }
 
-        private async Task<(bool, string?)> IsValidBranch(Branch branch)
+        private bool IsValidBranch(Branch branch, out string? message)
         {
             if (string.IsNullOrEmpty(branch.name))
-                return (false, "Name of branch is required");
+            {
+                message = "Name of branch is required";
+                return false;
+            }
 
-            return await _branchService.GetBranchById(branch.id) != null ? (false, "Id of branch is duplicate") : (true, null);
+            if (_branchService.GetBranchById(branch.id) != null)
+            {
+                message = "Id of branch is duplicate";
+                return false;
+            }
+
+            message = null;
+            return true;
         }
 
         /// <summary>
@@ -58,11 +68,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetBranches()
+        public ActionResult GetBranches()
         {
             try
             {
-                var branches = await Task.Run(_branchService.GetBranches);
+                var branches = _branchService.GetBranches().ToArray();
                 return branches.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = branches })
                     : NoContent();
@@ -90,11 +100,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("name/{name}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetBranchesByNames([FromRoute] string? name)
+        public ActionResult GetBranchesByNames([FromRoute] string? name)
         {
             try
             {
-                var branches = await Task.Run(() => _branchService.GetBranchesByNames(name));
+                var branches =  _branchService.GetBranchesByNames(name).ToArray();
                 return branches.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = branches })
                     : NoContent();
@@ -122,11 +132,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetBranchById([FromRoute] string? id)
+        public ActionResult GetBranchById([FromRoute] string? id)
         {
             try
             {
-                var branch = await Task.Run(() => _branchService.GetBranchById(id));
+                var branch = _branchService.GetBranchById(id);
                 return branch != null
                     ? Ok(new { status = true, message = "Get data successfully", data = branch })
                     : NotFound(new { status = false, message = "No branch was found" });
@@ -154,11 +164,11 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("zone/{zone}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetBranchByZone([FromRoute] string? zone)
+        public ActionResult GetBranchByZone([FromRoute] string? zone)
         {
             try
             {
-                var branch = await Task.Run(() => _branchService.GetBranchesByZone(zone));
+                var branch = _branchService.GetBranchesByZone(zone).ToArray();
                 return branch.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = branch })
                     : NoContent();
@@ -192,16 +202,15 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddBranch([FromBody] Branch branch)
+        public ActionResult AddBranch([FromBody] Branch branch)
         {
-            var (isValid, message) = await Task.Run(() => IsValidBranch(branch));
-            if (!isValid)
+            if(!IsValidBranch(branch, out var message))
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var branchEntity = _mapper.Map<Domain.Entities.Branch>(branch);
-                await Task.Run(() => _branchService.AddBranch(branchEntity));
+                _branchService.AddBranch(branchEntity);
                 return Ok(new { status = true, message = "Add branch successfully" });
             }
             catch (Exception e)
@@ -215,7 +224,6 @@ namespace WebAPI.Controllers
         /// Cập nhật chi nhánh
         /// </summary>
         /// <param name="branch">Đối tượng chi nhánh</param>
-        /// <param name="id">Mã chi nhánh</param>
         /// <returns></returns>
         /// <remarks>
         /// Sample request:
@@ -232,18 +240,17 @@ namespace WebAPI.Controllers
         /// <response code="401">Không có quyền</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
-        [HttpPut("{id}")]
+        [HttpPut]
         [Authorize]
-        public async Task<IActionResult> UpdateBranch([FromBody] Branch branch, [FromRoute] string id)
+        public ActionResult UpdateBranch([FromBody] Branch branch)
         {
-            var (isValid, message) = await Task.Run(() => IsValidBranch(branch));
-            if (!isValid)
+            if (!IsValidBranch(branch, out var message))
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var branchEntity = _mapper.Map<Domain.Entities.Branch>(branch);
-                await Task.Run(() => _branchService.UpdateBranch(branchEntity, id));
+                _branchService.UpdateBranch(branchEntity);
                 return Ok(new { status = true, message = "Update branch successfully" });
             }
             catch (Exception e)
@@ -269,13 +276,13 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBranch([FromRoute] string id)
+        public ActionResult DeleteBranch([FromRoute] string id)
         {
             try
             {
-                if (await Task.Run(() => _branchService.GetBranchById(id)) == null)
+                if (_branchService.GetBranchById(id) == null)
                     return NotFound(new { status = false, message = "No branch was found" });
-                await Task.Run(() => _branchService.DeleteBranch(id));
+                _branchService.DeleteBranch(id);
                 return Ok(new { status = true, message = "Delete branch successfully" });
             }
             catch (Exception e)

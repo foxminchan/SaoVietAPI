@@ -26,30 +26,30 @@ namespace Application.Services
             _teacherRepository = new TeacherRepository(_context, cache);
         }
 
-        public async Task<IEnumerable<string>> GetAllId() => await  _context.GetAllId();
+        public IEnumerable<string> GetAllId() => _context.GetAllId();
 
-        public async Task<List<Teacher>> GetTeachers() => await _teacherRepository.GetTeachers();
+        public IEnumerable<Teacher> GetTeachers() => _teacherRepository.GetTeachers();
 
-        public async Task<List<Teacher>> FindTeacherByName(string name) => await _teacherRepository.FindTeacherByName(name);
+        public IEnumerable<Teacher> FindTeacherByName(string name) => _teacherRepository.FindTeacherByName(name);
 
-        public async Task<Teacher?> GetTeacherById(Guid? id) => await _teacherRepository.GetTeacherById(id);
+        public Teacher? GetTeacherById(Guid? id) => _teacherRepository.GetTeacherById(id);
 
-        public async Task AddTeacher(Teacher newTeacher)
+        public void AddTeacher(Teacher newTeacher)
         {
-            await _teacherRepository.AddTeacher(newTeacher);
-            await SaveAsync();
+            _teacherRepository.AddTeacher(newTeacher);
+            Save();
         }
 
-        public async Task UpdateTeacher(Teacher newTeacher, Guid id)
+        public void UpdateTeacher(Teacher newTeacher)
         {
-            await _teacherRepository.UpdateTeacher(newTeacher, id);
-            await SaveAsync();
+            _teacherRepository.UpdateTeacher(newTeacher);
+            Save();
         }
 
-        public async Task DeleteTeacher(Guid id)
+        public void DeleteTeacher(Guid id)
         {
-            await _teacherRepository.DeleteTeacher(id);
-            await SaveAsync();
+            _teacherRepository.DeleteTeacher(id);
+            Save();
         }
     }
 }
