@@ -228,7 +228,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/Branch/string
+        ///     PUT /api/v1/Branch
         ///     {
         ///         "id": "string",
         ///         "name": "string",

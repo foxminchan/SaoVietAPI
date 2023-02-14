@@ -208,7 +208,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/Course/string
+        ///     PUT /api/v1/Course
         ///     {
         ///         "id": "string",
         ///         "name": "string",

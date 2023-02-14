@@ -29,7 +29,7 @@ namespace Infrastructure.Repositories
 
         public void UpdateLesson(Lesson lesson) => Update(lesson);
 
-        public void DeleteLesson(string id) => Delete(x => x.id == id);
+        public void DeleteLesson(string lesson) => Delete(x => x.id == lesson);
 
         public bool LessonExists(string id) => Any(x => x.id == id);
     }

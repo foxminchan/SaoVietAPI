@@ -20,3 +20,14 @@ Content-Type: application/json
 	"username": "developer",
 	"password": "Abc@1234"
 }
+
+###
+
+# Get refresh token
+POST {{base_url}}/{{controller}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "token": {{bearer_token}},
+  "refreshToken": {{refresh_token}}
+}

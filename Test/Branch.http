@@ -37,7 +37,7 @@ Authorization: Bearer {{bearer_token}}
 ###
 
 # Update a branch
-PUT {{base_url}}/{{controller}}/{{branch_id}} HTTP/1.1
+PUT {{base_url}}/{{controller}} HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{bearer_token}}
 

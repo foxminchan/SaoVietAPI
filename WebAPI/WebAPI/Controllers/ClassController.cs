@@ -361,7 +361,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/Class/string
+        ///     PUT /api/v1/Class
         ///     {
         ///         "id": "string",
         ///         "name": "string",

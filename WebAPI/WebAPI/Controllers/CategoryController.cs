@@ -164,7 +164,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /api/v1/Category/string
+        ///     PUT /api/v1/Category
         ///     {
         ///         "id": "string",
         ///         "name": "string"
