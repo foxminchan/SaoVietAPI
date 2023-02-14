@@ -20,6 +20,9 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using WebAPI.Middlewares;
 using HealthCheckService = Application.Health.HealthCheckService;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
+using Application.Transaction;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,10 +32,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthorization();
 #endregion
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.RespectBrowserAcceptHeader = true;
+}).AddXmlSerializerFormatters();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
+
+#region Compression
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<GzipCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "application/octet-stream",
+        "application/x-msdownload",
+        "application/x-msdos-program",
+        "application/x-msmetafile",
+        "application/x-ms-shortcut",
+    });
+});
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.SmallestSize;
+});
+#endregion
 
 #region ELK Stack
 ConfigureLogging();
@@ -144,6 +170,7 @@ builder.Services.AddSwaggerGen(options =>
 #region Cache
 builder.Services.AddMemoryCache();
 builder.Services.AddTransient<ICache, CacheService>();
+builder.Services.AddResponseCaching();
 #endregion
 
 #region Hangfire
@@ -219,6 +246,7 @@ builder.Services.AddTransient<CourseService>();
 builder.Services.AddTransient<LessonService>();
 builder.Services.AddTransient<AttendanceService>();
 builder.Services.AddTransient<AuthorizationService>();
+builder.Services.AddTransient<TransactionService>();
 #endregion
 
 var app = builder.Build();
@@ -386,4 +414,6 @@ app.UseHealthChecks("/health/live", new HealthCheckOptions()
     AllowCachingResponses = false,
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
+app.UseResponseCaching();
+app.UseResponseCompression();
 app.Run();

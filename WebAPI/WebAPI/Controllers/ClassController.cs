@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using Application.Transaction;
 using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
@@ -26,13 +27,18 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly ClassService _classService;
+        private readonly TransactionService _transactionService;
 
         /// <inheritdoc />
-        public ClassController(ClassService classService, ILogger<TeacherController> logger)
+        public ClassController(
+            ClassService classService, 
+            TransactionService transactionService,
+            ILogger<TeacherController> logger)
         {
             _logger = logger;
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Class, Domain.Entities.Class>()).CreateMapper();
             _classService = classService;
+            _transactionService = transactionService;
         }
 
         private bool IsValidClass(Models.Class @class, out string? message)
@@ -98,6 +104,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "classes" })]
         public ActionResult GetClasses()
         {
             try
@@ -343,7 +350,7 @@ namespace WebAPI.Controllers
                     || _classService.CheckClassIdExist(request.id))
                     return BadRequest(new { status = false, message = "Class id is null or existed" });
                 var newClass = _mapper.Map<Domain.Entities.Class>(request);
-                _classService.AddClass(newClass);
+                _transactionService.ExecuteTransaction(() => { _classService.AddClass(newClass); });
                 return Ok(new { status = true, message = "Add class successfully" });
             }
             catch (Exception e)
@@ -389,7 +396,7 @@ namespace WebAPI.Controllers
                     || !_classService.CheckClassIdExist(request.id))
                     return BadRequest(new { status = false, message = "Class id is null or not exist" });
                 var classEntity = _mapper.Map<Domain.Entities.Class>(request);
-                _classService.UpdateClass(classEntity);
+                _transactionService.ExecuteTransaction(() => { _classService.UpdateClass(classEntity); });
                 return Ok(new { status = true, message = "Update class successfully", data = classEntity });
             }
             catch (Exception e)
@@ -421,7 +428,7 @@ namespace WebAPI.Controllers
             {
                 if (_classService.GetClasses().Any(x => x.id != id))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
-                _classService.DeleteClass(id);
+                _transactionService.ExecuteTransaction(() => { _classService.DeleteClass(id); });
                 return Ok(new { status = true, message = "Delete class successfully" });
             }
             catch (Exception e)
@@ -458,8 +465,10 @@ namespace WebAPI.Controllers
             {
                 if (!_classService.CheckStudentInClass(classId, studentId))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
-                _classService.DeleteStudentFromClass(
-                    new Domain.Entities.ClassStudent { classId = classId, studentId = studentId });
+                _transactionService.ExecuteTransaction(() => {
+                    _classService.DeleteStudentFromClass(
+                        new Domain.Entities.ClassStudent { classId = classId, studentId = studentId });
+                });
                 return Ok(new { status = true, message = "Delete student from class successfully" });
             }
             catch (Exception e)

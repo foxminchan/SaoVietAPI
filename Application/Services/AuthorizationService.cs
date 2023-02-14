@@ -1,5 +1,4 @@
-﻿using Application.Common;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure;
 using Infrastructure.Repositories;
@@ -15,12 +14,12 @@ namespace Application.Services
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
 
-    public class AuthorizationService : BaseService
+    public class AuthorizationService
     {
         private readonly IApplicationUserRepository _userRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-        public AuthorizationService(ApplicationDbContext context, ICache cache) : base(context)
+        public AuthorizationService(ApplicationDbContext context, ICache cache)
         {
             _refreshTokenRepository = new RefreshTokenRepository(context, cache);
             _userRepository = new ApplicationUserRepository(context, cache);
@@ -40,44 +39,22 @@ namespace Application.Services
 
         public ApplicationUser GetUserByUserName(string username) => _userRepository.GetByUserName(username);
 
-        public void Register(ApplicationUser user)
-        {
-            _userRepository.Register(user);
-            Save();
-        }
+        public void Register(ApplicationUser user) => _userRepository.Register(user);
 
         public void FailLogin(string username)
         {
             _userRepository.FailLogin(username);
-            Save();
             var failLogin = _userRepository.GetFailLogin(username);
             if (failLogin >= 5)
-            {
                 _userRepository.LockAccount(username);
-                Save();
-            }
-
             if (failLogin < 10) return;
             _userRepository.BanAccount(username);
-            Save();
         }
 
-        public void ResetFailLogin(string username)
-        {
-            _userRepository.ResetFailLogin(username);
-            Save();
-        }
+        public void ResetFailLogin(string username) => _userRepository.ResetFailLogin(username);
 
-        public void AddToken(RefreshToken token)
-        {
-            _refreshTokenRepository.AddToken(token);
-            Save();
-        }
+        public void AddToken(RefreshToken token) => _refreshTokenRepository.AddToken(token);
 
-        public void UpdateRefreshToken(RefreshToken token)
-        {
-            _refreshTokenRepository.UpdateToken(token);
-            Save();
-        }
+        public void UpdateRefreshToken(RefreshToken token) => _refreshTokenRepository.UpdateToken(token);
     }
 }

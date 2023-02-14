@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using Application.Transaction;
 using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
@@ -26,13 +27,18 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly StudentService _studentService;
+        private readonly TransactionService _transactionService;
 
         /// <inheritdoc />
-        public StudentController(StudentService studentService, ILogger<TeacherController> logger)
+        public StudentController(
+            StudentService studentService,
+            TransactionService transactionService,
+            ILogger<TeacherController> logger)
         {
             _logger = logger;
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Student, Domain.Entities.Student>()).CreateMapper();
             _studentService = studentService;
+            _transactionService = transactionService;
         }
 
         private static bool IsValidStudent(Models.Student student, out string? message)
@@ -88,6 +94,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [Authorize]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "students" })]
         public ActionResult GetStudents()
         {
             try
@@ -272,7 +279,7 @@ namespace WebAPI.Controllers
             {
                 var newStudent = _mapper.Map<Domain.Entities.Student>(student);
                 newStudent.id = Guid.NewGuid();
-                _studentService.AddStudent(newStudent);
+                _transactionService.ExecuteTransaction(() => { _studentService.AddStudent(newStudent); });
                 return Ok(new { status = true, message = "Add student successfully" });
             }
             catch (Exception e)
@@ -313,8 +320,10 @@ namespace WebAPI.Controllers
                     return BadRequest(new { status = false, message = "Class id is not exists" });
                 if (_studentService.IsAlreadyInClass(studentId.Value, classId))
                     return BadRequest(new { status = false, message = "Student is already in class" });
-                _studentService.AddClassStudent(
-                    new Domain.Entities.ClassStudent { classId = classId, studentId = studentId.Value });
+                _transactionService.ExecuteTransaction(() => {
+                    _studentService.AddClassStudent(
+                        new Domain.Entities.ClassStudent { classId = classId, studentId = studentId.Value });
+                });
                 return Ok(new { status = true, message = "Add student to class successfully" });
             }
             catch (Exception e)
@@ -359,7 +368,7 @@ namespace WebAPI.Controllers
                     return BadRequest(new { status = false, message });
                 var newStudent = _mapper.Map<Domain.Entities.Student>(student);
                 newStudent.id = id;
-                _studentService.UpdateStudent(newStudent);
+                _transactionService.ExecuteTransaction(() => { _studentService.UpdateStudent(newStudent); });
                 return Ok(new { status = true, message = "Update student successfully" });
             }
             catch (Exception e)
@@ -392,7 +401,7 @@ namespace WebAPI.Controllers
             {
                 if (_studentService.GetStudentById(id) == null)
                     return BadRequest(new { status = false, message = "Student not found" });
-                _studentService.DeleteStudent(id);
+                _transactionService.ExecuteTransaction(() => { _studentService.DeleteStudent(id); });
                 return Ok(new { status = true, message = "Delete student successfully" });
             }
             catch (Exception e)

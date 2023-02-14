@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using Application.Transaction;
 
 namespace WebAPI.Controllers
 {
@@ -32,11 +33,13 @@ namespace WebAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
         private readonly AuthorizationService _authorizationService;
+        private readonly TransactionService _transactionService;
         private readonly TokenValidationParameters _tokenValidationParameters;
 
         /// <inheritdoc />
         public AuthenticationController(
             AuthorizationService authorizationService,
+            TransactionService transactionService,
             ILogger<AuthenticationController> logger,
             IConfiguration config,
             TokenValidationParameters tokenValidationParameters)
@@ -46,6 +49,7 @@ namespace WebAPI.Controllers
             _mapper = new MapperConfiguration(cfg =>
                 cfg.CreateMap<Models.RegisterUser, Domain.Entities.ApplicationUser>()).CreateMapper();
             _authorizationService = authorizationService;
+            _transactionService = transactionService;
             _tokenValidationParameters = tokenValidationParameters;
         }
 
@@ -131,7 +135,7 @@ namespace WebAPI.Controllers
                 userId = _authorizationService.GetUserId(user.UserName!)
             };
 
-            _authorizationService.AddToken(refreshToken);
+            _transactionService.ExecuteTransaction(() => { _authorizationService.AddToken(refreshToken); });
 
             return new Models.Auth()
             {
@@ -150,41 +154,35 @@ namespace WebAPI.Controllers
             {
                 _tokenValidationParameters.ValidateLifetime = false;
                 var principal = jwtTokenHandler.ValidateToken(tokenRefresh.token, _tokenValidationParameters, out var validatedToken);
-                if (validatedToken is JwtSecurityToken jwtSecurityToken
-                    && !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature, StringComparison.InvariantCultureIgnoreCase))
-                {
+                if (validatedToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature, StringComparison.InvariantCultureIgnoreCase))
                     throw new SecurityTokenException("Invalid token");
-                }
 
-                var utcExpiryDate = long.Parse(principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)!.Value);
+                var expiryDateClaim = principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp);
+                if (expiryDateClaim is null || !long.TryParse(expiryDateClaim.Value, out var utcExpiryDate))
+                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Invalid token expiry date" } };
 
-                var expiryDateUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(utcExpiryDate)
-                    .ToUniversalTime();
-
-                if (expiryDateUtc > DateTime.UtcNow)
+                var expiryDateUtc = DateTimeOffset.FromUnixTimeSeconds(utcExpiryDate);
+                if (expiryDateUtc.UtcDateTime > DateTime.UtcNow)
                     return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Expired token" } };
 
-                if (tokenRefresh.refreshToken == null)
+                if (string.IsNullOrEmpty(tokenRefresh.refreshToken))
                     return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Invalid tokens" } };
-                var storedRefreshToken = _authorizationService.GetToken(tokenRefresh.refreshToken);
+                var storedRefreshToken = _authorizationService.GetToken(tokenRefresh.refreshToken!);
 
-                if (storedRefreshToken.isUsed)
-                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Token is used" } };
-
-                if (storedRefreshToken.isRevoked)
-                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Token is revoked" } };
-
-                var jti = principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
-
-                if (storedRefreshToken.jwtId != jti)
-                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Unknown tokens" } };
-
-                if (storedRefreshToken.expiryDate < DateTime.UtcNow)
-                    return new Models.Auth
-                    { isAuthSuccessful = false, errors = new List<string> { "Tokens is invalid" } };
+                switch (storedRefreshToken)
+                {
+                    case { isUsed: true }:
+                        return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Token is used" } };
+                    case { isRevoked: true }:
+                        return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Token is revoked" } };
+                    case { jwtId: not null } when storedRefreshToken.jwtId != principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value:
+                        return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Unknown tokens" } };
+                    case { expiryDate: not null } when storedRefreshToken.expiryDate < DateTimeOffset.UtcNow:
+                        return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Tokens is invalid" } };
+                }
 
                 storedRefreshToken.isUsed = true;
-                _authorizationService.UpdateRefreshToken(storedRefreshToken);
+                _transactionService.ExecuteTransaction(() => { _authorizationService.UpdateRefreshToken(storedRefreshToken); });
                 return GenerateJwtToken(_authorizationService.GetUserById(storedRefreshToken.userId!));
             }
             catch (Exception e)
@@ -240,7 +238,7 @@ namespace WebAPI.Controllers
                 if (user.username != null) newUser.NormalizedUserName = user.username.ToUpper();
                 if (user.email != null) newUser.NormalizedEmail = user.email.ToUpper();
                 newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.password);
-                _authorizationService.Register(newUser);
+                _transactionService.ExecuteTransaction(() => { _authorizationService.Register(newUser); });
                 return Ok(new { status = true, message = "Register successfully" });
             }
             catch (Exception e)
@@ -281,10 +279,10 @@ namespace WebAPI.Controllers
                     return BadRequest(new { status = false, message = "Account is locked. Please contact admin" });
                 if (!_authorizationService.CheckAccountValid(loginUser.username, loginUser.password))
                 {
-                    _authorizationService.FailLogin(loginUser.username);
+                   _transactionService.ExecuteTransaction(() => { _authorizationService.FailLogin(loginUser.username); });
                     return BadRequest(new { status = false, message = "Invalid credentials" });
                 }
-                _authorizationService.ResetFailLogin(loginUser.username);
+                _transactionService.ExecuteTransaction(() => { _authorizationService.ResetFailLogin(loginUser.username); });
                 var jwtToken = GenerateJwtToken(_authorizationService.GetUserByUserName(loginUser.username));
 
                 return Ok(new

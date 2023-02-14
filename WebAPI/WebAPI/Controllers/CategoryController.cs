@@ -1,4 +1,5 @@
 ﻿using Application.Services;
+using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,13 +26,18 @@ namespace WebAPI.Controllers
         private readonly ILogger<CategoryController> _logger;
         private readonly IMapper _mapper;
         private readonly CategoryService _studentService;
+        private readonly TransactionService _transactionService;
 
         /// <inheritdoc />
-        public CategoryController(ILogger<CategoryController> logger, CategoryService studentService)
+        public CategoryController(
+            CategoryService studentService,
+            TransactionService transactionService,
+            ILogger<CategoryController> logger )
         {
             _logger = logger;
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Category, Domain.Entities.Category>()).CreateMapper();
             _studentService = studentService;
+            _transactionService = transactionService;
         }
 
         private static bool IsValidCategory(Models.Category category, out string? message)
@@ -67,6 +73,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "categories" })]
         public ActionResult GetCategories()
         {
             try
@@ -145,8 +152,8 @@ namespace WebAPI.Controllers
             {
                 if (category.id != null && !_studentService.CategoryExists(category.id))
                     return BadRequest(new { status = false, message = "Category id already exists" });
-                var categoryEntity = _mapper.Map<Domain.Entities.Category>(category); 
-                _studentService.AddCategory(categoryEntity);
+                var categoryEntity = _mapper.Map<Domain.Entities.Category>(category);
+                _transactionService.ExecuteTransaction(() => { _studentService.AddCategory(categoryEntity); });
                 return Ok(new { status = true, message = "Add category successfully" });
             }
             catch (Exception e)
@@ -187,7 +194,7 @@ namespace WebAPI.Controllers
                 if (category.id != null && _studentService.CategoryExists(category.id))
                     return BadRequest(new { status = false, message = "Category id is not exists" });
                 var categoryEntity = _mapper.Map<Domain.Entities.Category>(category);
-                _studentService.UpdateCategory(categoryEntity);
+                _transactionService.ExecuteTransaction(() => { _studentService.UpdateCategory(categoryEntity); });
                 return Ok(new { status = true, message = "Update category successfully" });
             }
             catch (Exception e)
@@ -220,7 +227,7 @@ namespace WebAPI.Controllers
             {
                 if (_studentService.CategoryExists(id))
                     return BadRequest(new { status = false, message = "Category id is not exists" });
-                _studentService.DeleteCategory(id);
+                _transactionService.ExecuteTransaction(() => { _studentService.DeleteCategory(id); });
                 return Ok(new { status = true, message = "Delete category successfully" });
             }
             catch (Exception e)

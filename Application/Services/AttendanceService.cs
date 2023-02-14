@@ -1,7 +1,5 @@
-﻿using Application.Common;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Interfaces;
-using Hangfire;
 using Infrastructure;
 using Infrastructure.Repositories;
 
@@ -16,13 +14,13 @@ namespace Application.Services
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
 
-    public class AttendanceService : BaseService
+    public class AttendanceService
     {
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly ILessonRepository _lessonRepository;
         private readonly IClassRepository _classRepository;
 
-        public AttendanceService(ApplicationDbContext context, ICache cache) : base(context)
+        public AttendanceService(ApplicationDbContext context, ICache cache)
         {
             _attendanceRepository = new AttendanceRepository(context, cache);
             _lessonRepository = new LessonRepository(context, cache);
@@ -37,23 +35,11 @@ namespace Application.Services
 
         public IEnumerable<Attendance> SortByAttendance() => _attendanceRepository.SortByAttendance();
 
-        public void AddAttendance(Attendance attendance)
-        {
-            _attendanceRepository.AddAttendance(attendance);
-            Save();
-        }
+        public void AddAttendance(Attendance attendance) => _attendanceRepository.AddAttendance(attendance);
 
-        public void UpdateAttendance(Attendance attendance)
-        {
-            _attendanceRepository.UpdateAttendance(attendance);
-            Save();
-        }
+        public void UpdateAttendance(Attendance attendance) => _attendanceRepository.UpdateAttendance(attendance);
 
-        public void DeleteAttendance(string classId, string lessonId)
-        {
-            _attendanceRepository.DeleteAttendance(classId, lessonId);
-            Save();
-        }
+        public void DeleteAttendance(string classId, string lessonId) => _attendanceRepository.DeleteAttendance(classId, lessonId);
 
         public bool CheckLessonExists(string lessonId) => _lessonRepository.LessonExists(lessonId);
 

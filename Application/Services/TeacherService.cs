@@ -1,4 +1,3 @@
-using Application.Common;
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure;
@@ -15,12 +14,12 @@ namespace Application.Services
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
 
-    public class TeacherService : BaseService
+    public class TeacherService
     {
         private readonly ApplicationDbContext _context;
         private readonly ITeacherRepository _teacherRepository;
 
-        public TeacherService(ApplicationDbContext context, ICache cache) : base(context)
+        public TeacherService(ApplicationDbContext context, ICache cache)
         {
             _context = context;
             _teacherRepository = new TeacherRepository(_context, cache);
@@ -34,22 +33,10 @@ namespace Application.Services
 
         public Teacher? GetTeacherById(Guid? id) => _teacherRepository.GetTeacherById(id);
 
-        public void AddTeacher(Teacher newTeacher)
-        {
-            _teacherRepository.AddTeacher(newTeacher);
-            Save();
-        }
+        public void AddTeacher(Teacher newTeacher) => _teacherRepository.AddTeacher(newTeacher);
 
-        public void UpdateTeacher(Teacher newTeacher)
-        {
-            _teacherRepository.UpdateTeacher(newTeacher);
-            Save();
-        }
+        public void UpdateTeacher(Teacher newTeacher) => _teacherRepository.UpdateTeacher(newTeacher);
 
-        public void DeleteTeacher(Guid id)
-        {
-            _teacherRepository.DeleteTeacher(id);
-            Save();
-        }
+        public void DeleteTeacher(Guid id) => _teacherRepository.DeleteTeacher(id);
     }
 }

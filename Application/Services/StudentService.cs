@@ -1,5 +1,4 @@
-﻿using Application.Common;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure;
 using Infrastructure.Repositories;
@@ -15,18 +14,18 @@ namespace Application.Services
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
 
-    public class StudentService : BaseService
+    public class StudentService
     {
         private readonly IStudentRepository _studentRepository;
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IClassRepository _classRepository;
 
-        public StudentService(ApplicationDbContext context, ICache cache) : base(context)
+        public StudentService(ApplicationDbContext context, ICache cache)
         {
             _studentRepository = new StudentRepository(context, cache);
             _classRepository = new ClassRepository(context, cache);
             _classStudentRepository = new ClassStudentRepository(context, cache);
-            
+
         }
 
         public IEnumerable<Student> GetStudents() => _studentRepository.GetStudents();
@@ -37,23 +36,11 @@ namespace Application.Services
 
         public Student? GetStudentById(Guid? id) => _studentRepository.GetStudentById(id);
 
-        public void AddStudent(Student student)
-        {
-            _studentRepository.AddStudent(student);
-            Save();
-        }
+        public void AddStudent(Student student) => _studentRepository.AddStudent(student);
 
-        public void UpdateStudent(Student student)
-        {
-            _studentRepository.UpdateStudent(student);
-            Save();
-        }
+        public void UpdateStudent(Student student) => _studentRepository.UpdateStudent(student);
 
-        public void DeleteStudent(Guid id)
-        {
-            _studentRepository.DeleteStudent(id);
-            Save();
-        }
+        public void DeleteStudent(Guid id) => _studentRepository.DeleteStudent(id);
 
         public int CountClassByStudent(Guid? studentId) => _classStudentRepository.CountClassByStudent(studentId);
 
@@ -65,10 +52,6 @@ namespace Application.Services
 
         public bool IsAlreadyInClass(Guid? studentId, string? classId) => _classStudentRepository.IsExistClassStudent(classId, studentId);
 
-        public void AddClassStudent(ClassStudent classStudent)
-        {
-            _classStudentRepository.AddClassStudent(classStudent);
-            Save();
-        }
+        public void AddClassStudent(ClassStudent classStudent) => _classStudentRepository.AddClassStudent(classStudent);
     }
 }

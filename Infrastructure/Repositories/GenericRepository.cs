@@ -31,14 +31,14 @@ namespace Infrastructure.Repositories
 
         public virtual IEnumerable<T> GetAll()
         {
-            if (_memoryCache.TryGet(_cacheKey, out IEnumerable<T> entities)) return entities;
-            _lock.Wait();
             try
             {
-                if (_memoryCache.TryGet(_cacheKey, out entities)) return entities;
-                entities = _dbSet.AsNoTracking().ToList();
-                _memoryCache.Set(_cacheKey, entities);
-                return entities;
+                _lock.Wait();
+                if (_memoryCache.TryGet(_cacheKey, out IEnumerable<T> cache))
+                    return cache;
+                var data = _dbSet.AsNoTracking().ToArray();
+                _memoryCache.Set(_cacheKey, data);
+                return data;
             }
             finally
             {
@@ -129,10 +129,10 @@ namespace Infrastructure.Repositories
             if (take != 0)
                 _ = query.Take(take);
 
-            return query.ToList();
+            return query.ToArray();
         }
 
-        public virtual IEnumerable<T> GetMany(Expression<Func<T, bool>> where) => _dbSet.Where(where).ToList();
+        public virtual IEnumerable<T> GetMany(Expression<Func<T, bool>> where) => _dbSet.Where(where).ToArray();
 
         public virtual bool Any(Expression<Func<T, bool>> where) => _dbSet.Any(where);
 

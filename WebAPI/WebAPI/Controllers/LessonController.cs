@@ -1,4 +1,5 @@
 ﻿using Application.Services;
+using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,13 +26,18 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly LessonService _lessonService;
+        private readonly TransactionService _transactionService;
 
         /// <inheritdoc />
-        public LessonController(LessonService lessonService, ILogger<TeacherController> logger)
+        public LessonController(
+            LessonService lessonService, 
+            TransactionService transactionService,
+            ILogger<TeacherController> logger)
         {
             _logger = logger;
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Lesson, Domain.Entities.Lesson>()).CreateMapper();
             _lessonService = lessonService;
+            _transactionService = transactionService;
         }
 
         private bool IsValidLesson(Models.Lesson lesson, out string? message)
@@ -73,6 +79,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "lessons" })]
         public ActionResult GetLessons()
         {
             try
@@ -185,7 +192,7 @@ namespace WebAPI.Controllers
                 if (lesson.id != null && _lessonService.GetLessonById(lesson.id) != null)
                     return BadRequest(new { status = false, message = "Lesson id is null or exists" });
                 var lessonEntity = _mapper.Map<Domain.Entities.Lesson>(lesson);
-                _lessonService.AddLesson(lessonEntity);
+                _transactionService.ExecuteTransaction(() => { _lessonService.AddLesson(lessonEntity); });
                 return Ok(new { status = true, message = "Add lesson successfully" });
             }
             catch (Exception e)
@@ -231,7 +238,7 @@ namespace WebAPI.Controllers
                 if (lessonEntity == null)
                     return NotFound(new { status = false, message = "Lesson not found" });
                 lessonEntity = _mapper.Map<Domain.Entities.Lesson>(lesson);
-                _lessonService.UpdateLesson(lessonEntity);
+                _transactionService.ExecuteTransaction(() => { _lessonService.UpdateLesson(lessonEntity); });
                 return Ok(new { status = true, message = "Update lesson successfully" });
             }
             catch (Exception e)
@@ -265,7 +272,7 @@ namespace WebAPI.Controllers
             {
                 if (_lessonService.GetLessonById(id) == null)
                     return NotFound(new { status = false, message = "Lesson not found" });
-                _lessonService.DeleteLesson(id);
+                _transactionService.ExecuteTransaction(() => { _lessonService.DeleteLesson(id); });
                 return Ok(new { status = true, message = "Delete lesson successfully" });
             }
             catch (Exception e)

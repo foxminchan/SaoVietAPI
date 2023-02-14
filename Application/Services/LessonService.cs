@@ -1,8 +1,7 @@
-﻿using Domain.Interfaces;
-using Infrastructure.Repositories;
+﻿using Domain.Entities;
+using Domain.Interfaces;
 using Infrastructure;
-using Application.Common;
-using Domain.Entities;
+using Infrastructure.Repositories;
 
 namespace Application.Services
 {
@@ -14,13 +13,13 @@ namespace Application.Services
     * @License MIT
     * @Create date Mon 23 Jan 2023 00:00:00 AM +07
     */
-    
-    public class LessonService : BaseService
+
+    public class LessonService
     {
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseRepository _courseRepository;
 
-        public LessonService(ApplicationDbContext context, ICache cache) : base(context)
+        public LessonService(ApplicationDbContext context, ICache cache)
         {
             _lessonRepository = new LessonRepository(context, cache);
             _courseRepository = new CourseRepository(context, cache);
@@ -32,23 +31,11 @@ namespace Application.Services
 
         public Lesson? GetLessonById(string id) => _lessonRepository.GetLessonById(id);
 
-        public void AddLesson(Lesson lesson)
-        {
-            _lessonRepository.AddLesson(lesson);
-            Save();
-        }
+        public void AddLesson(Lesson lesson) => _lessonRepository.AddLesson(lesson);
 
-        public void UpdateLesson(Lesson lesson)
-        {
-            _lessonRepository.UpdateLesson(lesson);
-            Save();
-        }
+        public void UpdateLesson(Lesson lesson) => _lessonRepository.UpdateLesson(lesson);
 
-        public void DeleteLesson(string id)
-        {
-            _lessonRepository.DeleteLesson(id);
-            Save();
-        }
+        public void DeleteLesson(string id) => _lessonRepository.DeleteLesson(id);
 
         public bool IsCourseExists(string id) => _courseRepository.CourseExists(id);
     }

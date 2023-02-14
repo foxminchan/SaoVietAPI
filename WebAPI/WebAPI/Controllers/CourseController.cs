@@ -1,4 +1,5 @@
 ﻿using Application.Services;
+using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,14 +26,19 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly CourseService _courseService;
+        private readonly TransactionService _transactionService;
 
         /// <inheritdoc />
-        public CourseController(CourseService courseService, ILogger<TeacherController> logger)
+        public CourseController(
+            CourseService courseService,
+            TransactionService transactionService,
+            ILogger<TeacherController> logger)
         {
             _logger = logger;
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Course, Domain.Entities.Course>())
                 .CreateMapper();
             _courseService = courseService;
+            _transactionService = transactionService;
         }
 
         private bool IsValidCourse(Models.Course course, out string? message)
@@ -75,6 +81,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "courses" })]
         public ActionResult GetCourses()
         {
             try
@@ -145,7 +152,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var course =  _courseService.GetCourseById(id);
+                var course = _courseService.GetCourseById(id);
                 return course != null
                     ? Ok(new { status = true, message = "Get data successfully", data = course })
                     : NotFound(new { status = false, message = "No course was found" });
@@ -183,13 +190,13 @@ namespace WebAPI.Controllers
         [Authorize]
         public ActionResult AddCourse([FromBody] Models.Course course)
         {
-            if(!IsValidCourse(course, out var message))
+            if (!IsValidCourse(course, out var message))
                 return BadRequest(new { status = false, message });
 
             try
             {
                 var courseEntity = _mapper.Map<Domain.Entities.Course>(course);
-                _courseService.AddCourse(courseEntity);
+                _transactionService.ExecuteTransaction(() => { _courseService.AddCourse(courseEntity); });
                 return Ok(new { status = true, message = "Add course successfully" });
             }
             catch (Exception e)
@@ -231,7 +238,7 @@ namespace WebAPI.Controllers
             try
             {
                 var courseEntity = _mapper.Map<Domain.Entities.Course>(course);
-                _courseService.UpdateCourse(courseEntity);
+                _transactionService.ExecuteTransaction(() => { _courseService.UpdateCourse(courseEntity); });
                 return Ok(new { status = true, message = "Update course successfully" });
             }
             catch (Exception e)
@@ -265,7 +272,7 @@ namespace WebAPI.Controllers
             {
                 if (!_courseService.CourseExists(id))
                     return NotFound(new { status = false, message = "No course id was found" });
-                _courseService.DeleteCourse(id);
+                _transactionService.ExecuteTransaction(() => { _courseService.DeleteCourse(id); });
                 return Ok(new { status = true, message = "Delete course successfully" });
             }
             catch (Exception e)

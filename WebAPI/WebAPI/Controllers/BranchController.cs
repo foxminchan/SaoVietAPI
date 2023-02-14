@@ -1,4 +1,5 @@
 ﻿using Application.Services;
+using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,13 +27,18 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly BranchService _branchService;
+        private readonly TransactionService _transactionService;
 
         /// <inheritdoc />
-        public BranchController(BranchService branchService, ILogger<TeacherController> logger)
+        public BranchController(
+            BranchService branchService, 
+            TransactionService transactionService,
+            ILogger<TeacherController> logger)
         {
             _logger = logger;
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Branch, Domain.Entities.Branch>()).CreateMapper();
             _branchService = branchService;
+            _transactionService = transactionService;
         }
 
         private bool IsValidBranch(Branch branch, out string? message)
@@ -68,6 +74,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "branches" })]
         public ActionResult GetBranches()
         {
             try
@@ -210,7 +217,7 @@ namespace WebAPI.Controllers
             try
             {
                 var branchEntity = _mapper.Map<Domain.Entities.Branch>(branch);
-                _branchService.AddBranch(branchEntity);
+                _transactionService.ExecuteTransaction(() => { _branchService.AddBranch(branchEntity); });
                 return Ok(new { status = true, message = "Add branch successfully" });
             }
             catch (Exception e)
@@ -250,7 +257,7 @@ namespace WebAPI.Controllers
             try
             {
                 var branchEntity = _mapper.Map<Domain.Entities.Branch>(branch);
-                _branchService.UpdateBranch(branchEntity);
+                _transactionService.ExecuteTransaction(() => { _branchService.UpdateBranch(branchEntity); });
                 return Ok(new { status = true, message = "Update branch successfully" });
             }
             catch (Exception e)
@@ -282,7 +289,7 @@ namespace WebAPI.Controllers
             {
                 if (_branchService.GetBranchById(id) == null)
                     return NotFound(new { status = false, message = "No branch was found" });
-                _branchService.DeleteBranch(id);
+                _transactionService.ExecuteTransaction(() => { _branchService.DeleteBranch(id); });
                 return Ok(new { status = true, message = "Delete branch successfully" });
             }
             catch (Exception e)

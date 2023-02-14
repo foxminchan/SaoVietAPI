@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using Application.Transaction;
 
 namespace WebAPI.Controllers
 {
@@ -26,15 +27,18 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly TeacherService _teacherService;
+        private readonly TransactionService _transactionService;
 
         /// <inheritdoc />
         public TeacherController(
             TeacherService teacherService,
+            TransactionService transactionService,
             ILogger<TeacherController> logger)
         {
             _logger = logger;
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Teacher, Domain.Entities.Teacher>()).CreateMapper();
             _teacherService = teacherService;
+            _transactionService = transactionService;
         }
 
         private bool IsValidTeacher(Models.Teacher teacher, out string? message)
@@ -62,7 +66,7 @@ namespace WebAPI.Controllers
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(teacher.customerId) && 
+            if (!string.IsNullOrWhiteSpace(teacher.customerId) && 
                 !_teacherService.GetAllId().Contains(teacher.customerId))
             {
                 message = "Customer id is not exists";
@@ -88,6 +92,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet()]
         [AllowAnonymous]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "teachers" })]
         public ActionResult GetTeachers()
         {
             try
@@ -199,7 +204,7 @@ namespace WebAPI.Controllers
             {
                 var newTeacher = _mapper.Map<Domain.Entities.Teacher>(teacher);
                 newTeacher.id = Guid.NewGuid();
-                _teacherService.AddTeacher(newTeacher);
+                _transactionService.ExecuteTransaction(() => { _teacherService.AddTeacher(newTeacher); });
                 return Ok(new { status = true, message = "Add teacher successfully" });
             }
             catch (Exception e)
@@ -244,7 +249,7 @@ namespace WebAPI.Controllers
                 if (teacherToUpdate == null)
                     return NotFound(new { status = false, message = "Teacher not found" });
                 _mapper.Map(teacher, teacherToUpdate);
-                _teacherService.UpdateTeacher(teacherToUpdate);
+                _transactionService.ExecuteTransaction(() => { _teacherService.UpdateTeacher(teacherToUpdate); });
                 return Ok(new { status = true, message = "Update teacher successfully" });
             }
             catch (Exception e)
@@ -277,7 +282,7 @@ namespace WebAPI.Controllers
             {
                 if (_teacherService.GetTeacherById(id) == null)
                     return NotFound(new { status = false, message = "Teacher not found" });
-                _teacherService.DeleteTeacher(id);
+                _transactionService.ExecuteTransaction(() => { _teacherService.DeleteTeacher(id); });
                 return Ok(new { status = true, message = "Delete teacher successfully" });
             }
             catch (Exception e)

@@ -1,4 +1,5 @@
 ﻿using Application.Services;
+using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,13 +26,18 @@ namespace WebAPI.Controllers
         private readonly ILogger<TeacherController> _logger;
         private readonly IMapper _mapper;
         private readonly AttendanceService _attendanceService;
+        private readonly TransactionService _transactionService;
 
         /// <inheritdoc />
-        public AttendanceController(AttendanceService attendanceService, ILogger<TeacherController> logger)
+        public AttendanceController(
+            AttendanceService attendanceService, 
+            TransactionService transactionService, 
+            ILogger<TeacherController> logger)
         {
             _logger = logger;
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Attendance, Domain.Entities.Attendance>()).CreateMapper();
             _attendanceService = attendanceService;
+            _transactionService = transactionService;
         }
 
         private bool IsValidAttendance(Models.Attendance attendance, out string? message)
@@ -86,6 +92,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "attendances" })]
         public ActionResult GetAttendance()
         {
             try
@@ -231,7 +238,7 @@ namespace WebAPI.Controllers
             try
             {
                 var attendanceEntity = _mapper.Map<Domain.Entities.Attendance>(attendance);
-                _attendanceService.AddAttendance(attendanceEntity);
+                _transactionService.ExecuteTransaction(() => { _attendanceService.AddAttendance(attendanceEntity); });
                 return Ok(new { status = true, message = "Add attendance successfully" });
             }
             catch (Exception e)
@@ -274,7 +281,7 @@ namespace WebAPI.Controllers
             try
             {
                 var attendanceEntity = _mapper.Map<Domain.Entities.Attendance>(attendance);
-                _attendanceService.UpdateAttendance(attendanceEntity);
+                _transactionService.ExecuteTransaction(() => { _attendanceService.UpdateAttendance(attendanceEntity); });
                 return Ok(new { status = true, message = "Update attendance successfully" });
             }
             catch (Exception e)
@@ -308,7 +315,7 @@ namespace WebAPI.Controllers
             {
                 if (!_attendanceService.IsAttendanceExist(classId, lessonId))
                     return NotFound(new { status = false, message = "Attendance not found" });
-                _attendanceService.DeleteAttendance(classId, lessonId);
+                _transactionService.ExecuteTransaction(() => { _attendanceService.DeleteAttendance(classId, lessonId); });
                 return Ok(new { status = true, message = "Delete attendance successfully" });
             }
             catch (Exception e)
