@@ -1,8 +1,8 @@
 {
   "rest-client.environmentVariables": {
     "$shared": {
-      "bearer_token": "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6ImY0ZTFjMmQzLTU3MDItNDE5OC1hYzExLTFjYTc1NWFjNzE1ZCIsInN1YiI6IkpXVFNlcnZpY2VBY2Nlc3NUb2tlbiIsImp0aSI6IjY2NWNhZWNlLWVjZjgtNDU3OS05OTIwLTM4OWEyODQwODA4ZCIsImlhdCI6IjE2NzYzMzUyMDciLCJVc2VyTmFtZSI6ImRldmVsb3BlciIsIkVtYWlsIjoibnhuaGFuMTJhM0BnbWFpbC5jb20iLCJleHAiOjE2Nzg0MDg4MDcsImlzcyI6IkpXVEF1dGhlbnRpY2F0aW9uU2VydmVyIiwiYXVkIjoiSldUU2VydmljZUNsaWVudCJ9.Kxftb9uON5GQQXuu8o9sbtXf-C8rphjpDnMoPz0bHHs",
-      "refresh_token": "naQtzyzgVESV3zc6jBrx1W23FyoAKd7fFu8FBbEq06e98a0XBy1OaLhHInnId7Ee"
+      "bearer_token": "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6ImY0ZTFjMmQzLTU3MDItNDE5OC1hYzExLTFjYTc1NWFjNzE1ZCIsInN1YiI6IkpXVFNlcnZpY2VBY2Nlc3NUb2tlbiIsImp0aSI6IjVmMzQ0NTE5LTdlYzUtNDIxNS04MmIwLThmOWUwNTQ0NzI2MyIsImlhdCI6IjE2NzY0NzY0MTMiLCJVc2VyTmFtZSI6ImRldmVsb3BlciIsIkVtYWlsIjoibnhuaGFuMTJhM0BnbWFpbC5jb20iLCJleHAiOjE2Nzg1NTAwMTMsImlzcyI6IkpXVEF1dGhlbnRpY2F0aW9uU2VydmVyIiwiYXVkIjoiSldUU2VydmljZUNsaWVudCJ9.QfJTltmj6dTut4Gb8SeMxIIhfjVz0reUUGX8eZN_VdA",
+      "refresh_token": "dJmu1IuOKybAge5EoPfWNEYD0qMdlW8XkmafmvbuK8OLEU31XQz8Of3ut2vtYsld"
     },
     "local": {
       "base_url": "https://localhost:5000/api/v1"

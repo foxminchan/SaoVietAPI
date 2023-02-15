@@ -14,7 +14,7 @@ namespace Infrastructure.Repositories
 
     public class RefreshTokenRepository : GenericRepository<RefreshToken>, IRefreshTokenRepository
     {
-        public RefreshTokenRepository(ApplicationDbContext context, ICache memoryCache) : base(context, memoryCache)
+        public RefreshTokenRepository(ApplicationDbContext context, ICache cache) : base(context, cache)
         {
         }
 

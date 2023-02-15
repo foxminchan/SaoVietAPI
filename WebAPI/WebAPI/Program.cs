@@ -1,7 +1,6 @@
 using Application.Services;
 using AspNetCoreRateLimit;
 using Infrastructure;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -13,8 +12,6 @@ using Serilog.Sinks.SystemConsole.Themes;
 using System.Reflection;
 using System.Text;
 using Application.Cache;
-using Domain.Interfaces;
-using Hangfire;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -23,10 +20,9 @@ using HealthCheckService = Application.Health.HealthCheckService;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.IO.Compression;
 using Application.Transaction;
+using Domain.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 
 #region Authorization
 builder.Services.AddAuthorization();
@@ -117,12 +113,11 @@ var tokenValidationParameters = new TokenValidationParameters()
 
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     })
-    .AddCookie()
     .AddJwtBearer(options =>
     {
         options.RequireHttpsMetadata = false;
@@ -168,18 +163,17 @@ builder.Services.AddSwaggerGen(options =>
 #endregion
 
 #region Cache
-builder.Services.AddMemoryCache();
-builder.Services.AddTransient<ICache, CacheService>();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
+    options.InstanceName = "SaoVietApi";
+});
+builder.Services.AddSingleton<ICache, CacheService>();
 builder.Services.AddResponseCaching();
 #endregion
 
-#region Hangfire
-builder.Services.AddHangfire(x => 
-    x.UseSqlServerStorage(builder.Configuration.GetConnectionString("BackgroundJobConnection")));
-builder.Services.AddHangfireServer();
-#endregion
-
 #region Request Throttling
+builder.Services.AddMemoryCache();
 builder.Services.Configure<IpRateLimitOptions>(options =>
 {
     options.EnableEndpointRateLimiting = true;
@@ -187,14 +181,33 @@ builder.Services.Configure<IpRateLimitOptions>(options =>
     options.HttpStatusCode = 429;
     options.RealIpHeader = "X-Real-IP";
     options.ClientIdHeader = "X-ClientId";
+    options.IpWhitelist = new List<string> { "127.0.0.1", "::1/10", "192.168.5.143/24" };
     options.GeneralRules = new List<RateLimitRule>
     {
         new()
         {
-            Endpoint = "*",
-            Period = "1m",
+            Endpoint = "POST",
+            Period = "10m",
             Limit = 20,
-        }
+        },
+        new()
+        {
+            Endpoint = "PUT",
+            Period = "15m",
+            Limit = 15,
+        },
+        new()
+        {
+            Endpoint = "DELETE",
+            Period = "15m",
+            Limit = 10,
+        },
+        new()
+        {
+            Endpoint = "GET",
+            Period = "15m",
+            Limit = 50,
+        },
     };
 });
 builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
@@ -246,6 +259,9 @@ builder.Services.AddTransient<CourseService>();
 builder.Services.AddTransient<LessonService>();
 builder.Services.AddTransient<AttendanceService>();
 builder.Services.AddTransient<AuthorizationService>();
+#endregion
+
+#region Transaction
 builder.Services.AddTransient<TransactionService>();
 #endregion
 
@@ -387,7 +403,6 @@ else
 app.UseSecurityHeadersMiddleware();
 #endregion
 
-app.UseHangfireDashboard("/jobs");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseRouting();

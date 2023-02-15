@@ -25,7 +25,6 @@ namespace Application.Services
             _studentRepository = new StudentRepository(context, cache);
             _classRepository = new ClassRepository(context, cache);
             _classStudentRepository = new ClassStudentRepository(context, cache);
-
         }
 
         public IEnumerable<Student> GetStudents() => _studentRepository.GetStudents();
@@ -44,7 +43,8 @@ namespace Application.Services
 
         public int CountClassByStudent(Guid? studentId) => _classStudentRepository.CountClassByStudent(studentId);
 
-        public IEnumerable<Class?> GetClassesByStudentId(Guid? studentId) => _classStudentRepository.GetAllClassIdByStudentId(studentId).Select(_classRepository.FindClassById);
+        public IEnumerable<Class?> GetClassesByStudentId(Guid? studentId) => _classStudentRepository
+            .GetAllClassIdByStudentId(studentId).Select(x => _classRepository.FindClassById(x));
 
         public bool CheckStudentExists(Guid? id) => _studentRepository.StudentExists(id);
 

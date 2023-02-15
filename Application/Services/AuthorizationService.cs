@@ -23,7 +23,7 @@ namespace Application.Services
         {
             _refreshTokenRepository = new RefreshTokenRepository(context, cache);
             _userRepository = new ApplicationUserRepository(context, cache);
-        } 
+        }
 
         public bool CheckAccountValid(string username, string password) => _userRepository.CheckAccountValid(username, password);
 

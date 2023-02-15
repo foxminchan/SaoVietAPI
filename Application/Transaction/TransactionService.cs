@@ -23,22 +23,5 @@ namespace Application.Transaction
                 throw;
             }
         }
-
-        public T ExecuteTransaction<T>(Func<T> action)
-        {
-            using var transaction = _context.Database.BeginTransaction();
-            try
-            {
-                var result = action();
-                _context.SaveChanges();
-                transaction.Commit();
-                return result;
-            }
-            catch (Exception)
-            {
-                transaction.Rollback();
-                throw;
-            }
-        }
     }
 }

@@ -1,7 +1,6 @@
-﻿using System.Linq.Expressions;
-using Domain.Interfaces;
-using Hangfire;
+﻿using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories
 {
@@ -19,26 +18,28 @@ namespace Infrastructure.Repositories
         private readonly ApplicationDbContext _context;
         private readonly DbSet<T> _dbSet;
         private readonly string _cacheKey = $"{typeof(T)}";
-        private readonly ICache _memoryCache;
+        private readonly ICache _redisCache;
         private readonly SemaphoreSlim _lock = new(1, 1);
 
-        protected GenericRepository(ApplicationDbContext context, ICache memoryCache)
+        protected GenericRepository(ApplicationDbContext context, ICache cache)
         {
             _context = context;
-            _memoryCache = memoryCache;
+            _redisCache = cache;
             _dbSet = _context.Set<T>();
         }
 
         public virtual IEnumerable<T> GetAll()
         {
+            if (_redisCache.TryGet(_cacheKey, out IEnumerable<T> entities))
+                return entities;
             try
             {
                 _lock.Wait();
-                if (_memoryCache.TryGet(_cacheKey, out IEnumerable<T> cache))
-                    return cache;
-                var data = _dbSet.AsNoTracking().ToArray();
-                _memoryCache.Set(_cacheKey, data);
-                return data;
+                if (_redisCache.TryGet(_cacheKey, out entities))
+                    return entities;
+                entities = _dbSet.AsNoTracking().ToList();
+                _redisCache.Set(_cacheKey, entities);
+                return entities;
             }
             finally
             {
@@ -48,59 +49,31 @@ namespace Infrastructure.Repositories
 
         public virtual void Insert(T entity)
         {
-            try
-            {
-                _dbSet.Add(entity);
-                BackgroundJob.Enqueue(() => RefreshCache());
-            }
-            catch (DbUpdateException e)
-            {
-                throw new DbUpdateException("Error while inserting entity into the database.", e);
-            }
+            _dbSet.Add(entity);
+            _redisCache.Remove(_cacheKey);
         }
 
         public virtual void Update(T entity)
         {
-            try
-            {
-                _dbSet.Attach(entity);
-                _context.Entry(entity).State = EntityState.Modified;
-                BackgroundJob.Enqueue(() => RefreshCache());
-            }
-            catch (DbUpdateException e)
-            {
-                throw new DbUpdateException("Error while updating entity in the database.", e);
-            }
+            _dbSet.Attach(entity);
+            _context.Entry(entity).State = EntityState.Modified;
+            _redisCache.Remove(_cacheKey);
         }
 
         public virtual void Delete(T entity)
         {
-            try
-            {
-                if (_context.Entry(entity).State == EntityState.Detached)
-                    _dbSet.Attach(entity);
-                _dbSet.Remove(entity);
-                BackgroundJob.Enqueue(() => RefreshCache());
-            }
-            catch (DbUpdateException e)
-            {
-                throw new DbUpdateException("Error while deleting entity from the database.", e);
-            }
+            if (_context.Entry(entity).State == EntityState.Detached)
+                _dbSet.Attach(entity);
+            _dbSet.Remove(entity);
+            _redisCache.Remove(_cacheKey);
         }
 
         public virtual void Delete(Expression<Func<T, bool>> where)
         {
-            try
-            {
-                var objects = _dbSet.Where(where).AsEnumerable();
-                foreach (var obj in objects)
-                    _dbSet.Remove(obj);
-                BackgroundJob.Enqueue(() => RefreshCache());
-            }
-            catch (DbUpdateException e)
-            {
-                throw new DbUpdateException("Error while deleting entity from the database.", e);
-            }
+            var objects = _dbSet.Where(where).AsEnumerable();
+            foreach (var obj in objects)
+                _dbSet.Remove(obj);
+            _redisCache.Remove(_cacheKey);
         }
 
         public virtual int Count(Expression<Func<T, bool>> where) => _dbSet.Count(where);
@@ -129,19 +102,11 @@ namespace Infrastructure.Repositories
             if (take != 0)
                 _ = query.Take(take);
 
-            return query.ToArray();
+            return query;
         }
 
-        public virtual IEnumerable<T> GetMany(Expression<Func<T, bool>> where) => _dbSet.Where(where).ToArray();
+        public virtual IEnumerable<T> GetMany(Expression<Func<T, bool>> where) => _dbSet.Where(where);
 
         public virtual bool Any(Expression<Func<T, bool>> where) => _dbSet.Any(where);
-
-        // ReSharper disable once MemberCanBePrivate.Global
-        public async Task RefreshCache()
-        {
-            _memoryCache.Remove(_cacheKey);
-            var entities = await _dbSet.AsNoTracking().ToListAsync();
-            _memoryCache.Set(_cacheKey, entities);
-        }
     }
 }

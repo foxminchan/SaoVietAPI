@@ -159,7 +159,7 @@ namespace WebAPI.Controllers
 
                 var expiryDateClaim = principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp);
                 if (expiryDateClaim is null || !long.TryParse(expiryDateClaim.Value, out var utcExpiryDate))
-                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Invalid token expiry date" } };
+                    return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "An error occurred" } };
 
                 var expiryDateUtc = DateTimeOffset.FromUnixTimeSeconds(utcExpiryDate);
                 if (expiryDateUtc.UtcDateTime > DateTime.UtcNow)
@@ -176,9 +176,9 @@ namespace WebAPI.Controllers
                     case { isRevoked: true }:
                         return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Token is revoked" } };
                     case { jwtId: not null } when storedRefreshToken.jwtId != principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value:
-                        return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Unknown tokens" } };
+                        return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Claim is invalid" } };
                     case { expiryDate: not null } when storedRefreshToken.expiryDate < DateTimeOffset.UtcNow:
-                        return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Tokens is invalid" } };
+                        return new Models.Auth { isAuthSuccessful = false, errors = new List<string> { "Token is expired" } };
                 }
 
                 storedRefreshToken.isUsed = true;
