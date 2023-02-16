@@ -28,3 +28,18 @@ Tất cả những thay đổi đáng chú ý đối với dự án này sẽ đ
 ## Sửa đổi:
 
 - Thay đổi đường dẫn API
+
+## [1.1.0] - 2021/02/17
+
+### Tính năng mới:
+
+- Phân quyền cho API
+- Policy cho API
+- Refresh token
+- Thêm header Authorization cho API
+- Triển khai HATEOAS
+- Thêm bộ đệm cho API
+
+## Sửa đổi:
+
+- Thay đổi đường dẫn API

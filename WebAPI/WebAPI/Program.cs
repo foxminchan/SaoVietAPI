@@ -224,7 +224,7 @@ builder.Services.AddInMemoryRateLimiting();
 #endregion
 
 #region DbContext
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
     options.UseLoggerFactory(LoggerFactory.Create(log =>

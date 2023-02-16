@@ -94,7 +94,6 @@ namespace WebAPI.Controllers
         [HttpGet]
         [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Student")]
-        [EnableCors("AllowAll")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "students" })]
         public ActionResult GetStudents()
         {
@@ -130,7 +129,6 @@ namespace WebAPI.Controllers
         [HttpGet("name/{name}")]
         [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Student")]
-        [EnableCors("AllowAll")]
         public ActionResult GetStudentsByName([FromRoute] string? name)
         {
             try
@@ -165,7 +163,6 @@ namespace WebAPI.Controllers
         [HttpGet("phone/{phone:regex(^\\d{{10}}$)}")]
         [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Student")]
-        [EnableCors("AllowAll")]
         public ActionResult GetStudentsByPhone([FromRoute] string? phone)
         {
             try
@@ -198,7 +195,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id:guid}")]
         [AllowAnonymous]
-        [EnableCors("AllowAll")]
         public ActionResult GetStudentById([FromRoute] Guid? id)
         {
             try
@@ -234,7 +230,6 @@ namespace WebAPI.Controllers
         [HttpGet("class/{id:guid}")]
         [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Student")]
-        [EnableCors("AllowAll")]
         public ActionResult GetClassByStudentId([FromRoute] Guid? id)
         {
             if (id == null)
@@ -279,7 +274,6 @@ namespace WebAPI.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Student")]
-        [EnableCors("AllowAll")]
         public ActionResult AddStudent([FromBody] Models.Student student)
         {
             if (!IsValidStudent(student, out var message))
@@ -318,7 +312,6 @@ namespace WebAPI.Controllers
         [HttpPost("{studentId:guid}/{classId}")]
         [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Student")]
-        [EnableCors("AllowAll")]
         public ActionResult AddStudentToClass([FromRoute] Guid? studentId, [FromRoute] string classId)
         {
             if (studentId == null || string.IsNullOrEmpty(classId))
@@ -371,7 +364,6 @@ namespace WebAPI.Controllers
         [HttpPut]
         [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Student")]
-        [EnableCors("AllowAll")]
         public ActionResult UpdateStudent([FromBody] Models.Student student, [FromRoute] Guid id)
         {
             try
@@ -410,7 +402,6 @@ namespace WebAPI.Controllers
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Student")]
-        [EnableCors("AllowAll")]
         public ActionResult DeleteStudent([FromRoute] Guid id)
         {
             try

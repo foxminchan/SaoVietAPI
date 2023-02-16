@@ -41,7 +41,6 @@ namespace Infrastructure
             builder.Entity<RefreshToken>(entity =>
             {
                 entity.ToTable("RefreshTokens");
-                entity.ToView("vRefreshTokens");
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.id)
                     .HasColumnType("bigint")
@@ -65,7 +64,6 @@ namespace Infrastructure
             builder.Entity<Teacher>(entity =>
             {
                 entity.ToTable("Teachers");
-                entity.ToView("vTeachers");
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.fullName)
                     .HasColumnType("nvarchar(50)")
@@ -84,7 +82,6 @@ namespace Infrastructure
             builder.Entity<Branch>(entity =>
             {
                 entity.ToTable("Branches");
-                entity.ToView("vBranches");
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.id)
                     .HasColumnType("char(5)");
@@ -99,7 +96,6 @@ namespace Infrastructure
             builder.Entity<Class>(entity =>
             {
                 entity.ToTable("Classes");
-                entity.ToView("vClasses");
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.id)
                     .HasColumnType("char(7)");
@@ -127,7 +123,6 @@ namespace Infrastructure
             builder.Entity<Student>(entity =>
             {
                 entity.ToTable("Students");
-                entity.ToView("vStudents");
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.fullName)
                     .HasColumnType("nvarchar(50)")
@@ -145,7 +140,6 @@ namespace Infrastructure
             builder.Entity<ClassStudent>(entity =>
             {
                 entity.ToTable("ClassStudents");
-                entity.ToView("vClassStudents");
                 entity.HasKey(e => new { e.classId, e.studentId });
                 entity.HasOne(s => s.@class)
                     .WithMany(g => g.classStudents)
@@ -160,7 +154,6 @@ namespace Infrastructure
             builder.Entity<Category>(entity =>
             {
                 entity.ToTable("Categories");
-                entity.ToView("vCategories");
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.id)
                     .HasColumnType("char(5)");
@@ -172,7 +165,6 @@ namespace Infrastructure
             builder.Entity<Course>(entity =>
             {
                 entity.ToTable("Courses");
-                entity.ToView("vCourses");
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.id)
                     .HasColumnType("char(5)");
@@ -190,7 +182,6 @@ namespace Infrastructure
             builder.Entity<Lesson>(entity =>
             {
                 entity.ToTable("Lessons");
-                entity.ToView("vLessons");
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.id)
                     .HasColumnType("char(10)");
@@ -208,7 +199,6 @@ namespace Infrastructure
             builder.Entity<Attendance>(entity =>
             {
                 entity.ToTable("Attendance");
-                entity.ToView("vAttendance");
                 entity.HasKey(e => new { e.classId, e.lessonId });
                 entity.Property(e => e.date)
                     .HasConversion<StringConverter>()

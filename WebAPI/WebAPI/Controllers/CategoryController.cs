@@ -74,7 +74,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
-        [EnableCors("AllowAll")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "categories" })]
         public ActionResult GetCategories()
         {
@@ -108,7 +107,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
-        [EnableCors("AllowAll")]
         public ActionResult GetCategoryById([FromRoute] string? id)
         {
             try
@@ -147,7 +145,6 @@ namespace WebAPI.Controllers
         [HttpPost]
         [Authorize(Policy = "Admin")]
         [Authorize(Policy = "President")]
-        [EnableCors("AllowAll")]
         public ActionResult AddCategory([FromBody] Models.Category category)
         {
             if(!IsValidCategory(category, out var message))
@@ -191,7 +188,6 @@ namespace WebAPI.Controllers
         [Authorize]
         [Authorize(Policy = "Admin")]
         [Authorize(Policy = "President")]
-        [EnableCors("AllowAll")]
         public ActionResult UpdateCategory([FromBody] Models.Category category)
         {
             if (!IsValidCategory(category, out var message))
@@ -231,7 +227,6 @@ namespace WebAPI.Controllers
         [Authorize]
         [Authorize(Policy = "Admin")]
         [Authorize(Policy = "President")]
-        [EnableCors("AllowAll")]
         public ActionResult DeleteCategory([FromRoute] string id)
         {
             try

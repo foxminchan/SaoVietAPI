@@ -7,6 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
 {
+    /**
+    * @Project ASP.NET Core 7.0
+    * @Author: Nguyen Xuan Nhan
+    * @Team: 4FT
+    * @Copyright (C) 2023 4FT. All rights reserved
+    * @License MIT
+    * @Create date Mon 23 Jan 2023 00:00:00 AM +07
+    */
+
     /// <summary>
     /// Phân quyền truy cập
     /// </summary>
@@ -82,7 +91,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost]
         [Authorize(Policy = "Admin")]
-        [EnableCors("AllowAll")]
         public IActionResult AddClaim([FromBody] Models.UserClaim claim)
         {
             if (!IsValidClaim(claim, out var message))
@@ -122,7 +130,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPut]
         [Authorize(Policy = "Admin")]
-        [EnableCors("AllowAll")]
         public IActionResult UpdateClaim([FromBody] Models.UserClaim claim)
         {
             if (!IsValidClaim(claim, out var message))
@@ -165,7 +172,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpDelete]
         [Authorize(Policy = "Admin")]
-        [EnableCors("AllowAll")]
         public IActionResult DeleteClaim([FromBody] Models.UserClaim claim)
         {
             if (!IsValidClaim(claim, out var message))

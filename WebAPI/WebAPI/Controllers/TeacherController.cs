@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using Application.Transaction;
-using Microsoft.AspNetCore.Cors;
 
 namespace WebAPI.Controllers
 {
@@ -91,7 +90,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet()]
         [AllowAnonymous]
-        [EnableCors("AllowOrigin")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "teachers" })]
         public ActionResult GetTeachers()
         {
@@ -125,7 +123,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{name}")]
         [AllowAnonymous]
-        [EnableCors("AllowOrigin")]
         public ActionResult GetTeachersByName([FromRoute] string name)
         {
             try
@@ -158,7 +155,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id:guid}")]
         [AllowAnonymous]
-        [EnableCors("AllowOrigin")]
         public ActionResult GetTeacherById([FromRoute] Guid id)
         {
             try
@@ -197,7 +193,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost()]
         [AllowAnonymous]
-        [EnableCors("AllowOrigin")]
         public ActionResult AddTeacher([FromBody] Models.Teacher teacher)
         {
             if (!IsValidTeacher(teacher, out var message))
@@ -242,7 +237,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        [EnableCors("AllowOrigin")]
         public ActionResult UpdateTeacher([FromBody] Models.Teacher teacher, [FromRoute] Guid id)
         {
             try
@@ -280,7 +274,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        [EnableCors("AllowOrigin")]
         public ActionResult DeleteTeacher([FromRoute] Guid id)
         {
             try

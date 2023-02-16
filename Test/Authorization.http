@@ -1,0 +1,43 @@
+@controller=Authorization
+
+# Add a new claim
+@id=69aa2cf4-79f5-461c-95a6-69218622f2b7
+POST {{base_url}}/{{controller}}
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+
+   "userId": "{{id}}",
+   "claimType": "Admin",
+   "claimValue": "RootUser"
+}
+
+###
+
+# Update a claim
+@id=69aa2cf4-79f5-461c-95a6-69218622f2b7
+PUT {{base_url}}/{{controller}}/{{id}}
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+	 "userId": "{{id}}",
+	 "claimType": "Admin",
+	 "claimValue": "RootUser"
+}
+
+###
+
+# Delete a claim
+
+@id=69aa2cf4-79f5-461c-95a6-69218622f2b7
+DELETE {{base_url}}/{{controller}}
+Content-Type: application/json
+Authorization: Bearer {{bearer_token}}
+
+{
+	 "userId": "{{id}}",
+	 "claimType": "Admin",
+	 "claimValue": "RootUser"
+}

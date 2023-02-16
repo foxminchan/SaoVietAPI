@@ -2,7 +2,6 @@
 using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -93,7 +92,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
-        [EnableCors("AllowAll")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "attendances" })]
         public ActionResult GetAttendance()
         {
@@ -128,7 +126,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{classId}/{lessonId}")]
         [AllowAnonymous]
-        [EnableCors("AllowAll")]
         public ActionResult GetAttendanceById([FromRoute] string classId, [FromRoute] string lessonId)
         {
             try
@@ -161,7 +158,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{classId}")]
         [AllowAnonymous]
-        [EnableCors("AllowAll")]
         public ActionResult GetAttendanceByClassId([FromRoute] string classId)
         {
             try
@@ -193,7 +189,6 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("sort")]
         [AllowAnonymous]
-        [EnableCors("AllowAll")]
         public IActionResult SortByAttendance()
         {
             try
@@ -237,7 +232,6 @@ namespace WebAPI.Controllers
         [Authorize(Policy = "Admin")]
         [Authorize(Policy = "Teacher")]
         [Authorize(Policy = "President")]
-        [EnableCors("AllowAll")]
         public ActionResult AddAttendance([FromBody] Models.Attendance attendance)
         {
             if(!IsValidAttendance(attendance, out var message))
@@ -283,7 +277,6 @@ namespace WebAPI.Controllers
         [Authorize(Policy = "Admin")]
         [Authorize(Policy = "Teacher")]
         [Authorize(Policy = "President")]
-        [EnableCors("AllowAll")]
         public ActionResult UpdateAttendance([FromBody] Models.Attendance attendance)
         {
             if (!IsValidAttendance(attendance, out var message))
@@ -322,7 +315,6 @@ namespace WebAPI.Controllers
         [Authorize(Policy = "Admin")]
         [Authorize(Policy = "Teacher")]
         [Authorize(Policy = "President")]
-        [EnableCors("AllowAll")]
         public ActionResult DeleteAttendance([FromRoute] string classId, [FromRoute] string lessonId)
         {
             try

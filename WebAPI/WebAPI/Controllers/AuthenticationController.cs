@@ -275,7 +275,6 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         [HttpPost("Login")]
         [AllowAnonymous]
-        [EnableCors("AllowAll")]
         public ActionResult GetToken([FromBody] Models.LoginUser loginUser)
         {
             try
@@ -323,7 +322,6 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         [HttpPost("RefreshToken")]
         [AllowAnonymous]
-        [EnableCors("AllowAll")]
         public ActionResult RefreshToken([FromBody] Models.TokenRefresh tokenRefresh)
         {
             try
