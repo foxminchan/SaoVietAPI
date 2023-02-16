@@ -63,5 +63,7 @@ namespace Infrastructure.Repositories
         }
 
         public string GetUserId(string username) => GetList(x => x.UserName == username).First().Id;
+
+        public bool IsHasUserById(string userId) => Any(x => x.Id == userId);
     }
 }

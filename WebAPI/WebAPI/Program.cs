@@ -25,7 +25,13 @@ using Domain.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
 #region Authorization
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy => policy.RequireClaim("Admin"));
+    options.AddPolicy("Teacher", policy => policy.RequireClaim("Teacher"));
+    options.AddPolicy("Student", policy => policy.RequireClaim("Student"));
+    options.AddPolicy("President", policy => policy.RequireClaim("President"));
+});
 #endregion
 
 builder.Services.AddControllers(options =>
@@ -258,6 +264,7 @@ builder.Services.AddTransient<CategoryService>();
 builder.Services.AddTransient<CourseService>();
 builder.Services.AddTransient<LessonService>();
 builder.Services.AddTransient<AttendanceService>();
+builder.Services.AddTransient<AuthenticationService>();
 builder.Services.AddTransient<AuthorizationService>();
 #endregion
 
@@ -317,6 +324,12 @@ app.UseSwagger(c =>
             {
                 Name = "Authentication",
                 Description = "Xác thực",
+                ExternalDocs = findOutMore
+            },
+            new()
+            {
+                Name = "Authorization",
+                Description = "Phân quyền",
                 ExternalDocs = findOutMore
             },
             new()
@@ -399,8 +412,9 @@ else
 }
 #endregion
 
-#region Security Headers
+#region Middleware
 app.UseSecurityHeadersMiddleware();
+app.UseHateoasMiddleware();
 #endregion
 
 app.UseHttpsRedirection();

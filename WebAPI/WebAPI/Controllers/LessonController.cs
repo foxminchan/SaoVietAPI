@@ -2,6 +2,7 @@
 using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -79,6 +80,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "lessons" })]
         public ActionResult GetLessons()
         {
@@ -112,6 +114,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("name/{name}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult FindByName([FromRoute] string name)
         {
             try
@@ -144,6 +147,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult FindById([FromRoute] string id)
         {
             try
@@ -182,7 +186,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult AddLesson([FromBody] Models.Lesson lesson)
         {
             if (!IsValidLesson(lesson, out var message))
@@ -225,7 +231,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult UpdateLesson([FromBody] Models.Lesson lesson)
         {
             if (!IsValidLesson(lesson, out var message))
@@ -265,7 +273,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult DeleteLesson([FromRoute] string id)
         {
             try

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using Application.Transaction;
+using Microsoft.AspNetCore.Cors;
 
 namespace WebAPI.Controllers
 {
@@ -43,24 +44,22 @@ namespace WebAPI.Controllers
 
         private bool IsValidTeacher(Models.Teacher teacher, out string? message)
         {
-            if (string.IsNullOrWhiteSpace(teacher.fullName) &&
-                string.IsNullOrWhiteSpace(teacher.email) &&
+            if (string.IsNullOrWhiteSpace(teacher.fullName) ||
+                string.IsNullOrWhiteSpace(teacher.email) ||
                 string.IsNullOrWhiteSpace(teacher.phone))
             {
                 message = "Full name, email and phone are required";
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(teacher.email) &&
-                !Regex.IsMatch(teacher.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None,
+            if (!Regex.IsMatch(teacher.email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", RegexOptions.None,
                     TimeSpan.FromSeconds(2)))
             {
                 message = "Email is invalid";
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(teacher.phone) &&
-                !Regex.IsMatch(teacher.phone, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
+            if (!Regex.IsMatch(teacher.phone, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
             {
                 message = "Phone is invalid";
                 return false;
@@ -92,6 +91,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet()]
         [AllowAnonymous]
+        [EnableCors("AllowOrigin")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "teachers" })]
         public ActionResult GetTeachers()
         {
@@ -125,6 +125,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{name}")]
         [AllowAnonymous]
+        [EnableCors("AllowOrigin")]
         public ActionResult GetTeachersByName([FromRoute] string name)
         {
             try
@@ -157,6 +158,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id:guid}")]
         [AllowAnonymous]
+        [EnableCors("AllowOrigin")]
         public ActionResult GetTeacherById([FromRoute] Guid id)
         {
             try
@@ -195,6 +197,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost()]
         [AllowAnonymous]
+        [EnableCors("AllowOrigin")]
         public ActionResult AddTeacher([FromBody] Models.Teacher teacher)
         {
             if (!IsValidTeacher(teacher, out var message))
@@ -238,7 +241,8 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut("{id:guid}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [EnableCors("AllowOrigin")]
         public ActionResult UpdateTeacher([FromBody] Models.Teacher teacher, [FromRoute] Guid id)
         {
             try
@@ -275,7 +279,8 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id:guid}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [EnableCors("AllowOrigin")]
         public ActionResult DeleteTeacher([FromRoute] Guid id)
         {
             try

@@ -14,16 +14,17 @@ namespace Domain.Interfaces
     public interface IApplicationUserRepository
     {
         public void Register(ApplicationUser user);
-        public bool CheckAccountValid(string username, string password);
-        public bool IsLockedAccount(string username);
-        public bool IsUserNameExists(string username);
-        public int GetFailLogin(string username);
-        public string GetUserId(string username);
-        public ApplicationUser GetById(string userId);
-        public ApplicationUser GetByUserName(string username);
         public void FailLogin(string username);
         public void LockAccount(string username);
         public void ResetFailLogin(string username);
         public void BanAccount(string username);
+        public bool CheckAccountValid(string username, string password);
+        public bool IsLockedAccount(string username);
+        public bool IsUserNameExists(string username);
+        public bool IsHasUserById(string userId);
+        public int GetFailLogin(string username);
+        public string GetUserId(string username);
+        public ApplicationUser GetById(string userId);
+        public ApplicationUser GetByUserName(string username);
     }
 }

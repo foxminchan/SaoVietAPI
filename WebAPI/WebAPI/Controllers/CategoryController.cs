@@ -2,6 +2,7 @@
 using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -73,6 +74,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "categories" })]
         public ActionResult GetCategories()
         {
@@ -106,6 +108,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult GetCategoryById([FromRoute] string? id)
         {
             try
@@ -142,7 +145,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "President")]
+        [EnableCors("AllowAll")]
         public ActionResult AddCategory([FromBody] Models.Category category)
         {
             if(!IsValidCategory(category, out var message))
@@ -184,6 +189,9 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPut]
         [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "President")]
+        [EnableCors("AllowAll")]
         public ActionResult UpdateCategory([FromBody] Models.Category category)
         {
             if (!IsValidCategory(category, out var message))
@@ -221,6 +229,9 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]
         [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "President")]
+        [EnableCors("AllowAll")]
         public ActionResult DeleteCategory([FromRoute] string id)
         {
             try

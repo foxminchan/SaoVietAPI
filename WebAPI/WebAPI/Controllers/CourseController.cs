@@ -2,6 +2,7 @@
 using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -81,6 +82,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "courses" })]
         public ActionResult GetCourses()
         {
@@ -115,6 +117,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("name/{name}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult GetCoursesByNames([FromRoute] string? name)
         {
             try
@@ -148,6 +151,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult GetCourseById([FromRoute] string? id)
         {
             try
@@ -187,7 +191,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult AddCourse([FromBody] Models.Course course)
         {
             if (!IsValidCourse(course, out var message))
@@ -229,7 +235,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult UpdateCourse([FromBody] Models.Course course)
         {
             if (!IsValidCourse(course, out var message))
@@ -265,7 +273,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult DeleteCourse([FromRoute] string id)
         {
             try

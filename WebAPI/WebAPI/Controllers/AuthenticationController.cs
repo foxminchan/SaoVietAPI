@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Application.Transaction;
+using Microsoft.AspNetCore.Cors;
 
 namespace WebAPI.Controllers
 {
@@ -32,13 +33,13 @@ namespace WebAPI.Controllers
         private readonly ILogger<AuthenticationController> _logger;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
-        private readonly AuthorizationService _authorizationService;
+        private readonly AuthenticationService _authorizationService;
         private readonly TransactionService _transactionService;
         private readonly TokenValidationParameters _tokenValidationParameters;
 
         /// <inheritdoc />
         public AuthenticationController(
-            AuthorizationService authorizationService,
+            AuthenticationService authorizationService,
             TransactionService transactionService,
             ILogger<AuthenticationController> logger,
             IConfiguration config,
@@ -104,12 +105,17 @@ namespace WebAPI.Controllers
             var claims = new[]
             {
                 new Claim("Id", user.Id),
+                new Claim("UserName", user.UserName!),
+                new Claim("Email", user.Email!),
                 new Claim(JwtRegisteredClaimNames.Sub, _config.GetSection("Jwt:Subject").Value ?? throw new InvalidOperationException()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds().ToString()),
-                new Claim("UserName", user.UserName!),
-                new Claim("Email", user.Email!)
+                new Claim(JwtRegisteredClaimNames.Iat, ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds().ToString())
             };
+
+            var userClaims = _authorizationService.GetUserClaims(user.Id).ToArray();
+            var allClaims = new Claim[claims.Length + userClaims.Length];
+            Array.Copy(claims, allClaims, claims.Length);
+            Array.Copy(userClaims, 0, allClaims, claims.Length, userClaims.Length);
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("Jwt:Key").Value ?? throw new InvalidOperationException()));
 
@@ -269,6 +275,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         [HttpPost("Login")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult GetToken([FromBody] Models.LoginUser loginUser)
         {
             try
@@ -316,6 +323,7 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         [HttpPost("RefreshToken")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult RefreshToken([FromBody] Models.TokenRefresh tokenRefresh)
         {
             try

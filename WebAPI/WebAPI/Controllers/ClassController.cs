@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using Application.Transaction;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 
 namespace WebAPI.Controllers
 {
@@ -104,6 +105,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "classes" })]
         public ActionResult GetClasses()
         {
@@ -138,6 +140,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult FindClassById([FromRoute] string? id)
         {
             if (id == null)
@@ -176,6 +179,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("name/{name}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult FindClassByName([FromRoute] string? name)
         {
             if (name == null)
@@ -216,7 +220,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("status/{status:regex(Expired|Active|Upcoming)}")]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult FindClassByStatus([FromRoute] string? status)
         {
             if (string.IsNullOrEmpty(status))
@@ -253,7 +259,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("teacher/{teacherId:Guid}")]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult GetClassesByTeacherId([FromRoute] Guid? teacherId)
         {
             if (teacherId == null)
@@ -290,7 +298,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("student/{classId}")]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult GetStudentList([FromRoute] string? classId)
         {
             if (string.IsNullOrEmpty(classId))
@@ -338,7 +348,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult AddClass([FromBody] Models.Class request)
         {
             if(!IsValidClass(request, out var message))
@@ -384,7 +396,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult UpdateClass([FromBody] Models.Class request)
         {
             if (!IsValidClass(request, out var message))
@@ -421,7 +435,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult DeleteClass([FromRoute] string id)
         {
             try
@@ -455,7 +471,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{classId}/student/{studentId:guid}")]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [EnableCors("AllowAll")]
         public ActionResult DeleteStudentFromClass([FromRoute] string classId, [FromRoute] Guid studentId)
         {
             if (string.IsNullOrEmpty(classId) && studentId == Guid.Empty)

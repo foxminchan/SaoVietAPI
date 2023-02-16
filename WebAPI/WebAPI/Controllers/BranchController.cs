@@ -2,6 +2,7 @@
 using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Models;
 
@@ -74,6 +75,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "branches" })]
         public ActionResult GetBranches()
         {
@@ -107,6 +109,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("name/{name}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult GetBranchesByNames([FromRoute] string? name)
         {
             try
@@ -139,6 +142,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult GetBranchById([FromRoute] string? id)
         {
             try
@@ -171,6 +175,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("zone/{zone}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult GetBranchByZone([FromRoute] string? zone)
         {
             try
@@ -208,7 +213,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "President")]
+        [EnableCors("AllowAll")]
         public ActionResult AddBranch([FromBody] Branch branch)
         {
             if(!IsValidBranch(branch, out var message))
@@ -248,7 +255,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "President")]
+        [EnableCors("AllowAll")]
         public ActionResult UpdateBranch([FromBody] Branch branch)
         {
             if (!IsValidBranch(branch, out var message))
@@ -283,6 +292,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "President")]
+        [EnableCors("AllowAll")]
         public ActionResult DeleteBranch([FromRoute] string id)
         {
             try

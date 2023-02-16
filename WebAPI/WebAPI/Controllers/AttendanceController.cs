@@ -2,6 +2,7 @@
 using Application.Transaction;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -42,7 +43,7 @@ namespace WebAPI.Controllers
 
         private bool IsValidAttendance(Models.Attendance attendance, out string? message)
         {
-            if (string.IsNullOrEmpty(attendance.classId) &&
+            if (string.IsNullOrEmpty(attendance.classId) ||
                 string.IsNullOrEmpty(attendance.lessonId))
             {
                 message = "ClassId and LessonId cannot be null or empty";
@@ -61,13 +62,13 @@ namespace WebAPI.Controllers
                 return false;
             }
 
-            if (attendance.lessonId != null && !_attendanceService.CheckLessonExists(attendance.lessonId))
+            if (!_attendanceService.CheckLessonExists(attendance.lessonId))
             {
                 message = "LessonId does not exist";
                 return false;
             }
 
-            if (attendance.classId != null && !_attendanceService.CheckClassExists(attendance.classId))
+            if (!_attendanceService.CheckClassExists(attendance.classId))
             {
                 message = "ClassId does not exist";
                 return false;
@@ -92,6 +93,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "attendances" })]
         public ActionResult GetAttendance()
         {
@@ -126,6 +128,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{classId}/{lessonId}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult GetAttendanceById([FromRoute] string classId, [FromRoute] string lessonId)
         {
             try
@@ -158,6 +161,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{classId}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult GetAttendanceByClassId([FromRoute] string classId)
         {
             try
@@ -189,6 +193,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("sort")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public IActionResult SortByAttendance()
         {
             try
@@ -229,7 +234,10 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [Authorize(Policy = "President")]
+        [EnableCors("AllowAll")]
         public ActionResult AddAttendance([FromBody] Models.Attendance attendance)
         {
             if(!IsValidAttendance(attendance, out var message))
@@ -272,7 +280,10 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [Authorize(Policy = "President")]
+        [EnableCors("AllowAll")]
         public ActionResult UpdateAttendance([FromBody] Models.Attendance attendance)
         {
             if (!IsValidAttendance(attendance, out var message))
@@ -308,7 +319,10 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{classId}/{lessonId}")]
-        [Authorize]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Teacher")]
+        [Authorize(Policy = "President")]
+        [EnableCors("AllowAll")]
         public ActionResult DeleteAttendance([FromRoute] string classId, [FromRoute] string lessonId)
         {
             try

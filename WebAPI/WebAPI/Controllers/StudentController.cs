@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using Application.Transaction;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 
 namespace WebAPI.Controllers
 {
@@ -44,8 +45,8 @@ namespace WebAPI.Controllers
         private static bool IsValidStudent(Models.Student student, out string? message)
         {
 
-            if (string.IsNullOrEmpty(student.fullName) &&
-                string.IsNullOrEmpty(student.dob) &&
+            if (string.IsNullOrEmpty(student.fullName) ||
+                string.IsNullOrEmpty(student.dob) ||
                 string.IsNullOrEmpty(student.phone))
             {
                 message = "Full name, date of birth and phone number are required";
@@ -60,15 +61,13 @@ namespace WebAPI.Controllers
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(student.phone) &&
-                !Regex.IsMatch(student.phone, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
+            if (!Regex.IsMatch(student.phone, @"^([0-9]{10})$", RegexOptions.None, TimeSpan.FromSeconds(2)))
             {
                 message = "Phone is invalid";
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(student.dob) ||
-                !Regex.IsMatch(student.dob, "^\\d{4}-\\d{2}-\\d{2}$", RegexOptions.None, TimeSpan.FromSeconds(2)))
+            if (!Regex.IsMatch(student.dob, "^\\d{4}-\\d{2}-\\d{2}$", RegexOptions.None, TimeSpan.FromSeconds(2)))
             {
                 message = "Start date must be match YYYY-MM-DD format";
                 return false;
@@ -93,7 +92,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Student")]
+        [EnableCors("AllowAll")]
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "students" })]
         public ActionResult GetStudents()
         {
@@ -127,7 +128,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("name/{name}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Student")]
+        [EnableCors("AllowAll")]
         public ActionResult GetStudentsByName([FromRoute] string? name)
         {
             try
@@ -160,7 +163,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("phone/{phone:regex(^\\d{{10}}$)}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Student")]
+        [EnableCors("AllowAll")]
         public ActionResult GetStudentsByPhone([FromRoute] string? phone)
         {
             try
@@ -193,6 +198,7 @@ namespace WebAPI.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id:guid}")]
         [AllowAnonymous]
+        [EnableCors("AllowAll")]
         public ActionResult GetStudentById([FromRoute] Guid? id)
         {
             try
@@ -226,7 +232,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("class/{id:guid}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Student")]
+        [EnableCors("AllowAll")]
         public ActionResult GetClassByStudentId([FromRoute] Guid? id)
         {
             if (id == null)
@@ -269,7 +277,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Student")]
+        [EnableCors("AllowAll")]
         public ActionResult AddStudent([FromBody] Models.Student student)
         {
             if (!IsValidStudent(student, out var message))
@@ -306,7 +316,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("{studentId:guid}/{classId}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Student")]
+        [EnableCors("AllowAll")]
         public ActionResult AddStudentToClass([FromRoute] Guid? studentId, [FromRoute] string classId)
         {
             if (studentId == null || string.IsNullOrEmpty(classId))
@@ -357,7 +369,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Student")]
+        [EnableCors("AllowAll")]
         public ActionResult UpdateStudent([FromBody] Models.Student student, [FromRoute] Guid id)
         {
             try
@@ -394,7 +408,9 @@ namespace WebAPI.Controllers
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id:guid}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Student")]
+        [EnableCors("AllowAll")]
         public ActionResult DeleteStudent([FromRoute] Guid id)
         {
             try
