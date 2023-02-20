@@ -9,7 +9,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Application.Transaction;
-using Microsoft.AspNetCore.Cors;
 
 namespace WebAPI.Controllers
 {

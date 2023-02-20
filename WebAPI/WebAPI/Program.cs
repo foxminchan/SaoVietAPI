@@ -15,10 +15,10 @@ using Application.Cache;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using WebAPI.Middlewares;
 using HealthCheckService = Application.Health.HealthCheckService;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.IO.Compression;
+using Application.Middleware;
 using Application.Transaction;
 using Domain.Interfaces;
 
@@ -38,10 +38,10 @@ builder.Services.AddControllers(options =>
 {
     options.RespectBrowserAcceptHeader = true;
 }).AddXmlSerializerFormatters();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
-
+    
 #region Compression
 builder.Services.AddResponseCompression(options =>
 {
@@ -413,8 +413,8 @@ else
 #endregion
 
 #region Middleware
-app.UseSecurityHeadersMiddleware();
-app.UseHateoasMiddleware();
+app.UseMiddleware<SecurityHeadersMiddleware>();
+app.UseMiddleware<TimeoutMiddleware>();
 #endregion
 
 app.UseHttpsRedirection();

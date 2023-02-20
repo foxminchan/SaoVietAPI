@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using Application.Transaction;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 
 namespace WebAPI.Controllers
 {
@@ -94,7 +93,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         [Authorize(Roles = "Admin")]
         [Authorize(Roles = "Student")]
-        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "students" })]
+        [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "students" })]
         public ActionResult GetStudents()
         {
             try
