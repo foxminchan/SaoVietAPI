@@ -21,6 +21,7 @@ using System.IO.Compression;
 using Application.Middleware;
 using Application.Transaction;
 using Domain.Interfaces;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,7 @@ builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
     options.Providers.Add<GzipCompressionProvider>();
+    options.Providers.Add<BrotliCompressionProvider>();
     options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
     {
         "application/octet-stream",
@@ -55,6 +57,10 @@ builder.Services.AddResponseCompression(options =>
         "application/x-msmetafile",
         "application/x-ms-shortcut",
     });
+});
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.SmallestSize;
 });
 builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 {
@@ -174,6 +180,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
     options.InstanceName = "SaoVietApi";
 });
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection")));
+builder.Services.AddSingleton<ISubscriber>(p => p.GetRequiredService<IConnectionMultiplexer>().GetSubscriber());
 builder.Services.AddSingleton<ICache, CacheService>();
 builder.Services.AddResponseCaching();
 #endregion

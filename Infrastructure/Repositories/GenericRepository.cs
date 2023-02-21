@@ -39,6 +39,13 @@ namespace Infrastructure.Repositories
                     return entities;
                 entities = _dbSet.AsNoTracking().ToList();
                 _redisCache.Set(_cacheKey, entities);
+                _redisCache.Subscribe(cacheKey =>
+                {
+                    if (cacheKey != _cacheKey)
+                        return;
+                    entities = _dbSet.AsNoTracking().ToList();
+                    _redisCache.Set(_cacheKey, entities);
+                });
                 return entities;
             }
             finally
