@@ -1,4 +1,6 @@
-﻿namespace Domain.Interfaces
+﻿using Microsoft.Extensions.Caching.Distributed;
+
+namespace Domain.Interfaces
 {
     /**
     * @Project ASP.NET Core 7.0
@@ -13,6 +15,7 @@
     {
         public void Remove(string cacheKey);
         public T Set<T>(string cacheKey, T value);
+        public T Set<T>(string cacheKey, T value, DistributedCacheEntryOptions options);
         public bool TryGet<T>(string cacheKey, out T value);
         public void Subscribe(Action<string> handler);
         public void Unsubscribe();

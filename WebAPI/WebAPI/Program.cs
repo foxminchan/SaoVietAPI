@@ -1,5 +1,4 @@
 using Application.Services;
-using AspNetCoreRateLimit;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +41,7 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
-    
+
 #region Compression
 builder.Services.AddResponseCompression(options =>
 {
@@ -184,51 +183,6 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 builder.Services.AddSingleton<ISubscriber>(p => p.GetRequiredService<IConnectionMultiplexer>().GetSubscriber());
 builder.Services.AddSingleton<ICache, CacheService>();
 builder.Services.AddResponseCaching();
-#endregion
-
-#region Request Throttling
-builder.Services.AddMemoryCache();
-builder.Services.Configure<IpRateLimitOptions>(options =>
-{
-    options.EnableEndpointRateLimiting = true;
-    options.StackBlockedRequests = false;
-    options.HttpStatusCode = 429;
-    options.RealIpHeader = "X-Real-IP";
-    options.ClientIdHeader = "X-ClientId";
-    options.IpWhitelist = new List<string> { "127.0.0.1", "::1/10", "192.168.5.143/24" };
-    options.GeneralRules = new List<RateLimitRule>
-    {
-        new()
-        {
-            Endpoint = "POST",
-            Period = "10m",
-            Limit = 20,
-        },
-        new()
-        {
-            Endpoint = "PUT",
-            Period = "15m",
-            Limit = 15,
-        },
-        new()
-        {
-            Endpoint = "DELETE",
-            Period = "15m",
-            Limit = 10,
-        },
-        new()
-        {
-            Endpoint = "GET",
-            Period = "15m",
-            Limit = 50,
-        },
-    };
-});
-builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
-builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
-builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
-builder.Services.AddInMemoryRateLimiting();
 #endregion
 
 #region DbContext
@@ -423,6 +377,7 @@ else
 #region Middleware
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<TimeoutMiddleware>();
+app.UseMiddleware<RateLimitingMiddleware>();
 #endregion
 
 app.UseHttpsRedirection();
@@ -430,7 +385,6 @@ app.UseAuthentication();
 app.UseRouting();
 app.UseHttpMetrics();
 app.UseAuthorization();
-app.UseIpRateLimiting();
 app.MapControllers();
 app.MapMetrics();
 app.MapHealthChecks("/health", new HealthCheckOptions()

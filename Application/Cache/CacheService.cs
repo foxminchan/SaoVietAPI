@@ -43,6 +43,13 @@ namespace Application.Cache
             return value;
         }
 
+        public T Set<T>(string cacheKey, T value, DistributedCacheEntryOptions options)
+        {
+            _distributedCache.Set(cacheKey, Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value)), options);
+            _redisSubscriber.Publish("CacheUpdate", cacheKey);
+            return value;
+        }
+
         public bool TryGet<T>(string cacheKey, out T value)
         {
             var cacheValue = _distributedCache.Get(cacheKey);
