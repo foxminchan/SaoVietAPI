@@ -16,16 +16,16 @@ namespace Infrastructure
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public DbSet<Teacher>? teachers { get; set; }
-        public DbSet<Branch>? branches { get; set; }
-        public DbSet<Class>? classes { get; set; }
-        public DbSet<Student>? students { get; set; }
-        public DbSet<ClassStudent>? classStudents { get; set; }
-        public DbSet<Category>? categories { get; set; }
-        public DbSet<Course>? courses { get; set; }
-        public DbSet<Lesson>? lessons { get; set; }
-        public DbSet<Attendance>? attendances { get; set; }
-        public DbSet<RefreshToken>? refreshTokens { get; set; }
+        public DbSet<Teacher>? Teachers { get; set; }
+        public DbSet<Branch>? Branches { get; set; }
+        public DbSet<Class>? Classes { get; set; }
+        public DbSet<Student>? Students { get; set; }
+        public DbSet<ClassStudent>? ClassStudents { get; set; }
+        public DbSet<Category>? Categories { get; set; }
+        public DbSet<Course>? Courses { get; set; }
+        public DbSet<Lesson>? Lessons { get; set; }
+        public DbSet<Attendance>? Attendances { get; set; }
+        public DbSet<RefreshToken>? RefreshTokens { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

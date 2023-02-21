@@ -88,6 +88,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Lấy danh sách học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet]
@@ -123,6 +124,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("name/{name}")]
@@ -157,6 +159,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("phone/{phone:regex(^\\d{{10}}$)}")]
@@ -190,6 +193,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Tìm kiếm học viên thành công</response>
         /// <response code="204">Không có học viên nào</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id:guid}")]
@@ -224,6 +228,7 @@ namespace WebAPI.Controllers
         /// <response code="204">Không có lớp học nào</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("class/{id:guid}")]
@@ -268,6 +273,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Thêm mới học viên thành công</response>
         /// <response code="400">Thông tin học viên không hợp lệ</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
@@ -306,6 +312,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Thêm học viên vào lớp học thành công</response>
         /// <response code="400">Thông tin học viên không hợp lệ</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("{studentId:guid}/{classId}")]
@@ -358,6 +365,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Cập nhật thông tin học viên thành công</response>
         /// <response code="400">Thông tin học viên không hợp lệ</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
@@ -396,6 +404,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Xóa học viên thành công</response>
         /// <response code="400">Học viên không tồn tại</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id:guid}")]

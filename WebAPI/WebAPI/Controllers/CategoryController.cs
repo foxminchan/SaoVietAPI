@@ -69,6 +69,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Trả về danh sách danh mục</response>
         /// <response code="204">Không có danh mục nào</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet]
@@ -102,6 +103,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Trả về danh mục</response>
         /// <response code="404">Không tìm thấy danh mục</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id}")]
@@ -139,6 +141,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Thêm danh mục thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
@@ -181,6 +184,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Cập nhật danh mục thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
@@ -220,6 +224,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Xóa danh mục thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]

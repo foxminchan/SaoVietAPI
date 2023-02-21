@@ -100,6 +100,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy danh sách lớp học thành công</response>
         /// <response code="204">Không có lớp học nào</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet]
@@ -134,6 +135,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Lấy lớp học thành công</response>
         /// <response code="400">Mã lớp không hợp lệ</response>
         /// <response code="404">Không tìm thấy lớp học</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("{id}")]
@@ -172,6 +174,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Tìm lớp theo tên thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="404">Không tìm thấy lớp</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("name/{name}")]
@@ -210,9 +213,10 @@ namespace WebAPI.Controllers
         ///     GET /api/v1/Class/status/string
         /// </remarks>
         /// <response code="200">Tìm lớp theo trạng thái thành công</response>
+        /// <response code="204">Không tìm thấy lớp</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
-        /// <response code="204">Không tìm thấy lớp</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("status/{status:regex(Expired|Active|Upcoming)}")]
@@ -251,6 +255,7 @@ namespace WebAPI.Controllers
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
         /// <response code="404">Không tìm thấy lớp</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("teacher/{teacherId:Guid}")]
@@ -289,6 +294,7 @@ namespace WebAPI.Controllers
         /// <response code="204">Không có dữ liệu</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("student/{classId}")]
@@ -338,6 +344,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Thêm lớp học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
@@ -385,6 +392,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Cập nhật thông tin lớp học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
@@ -423,6 +431,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Xóa lớp học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]
@@ -458,6 +467,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Xóa học viên khỏi lớp học thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{classId}/student/{studentId:guid}")]

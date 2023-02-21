@@ -24,6 +24,9 @@ namespace Application.Middleware
                 {"X-Frame-Options", "DENY"},
                 {"X-XSS-Protection", "1; mode=block"},
                 {"X-Content-Type-Options", "nosniff"},
+                {"X-XSRF-TOKEN", httpContext.Request.Cookies["XSRF-TOKEN"] ?? ""},
+                {"Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"},
+                {"X-Download-Options", "noopen"},
                 {"Referrer-Policy", "no-referrer"},
                 {"X-Permitted-Cross-Domain-Policies", "none"},
                 {"Permissions-Policy", "accelerometer 'none'; camera 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; payment 'none'; usb 'none'"},
@@ -32,7 +35,7 @@ namespace Application.Middleware
 
             foreach (var header in headers.Where(header => !httpContext.Response.Headers.ContainsKey(header.Key)))
                 httpContext.Response.Headers.Add(header.Key, header.Value);
-            
+
             await _next(httpContext);
         }
     }

@@ -86,6 +86,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Thêm claim thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền truy cập</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
@@ -125,6 +126,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Cập nhật claim thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền truy cập</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
@@ -167,6 +169,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Xoá claim thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền truy cập</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete]

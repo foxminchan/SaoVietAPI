@@ -227,6 +227,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Tạo tài khoản thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("Register")]
@@ -271,6 +272,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy token thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         [HttpPost("Login")]
         [AllowAnonymous]
@@ -318,6 +320,7 @@ namespace WebAPI.Controllers
         ///     }
         /// </remarks>
         /// <response code="200">Refresh token thành công</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         [HttpPost("RefreshToken")]
         [AllowAnonymous]

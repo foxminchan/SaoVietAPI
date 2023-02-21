@@ -88,6 +88,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy danh sách sổ điểm danh thành công</response>
         /// <response code="204">Không có sổ điểm danh nào</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet]
@@ -122,6 +123,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy danh sách sổ điểm danh thành công</response>
         /// <response code="204">Không có sổ điểm danh nào</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("{classId}/{lessonId}")]
@@ -154,6 +156,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy danh sách sổ điểm danh thành công</response>
         /// <response code="204">Không có sổ điểm danh nào</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("{classId}")]
@@ -185,6 +188,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="200">Lấy danh sách sổ điểm danh thành công</response>
         /// <response code="204">Không có sổ điểm danh nào</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpGet("sort")]
@@ -226,6 +230,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Thêm sổ điểm danh thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
@@ -271,6 +276,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Cập nhật sổ điểm danh thành công</response>
         /// <response code="400">Lỗi dữ liệu đầu vào</response>
         /// <response code="401">Không có quyền</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpPut]
@@ -309,6 +315,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Xóa sổ điểm danh thành công</response>
         /// <response code="401">Không có quyền</response>
         /// <response code="404">Không tìm thấy sổ điểm danh</response>
+        /// <response code="408">Quá thời gian yêu cầu</response>
         /// <response code="429">Request quá nhiều</response>
         /// <response code="500">Lỗi server</response>
         [HttpDelete("{classId}/{lessonId}")]
