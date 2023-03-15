@@ -286,7 +286,7 @@ namespace WebAPI.Controllers
                     return BadRequest(new { status = false, message = "Account is locked. Please contact admin" });
                 if (!_authorizationService.CheckAccountValid(loginUser.username, loginUser.password))
                 {
-                   _transactionService.ExecuteTransaction(() => { _authorizationService.FailLogin(loginUser.username); });
+                    _transactionService.ExecuteTransaction(() => { _authorizationService.FailLogin(loginUser.username); });
                     return BadRequest(new { status = false, message = "Invalid credentials" });
                 }
                 _transactionService.ExecuteTransaction(() => { _authorizationService.ResetFailLogin(loginUser.username); });

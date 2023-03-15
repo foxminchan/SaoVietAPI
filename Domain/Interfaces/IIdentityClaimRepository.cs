@@ -14,7 +14,7 @@ namespace Domain.Interfaces
     public interface IIdentityClaimRepository : IGenericRepository<IdentityClaim>
     {
         public IEnumerable<string?> GetClaimTypeByUserId(string userId);
-        public bool IsIdentityClaimExist(string userid,string claimType, string claimValue);
+        public bool IsIdentityClaimExist(string userid, string claimType, string claimValue);
         public void AddIdentityClaim(IdentityClaim identityClaim);
         public void DeleteIdentityClaim(string userId, string claimType, string claimValue);
         public void UpdateIdentityClaim(IdentityClaim identityClaim);

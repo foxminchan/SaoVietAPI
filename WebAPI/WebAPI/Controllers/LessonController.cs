@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
 
         /// <inheritdoc />
         public LessonController(
-            LessonService lessonService, 
+            LessonService lessonService,
             TransactionService transactionService,
             ILogger<TeacherController> logger)
         {
@@ -59,7 +59,7 @@ namespace WebAPI.Controllers
                 message = "Course id is not exists";
                 return false;
             }
-            
+
             message = null;
             return true;
         }
@@ -118,7 +118,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var lessons =  _lessonService.GetByNames(name).ToArray();
+                var lessons = _lessonService.GetByNames(name).ToArray();
                 return lessons.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = lessons })
                     : NoContent();

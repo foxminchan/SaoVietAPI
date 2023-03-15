@@ -64,7 +64,7 @@ namespace WebAPI.Controllers
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(teacher.customerId) && 
+            if (!string.IsNullOrWhiteSpace(teacher.customerId) &&
                 !_teacherService.GetAllId().Contains(teacher.customerId))
             {
                 message = "Customer id is not exists";
@@ -129,7 +129,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var teachers =  _teacherService.FindTeacherByName(name).ToArray();
+                var teachers = _teacherService.FindTeacherByName(name).ToArray();
                 return teachers.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = teachers })
                     : NoContent();

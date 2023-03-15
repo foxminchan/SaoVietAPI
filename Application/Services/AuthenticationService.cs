@@ -19,7 +19,7 @@ namespace Application.Services
         private readonly IApplicationUserRepository _userRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IIdentityClaimRepository _identityClaimRepository;
-        
+
         public AuthenticationService(ApplicationDbContext context, ICache cache)
         {
             _refreshTokenRepository = new RefreshTokenRepository(context, cache);
