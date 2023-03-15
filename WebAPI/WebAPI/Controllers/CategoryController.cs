@@ -32,7 +32,7 @@ namespace WebAPI.Controllers
         public CategoryController(
             CategoryService studentService,
             TransactionService transactionService,
-            ILogger<CategoryController> logger )
+            ILogger<CategoryController> logger)
         {
             _logger = logger;
             _mapper = new MapperConfiguration(cfg => cfg.CreateMap<Models.Category, Domain.Entities.Category>()).CreateMapper();
@@ -149,7 +149,7 @@ namespace WebAPI.Controllers
         [Authorize(Policy = "President")]
         public ActionResult AddCategory([FromBody] Models.Category category)
         {
-            if(!IsValidCategory(category, out var message))
+            if (!IsValidCategory(category, out var message))
                 return BadRequest(new { status = false, message });
 
             try

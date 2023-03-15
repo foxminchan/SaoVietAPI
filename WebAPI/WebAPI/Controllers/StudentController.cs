@@ -202,7 +202,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var student =  _studentService.GetStudentById(id);
+                var student = _studentService.GetStudentById(id);
                 return student != null
                     ? Ok(new { status = true, message = "Get data successfully", data = student })
                     : NoContent();
@@ -240,7 +240,7 @@ namespace WebAPI.Controllers
                 return BadRequest(new { status = false, message = "Id is required" });
             try
             {
-                var count =  _studentService.CountClassByStudent(id);
+                var count = _studentService.CountClassByStudent(id);
                 if (count == 0)
                     return NoContent();
                 var classes = _studentService.GetClassesByStudentId(id).ToArray();
@@ -331,7 +331,8 @@ namespace WebAPI.Controllers
                     return BadRequest(new { status = false, message = "Class id is not exists" });
                 if (_studentService.IsAlreadyInClass(studentId.Value, classId))
                     return BadRequest(new { status = false, message = "Student is already in class" });
-                _transactionService.ExecuteTransaction(() => {
+                _transactionService.ExecuteTransaction(() =>
+                {
                     _studentService.AddClassStudent(
                         new Domain.Entities.ClassStudent { classId = classId, studentId = studentId.Value });
                 });

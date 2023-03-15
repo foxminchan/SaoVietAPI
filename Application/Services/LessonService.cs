@@ -28,7 +28,7 @@ namespace Application.Services
         public IEnumerable<Lesson> GetAllLesson() => _lessonRepository.GetAllLesson();
 
         public IEnumerable<Lesson> GetByNames(string? name) => _lessonRepository.GetByNames(name);
-        
+
         public Lesson? GetLessonById(string id) => _lessonRepository.GetLessonById(id);
 
         public void AddLesson(Lesson lesson) => _lessonRepository.AddLesson(lesson);
