@@ -30,8 +30,8 @@ namespace WebAPI.Controllers
 
         /// <inheritdoc />
         public AttendanceController(
-            AttendanceService attendanceService, 
-            TransactionService transactionService, 
+            AttendanceService attendanceService,
+            TransactionService transactionService,
             ILogger<TeacherController> logger)
         {
             _logger = logger;
@@ -72,7 +72,7 @@ namespace WebAPI.Controllers
                 message = "ClassId does not exist";
                 return false;
             }
-            
+
             message = null;
             return true;
         }
@@ -239,7 +239,7 @@ namespace WebAPI.Controllers
         [Authorize(Policy = "President")]
         public ActionResult AddAttendance([FromBody] Models.Attendance attendance)
         {
-            if(!IsValidAttendance(attendance, out var message))
+            if (!IsValidAttendance(attendance, out var message))
                 return BadRequest(new { status = false, message });
 
             try

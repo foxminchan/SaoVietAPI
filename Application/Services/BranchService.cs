@@ -33,5 +33,5 @@ namespace Application.Services
         public void UpdateBranch(Branch branch) => _branchRepository.UpdateBranch(branch);
 
         public void DeleteBranch(string id) => _branchRepository.DeleteBranch(id);
-    }   
+    }
 }

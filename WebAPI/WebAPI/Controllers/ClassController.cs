@@ -31,7 +31,7 @@ namespace WebAPI.Controllers
 
         /// <inheritdoc />
         public ClassController(
-            ClassService classService, 
+            ClassService classService,
             TransactionService transactionService,
             ILogger<TeacherController> logger)
         {
@@ -352,7 +352,7 @@ namespace WebAPI.Controllers
         [Authorize(Policy = "Teacher")]
         public ActionResult AddClass([FromBody] Models.Class request)
         {
-            if(!IsValidClass(request, out var message))
+            if (!IsValidClass(request, out var message))
                 return BadRequest(new { status = false, message });
 
             try
@@ -482,7 +482,8 @@ namespace WebAPI.Controllers
             {
                 if (!_classService.CheckStudentInClass(classId, studentId))
                     return BadRequest(new { status = false, message = "Class id is not exist" });
-                _transactionService.ExecuteTransaction(() => {
+                _transactionService.ExecuteTransaction(() =>
+                {
                     _classService.DeleteStudentFromClass(
                         new Domain.Entities.ClassStudent { classId = classId, studentId = studentId });
                 });

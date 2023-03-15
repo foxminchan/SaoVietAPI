@@ -32,7 +32,7 @@ namespace WebAPI.Controllers
 
         /// <inheritdoc />
         public BranchController(
-            BranchService branchService, 
+            BranchService branchService,
             TransactionService transactionService,
             ILogger<TeacherController> logger)
         {
@@ -114,7 +114,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                var branches =  _branchService.GetBranchesByNames(name).ToArray();
+                var branches = _branchService.GetBranchesByNames(name).ToArray();
                 return branches.Any()
                     ? Ok(new { status = true, message = "Get data successfully", data = branches })
                     : NoContent();
@@ -218,7 +218,7 @@ namespace WebAPI.Controllers
         [Authorize(Policy = "President")]
         public ActionResult AddBranch([FromBody] Branch branch)
         {
-            if(!IsValidBranch(branch, out var message))
+            if (!IsValidBranch(branch, out var message))
                 return BadRequest(new { status = false, message });
 
             try

@@ -20,11 +20,11 @@ namespace Infrastructure.Repositories
 
         public IEnumerable<Class> GetClasses() => GetAll();
 
-        public IEnumerable<Class> FindClassByName(string? name) => GetMany( x => x.name != null && name != null && x.name.Contains(name));
+        public IEnumerable<Class> FindClassByName(string? name) => GetMany(x => x.name != null && name != null && x.name.Contains(name));
 
         public IEnumerable<Class> GetClassesByStatus(string? status)
         {
-            if(status == null) return GetAll();
+            if (status == null) return GetAll();
             if (status.Contains("Expired"))
                 return GetMany(x => Convert.ToDateTime(x.endDate) < DateTime.Now);
             if (status.Contains("Active"))
