@@ -48,14 +48,6 @@ builder.Services.AddResponseCompression(options =>
     options.EnableForHttps = true;
     options.Providers.Add<GzipCompressionProvider>();
     options.Providers.Add<BrotliCompressionProvider>();
-    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
-    {
-        "application/octet-stream",
-        "application/x-msdownload",
-        "application/x-msdos-program",
-        "application/x-msmetafile",
-        "application/x-ms-shortcut",
-    });
 });
 builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
 {
@@ -104,8 +96,7 @@ ElasticsearchSinkOptions ConfigureElasticSink(IConfiguration configuration, stri
 #endregion
 
 #region Health Check
-builder.Services.AddHealthChecks()
-    .AddCheck<HealthCheckService>("SaoVietApiChecks", tags: new[] { "Sao Viet Api" });
+builder.Services.AddHealthChecks();
 #endregion
 
 #region Authentication
