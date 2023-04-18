@@ -14,7 +14,6 @@ using Application.Cache;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using HealthCheckService = Application.Health.HealthCheckService;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.IO.Compression;
 using Application.Middleware;
